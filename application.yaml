@@ -19,26 +19,26 @@ indexing-settings:
   sites:
     - url: https://www.lenta.ru
       name: Лента.ру
-    - url: https://www.skillbox.ru
+    - url: https://www.skillbox.ru/
       name: Skillbox
-#    - url: http://www.playback.ru/
-#      name: PlayBack.Ru
-#    - url: https://www.volochek.life/
-#      name: Volochek.ru
-#    - url: http://radiomv.ru/
-#      name: Radimov.ru
-#    - url: https://ipfran.ru/
-#      name: Ipfran.ru
-#    - url: https://dimonvideo.ru/
-#      name: Dimonvideo.ru
-#    - url: https://nikoartgallery.com/
-#      name: Nikoartgallery.com
-#    - url: https://et-cetera.ru/mobile/
-#      name: Et-cetera.ru
-#    - url: https://www.lutherancathedral.ru/
-#      name: Lutherancathedral.ru
-#    - url: https://dombulgakova.ru/
-#      name: Dombulgakova.ru
+    - url: http://www.playback.ru/
+      name: PlayBack.Ru
+    - url: https://www.volochek.life/
+      name: Volochek.ru
+    - url: http://radiomv.ru/
+      name: Radimov.ru
+    - url: https://ipfran.ru/
+      name: Ipfran.ru
+    - url: https://dimonvideo.ru/
+      name: Dimonvideo.ru
+    - url: https://nikoartgallery.com/
+      name: Nikoartgallery.com
+    - url: https://et-cetera.ru/mobile/
+      name: Et-cetera.ru
+    - url: https://www.lutherancathedral.ru/
+      name: Lutherancathedral.ru
+    - url: https://dombulgakova.ru/
+      name: Dombulgakova.ru
 
 connection-settings:
   user-agent: VanguardSearchBot

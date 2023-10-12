@@ -9,8 +9,8 @@ import javax.persistence.Index;
 @Getter
 @Setter
 @NoArgsConstructor(force = true)
+@RequiredArgsConstructor
 @AllArgsConstructor
-@Builder
 @ToString
 public class PageModel {
     @Id
@@ -21,17 +21,17 @@ public class PageModel {
 
     @ManyToOne
     @JoinColumn(name = "site_id")
-    private SiteModel site;
+    private final SiteModel site;
 
 
     @Column(name = "path", nullable = false, columnDefinition = "TEXT")
-    private String path;
+    private final String path;
 
 
     @Column(nullable = false, columnDefinition = "INT")
-    private int code;
+    private final int code;
 
 
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
-    private String content;
+    private final String content;
 }

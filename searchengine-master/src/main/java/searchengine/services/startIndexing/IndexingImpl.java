@@ -6,12 +6,19 @@ import org.springframework.stereotype.Service;
 import searchengine.config.Connection2Site;
 import searchengine.config.SitesList;
 import searchengine.dto.startIndexing.IndexingResponse;
+import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
 import searchengine.model.repositories.PageRepository;
 import searchengine.model.repositories.SiteRepository;
+import searchengine.services.Connectivity.ConnectionResponse;
+import searchengine.services.Connectivity.ConnectionService;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 
 @Service
 @RequiredArgsConstructor
@@ -24,27 +31,26 @@ public class IndexingImpl implements IndexingService {
     PageRepository pageRepository;
     @Autowired
     Connection2Site connection2Site;
-
+    @Autowired
+    ConnectionService connectionService;
     ForkJoinPool forkJoinPool = new ForkJoinPool();
     @Override
     public IndexingResponse startIndexing() {
         deleteAllData();
-
-        sitesList.getSites()
+        Parser.isActive = true;
+        new Thread(()-> sitesList.getSites()
                 .parallelStream()
-                .map(site ->
-                    SiteModel.builder()
-                            .status(Status.INDEXING)
-                            .url(site.getUrl())
-                            .statusTime(new Date())
-                            .lastError(null)
-                            .name(site.getName())
-                            .build()
-                )
+                .map(site -> SiteModel.builder()
+                        .status(Status.INDEXING)
+                        .url(site.getUrl())
+                        .statusTime(new Date())
+                        .lastError(null)
+                        .name(site.getName())
+                        .build())
                 .forEach(siteModel -> {
                     siteRepository.saveAndFlush(siteModel);
                     try {
-                        forkJoinPool.invoke(new Parser(siteModel, pageRepository, connection2Site, siteRepository));
+                        forkJoinPool.invoke(new Parser(siteModel));
                         siteModel.setStatus(Status.INDEXED);
                         siteRepository.saveAndFlush(siteModel);
                     }catch (RuntimeException re){
@@ -52,13 +58,15 @@ public class IndexingImpl implements IndexingService {
                         siteModel.setLastError(re.getLocalizedMessage());
                         siteRepository.saveAndFlush(siteModel);
                     }
-                });
+                })).start();
+
         return new IndexingResponse(true, "Успешная индексация");
     }
 
     @Override
     public IndexingResponse stopIndexing() {
-        forkJoinPool.shutdown();
+        Parser.isActive = false;
+        forkJoinPool.shutdownNow();
         return new IndexingResponse(false, "Индексация остановлена пользователем");
     }
 
@@ -68,5 +76,36 @@ public class IndexingImpl implements IndexingService {
         pageRepository.dropFk();
         siteRepository.truncateTable();
         pageRepository.addFk();
+    }
+    @RequiredArgsConstructor
+    private class Parser extends RecursiveAction {
+        private final SiteModel siteModel;
+        public static boolean isActive;
+        @Override
+        protected  void compute() {
+            List<Parser> taskList = new ArrayList<>();
+            ConnectionResponse connectionResponse = connectionService.getConnection(siteModel.getUrl());
+            try {
+                if (isActive) {
+                    Thread.sleep(5000);
+                    connectionResponse.getUrls().stream()
+                            .map(item -> new PageModel(siteModel, item.absUrl("href"), connectionResponse.getResponseCode(), connectionResponse.getContent()))
+                            .filter(page -> pageRepository.findByPath(page.getPath()) == null
+                                    && page.getPath().startsWith(siteModel.getUrl()))
+                            .forEach(pageModel -> {
+                                pageRepository.saveAndFlush(pageModel);
+                                siteModel.setStatusTime(new Date());
+                                siteRepository.saveAndFlush(siteModel);
+                                taskList.add(new Parser(siteModel));
+                            });
+                }else {
+                    throw new RuntimeException("stop indexing");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(connectionResponse.getErrorMessage());
+            }
+            taskList.forEach(RecursiveAction::fork);
+            taskList.forEach(RecursiveAction::join);
+        }
     }
 }

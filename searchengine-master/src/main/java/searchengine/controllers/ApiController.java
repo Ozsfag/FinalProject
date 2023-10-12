@@ -29,9 +29,9 @@ public class ApiController {
     @GetMapping("/startIndexing")
     public ResponseEntity<IndexingResponse> startIndexing(){
         return new ResponseEntity<>(indexingService.startIndexing(), HttpStatus.OK);
-//       return startIndexingService.startIndexing().isSuccessful()?
-//              new ResponseEntity<>(new StartIndexingResponse("result: ", true, null), HttpStatus.OK):
-//               new ResponseEntity<>(new StartIndexingResponse("result: ", false, "error: Индексация уже запущена"), HttpStatus.CONFLICT);
+//       return indexingService.startIndexing()?
+//              new ResponseEntity<>(new IndexingResponse(true, ""), HttpStatus.OK):
+//               new ResponseEntity<>(new IndexingResponse(false, "error: Индексация уже запущена"), HttpStatus.CONFLICT);
 
     }
     @GetMapping("/stopIndexing")

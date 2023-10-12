@@ -17,11 +17,15 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
     void truncateTable();
     @Modifying
     @Transactional
-    @Query(value = "ALTER TABLE pages DROP FOREIGN KEY FK33gexkhrwd3yvnxy0usw9y3p1;", nativeQuery = true)
+    @Query(value = "ALTER TABLE pages" +
+            " DROP FOREIGN KEY FK33gexkhrwd3yvnxy0usw9y3p1;", nativeQuery = true)
     void dropFk();
 
     @Modifying
     @Transactional
-    @Query(value = "alter table pages add constraint FK33gexkhrwd3yvnxy0usw9y3p1 foreign key (site_id) references sites (site_id);", nativeQuery = true)
+    @Query(value = """
+            ALTER TABLE pages
+            ADD CONSTRAINT FK33gexkhrwd3yvnxy0usw9y3p1
+            FOREIGN KEY (site_id) REFERENCES sites (site_id);""", nativeQuery = true)
     void addFk();
 }
