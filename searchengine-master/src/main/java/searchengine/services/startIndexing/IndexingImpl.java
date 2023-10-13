@@ -11,8 +11,8 @@ import searchengine.model.SiteModel;
 import searchengine.model.Status;
 import searchengine.model.repositories.PageRepository;
 import searchengine.model.repositories.SiteRepository;
-import searchengine.services.Connectivity.ConnectionResponse;
-import searchengine.services.Connectivity.ConnectionService;
+import searchengine.services.connectivity.ConnectionResponse;
+import searchengine.services.connectivity.ConnectionService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,8 +23,8 @@ import java.util.concurrent.RecursiveAction;
 @Service
 @RequiredArgsConstructor
 public class IndexingImpl implements IndexingService {
-
-    private final SitesList sitesList;
+    @Autowired
+    SitesList sitesList;
     @Autowired
     SiteRepository siteRepository;
     @Autowired
@@ -50,7 +50,7 @@ public class IndexingImpl implements IndexingService {
                 .forEach(siteModel -> {
                     siteRepository.saveAndFlush(siteModel);
                     try {
-                        forkJoinPool.invoke(new Parser(siteModel));
+                        forkJoinPool.invoke(new Parser(siteModel, siteModel.getUrl()));
                         siteModel.setStatus(Status.INDEXED);
                         siteRepository.saveAndFlush(siteModel);
                     }catch (RuntimeException re){
@@ -80,23 +80,23 @@ public class IndexingImpl implements IndexingService {
     @RequiredArgsConstructor
     private class Parser extends RecursiveAction {
         private final SiteModel siteModel;
+        private final String url;
         public static boolean isActive;
         @Override
         protected  void compute() {
             List<Parser> taskList = new ArrayList<>();
-            ConnectionResponse connectionResponse = connectionService.getConnection(siteModel.getUrl());
+            ConnectionResponse connectionResponse = connectionService.getConnection(url);
             try {
                 if (isActive) {
                     Thread.sleep(5000);
                     connectionResponse.getUrls().stream()
                             .map(item -> new PageModel(siteModel, item.absUrl("href"), connectionResponse.getResponseCode(), connectionResponse.getContent()))
-                            .filter(page -> pageRepository.findByPath(page.getPath()) == null
-                                    && page.getPath().startsWith(siteModel.getUrl()))
+                            .filter(page -> pageRepository.findByPath(page.getPath()) == null && page.getPath().startsWith(siteModel.getUrl()))
                             .forEach(pageModel -> {
                                 pageRepository.saveAndFlush(pageModel);
                                 siteModel.setStatusTime(new Date());
                                 siteRepository.saveAndFlush(siteModel);
-                                taskList.add(new Parser(siteModel));
+                                taskList.add(new Parser(siteModel, pageModel.getPath()));
                             });
                 }else {
                     throw new RuntimeException("stop indexing");

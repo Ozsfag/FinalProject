@@ -1,4 +1,4 @@
-package searchengine.services.Connectivity;
+package searchengine.services.connectivity;
 
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
@@ -26,7 +26,7 @@ public class ConnectionService {
         Elements urls;
         try {
             document = connection.get();
-            content = document.html();
+            content = document.select("html").text();
             urls = document.select("a[href]");
             int responseCode = connection.response().statusCode();
             return ConnectionResponse.builder()

@@ -1,4 +1,4 @@
-package searchengine.services.Connectivity;
+package searchengine.services.connectivity;
 
 import lombok.Builder;
 import lombok.Data;
