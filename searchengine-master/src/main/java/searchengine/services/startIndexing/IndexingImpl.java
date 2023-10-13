@@ -23,6 +23,7 @@ import java.util.concurrent.RecursiveAction;
 @Service
 @RequiredArgsConstructor
 public class IndexingImpl implements IndexingService {
+
     @Autowired
     SitesList sitesList;
     @Autowired
