@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import searchengine.dto.startIndexing.IndexingResponse;
 import searchengine.dto.statistics.StatisticsResponse;
-import searchengine.services.startIndexing.IndexingService;
+import searchengine.services.indexing.IndexingService;
 import searchengine.services.statistics.StatisticsService;
 
 @RestController

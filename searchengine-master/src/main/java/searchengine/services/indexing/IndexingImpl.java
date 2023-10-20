@@ -1,4 +1,4 @@
-package searchengine.services.startIndexing;
+package searchengine.services.indexing;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +64,40 @@ public class IndexingImpl implements IndexingService {
         return new IndexingResponse(true, "Успешная индексация");
     }
 
+    @RequiredArgsConstructor
+    private class Parser extends RecursiveAction {
+        private final SiteModel siteModel;
+        private final String href;
+        public static boolean isActive;
+        @Override
+        protected  void compute() {
+            List<Parser> taskList = new ArrayList<>();
+            ConnectionResponse connectionResponse = null;
+            try {
+                connectionResponse = connectionService.getConnection(href);
+                if (isActive) {
+                    Thread.sleep(5000);
+                    connectionResponse.getUrls().stream()
+                            .map(item -> new PageModel(siteModel, item.absUrl("href"), connectionResponse.getResponseCode(), connectionResponse.getContent()))
+                            .filter(page -> pageRepository.findByPath(page.getPath()) == null && page.getPath().startsWith(siteModel.getUrl()))
+                            .forEach(pageModel -> {
+                                pageRepository.saveAndFlush(pageModel);
+                                siteModel.setStatusTime(new Date());
+                                siteRepository.saveAndFlush(siteModel);
+                                taskList.add(new Parser(siteModel, pageModel.getPath()));
+                            });
+                } else {
+                    throw new InterruptedException("stop indexing");
+                }
+            } catch (Exception e) {
+                pageRepository.saveAndFlush(new PageModel(siteModel, connectionResponse.getPath(), connectionResponse.getResponseCode(), connectionResponse.getContent()));
+                throw new RuntimeException(connectionResponse.getErrorMessage());
+            }
+            taskList.forEach(RecursiveAction::fork);
+            taskList.forEach(RecursiveAction::join);
+        }
+    }
+
     @Override
     public IndexingResponse stopIndexing() {
         Parser.isActive = false;
@@ -77,36 +111,5 @@ public class IndexingImpl implements IndexingService {
         pageRepository.dropFk();
         siteRepository.truncateTable();
         pageRepository.addFk();
-    }
-    @RequiredArgsConstructor
-    private class Parser extends RecursiveAction {
-        private final SiteModel siteModel;
-        private final String url;
-        public static boolean isActive;
-        @Override
-        protected  void compute() {
-            List<Parser> taskList = new ArrayList<>();
-            ConnectionResponse connectionResponse = connectionService.getConnection(url);
-            try {
-                if (isActive) {
-                    Thread.sleep(5000);
-                    connectionResponse.getUrls().stream()
-                            .map(item -> new PageModel(siteModel, item.absUrl("href"), connectionResponse.getResponseCode(), connectionResponse.getContent()))
-                            .filter(page -> pageRepository.findByPath(page.getPath()) == null && page.getPath().startsWith(siteModel.getUrl()))
-                            .forEach(pageModel -> {
-                                pageRepository.saveAndFlush(pageModel);
-                                siteModel.setStatusTime(new Date());
-                                siteRepository.saveAndFlush(siteModel);
-                                taskList.add(new Parser(siteModel, pageModel.getPath()));
-                            });
-                }else {
-                    throw new RuntimeException("stop indexing");
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(connectionResponse.getErrorMessage());
-            }
-            taskList.forEach(RecursiveAction::fork);
-            taskList.forEach(RecursiveAction::join);
-        }
     }
 }

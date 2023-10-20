@@ -1,4 +1,4 @@
-package searchengine.services.startIndexing;
+package searchengine.services.indexing;
 
 import searchengine.dto.startIndexing.IndexingResponse;
 

@@ -17,26 +17,26 @@ spring:
 
 indexing-settings:
   sites:
-    - url: https://lenta.ru/
-      name: Лента.ру
-    - url: https://skillbox.ru/
-      name: Skillbox
-    - url: http://www.playback.ru/
-      name: PlayBack.Ru
-    - url: https://www.volochek.life/
-      name: Volochek.ru
-    - url: http://radiomv.ru/
-      name: Radimov.ru
-    - url: https://ipfran.ru/
-      name: Ipfran.ru
-    - url: https://dimonvideo.ru/
-      name: Dimonvideo.ru
-    - url: https://et-cetera.ru/mobile/
-      name: Et-cetera.ru
+#    - url: https://lenta.ru/
+#      name: Лента.ру
+#    - url: https://skillbox.ru/
+#      name: Skillbox
+#    - url: http://www.playback.ru/
+#      name: PlayBack.Ru
+#    - url: https://www.volochek.life/
+#      name: Volochek.ru
+#    - url: http://radiomv.ru/
+#      name: Radimov.ru
+#    - url: https://ipfran.ru/
+#      name: Ipfran.ru
+#    - url: https://dimonvideo.ru/
+#      name: Dimonvideo.ru
+#    - url: https://et-cetera.ru/mobile/
+#      name: Et-cetera.ru
     - url: https://www.lutherancathedral.ru/
       name: Lutherancathedral.ru
-    - url: https://dombulgakova.ru/
-      name: Dombulgakova.ru
+#    - url: https://dombulgakova.ru/
+#      name: Dombulgakova.ru
 
 connection-settings:
   user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36

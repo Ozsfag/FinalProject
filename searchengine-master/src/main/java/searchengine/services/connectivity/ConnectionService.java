@@ -22,30 +22,18 @@ public class ConnectionService {
                 .referrer(connection2Site.getReferrer());
 
         Document document;
-        String content;
-        Elements urls;
+        String content = null;
+        Elements urls = null;
         try {
             document = connection.get();
             content = document.select("html").text();
             urls = document.select("a[href]");
             int responseCode = connection.response().statusCode();
-            return ConnectionResponse.builder()
-                    .path(url)
-                    .content(content)
-                    .urls(urls)
-                    .responseCode(responseCode)
-                    .build();
-        } catch (HttpStatusException e){
-            return ConnectionResponse.builder()
-                    .path(url)
-                    .responseCode(e.getStatusCode())
-                    .errorMessage(e.getLocalizedMessage())
-                    .build();
+            return new ConnectionResponse(url, responseCode, content, urls, null);
+        }catch (HttpStatusException e){
+            return new ConnectionResponse(url, e.getStatusCode(), content, urls, e.getLocalizedMessage());
         }catch (IOException e){
-            return ConnectionResponse.builder()
-                    .path(url)
-                    .errorMessage(e.getLocalizedMessage())
-                    .build();
+            return new ConnectionResponse(url, connection.response().statusCode(), content, urls, e.getLocalizedMessage());
         }
     }
 }
