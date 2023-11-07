@@ -19,7 +19,8 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
     @Transactional
     @Query(value = "ALTER TABLE pages" +
             " DROP FOREIGN KEY FK33gexkhrwd3yvnxy0usw9y3p1;", nativeQuery = true)
-    void dropFk();
+    void dropSitesFk();
+
 
     @Modifying
     @Transactional
@@ -27,5 +28,5 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
             ALTER TABLE pages
             ADD CONSTRAINT FK33gexkhrwd3yvnxy0usw9y3p1
             FOREIGN KEY (site_id) REFERENCES sites (site_id);""", nativeQuery = true)
-    void addFk();
+    void addSitesFk();
 }

@@ -1,7 +1,8 @@
 package searchengine.model;
+
 import lombok.*;
+
 import javax.persistence.*;
-import javax.persistence.Index;
 
 @Entity
 @Table( name = "pages", schema = "search_engine",
@@ -18,9 +19,8 @@ public class PageModel {
     @Column(name = "page_id", columnDefinition = "INT")
     private Integer id;
 
-
     @ManyToOne
-    @JoinColumn(name = "site_id")
+    @JoinColumn(name = "site_id", nullable = false)
     private final SiteModel site;
 
 
@@ -34,4 +34,6 @@ public class PageModel {
 
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private final String content;
+
+
 }

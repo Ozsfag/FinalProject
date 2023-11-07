@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>org.example</groupId>
     <artifactId>SearchEngine</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -11,7 +10,9 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <juit.version>4.13</juit.version>
     </properties>
+
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -19,6 +20,13 @@
         <version>2.7.1</version>
         <relativePath/>
     </parent>
+
+    <repositories>
+        <repository>
+            <id>skillbox-gitlab</id>
+            <url>https://gitlab.skillbox.ru/api/v4/projects/263574/packages/maven</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -52,8 +60,36 @@
             <artifactId>jsoup</artifactId>
             <version>1.16.1</version>
         </dependency>
-
-
+        <!--		Lucene.morphology-->
+        <dependency>
+            <groupId>org.apache.lucene.morphology</groupId>
+            <artifactId>morph</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene.analysis</groupId>
+            <artifactId>morphology</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene.morphology</groupId>
+            <artifactId>dictionary-reader</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene.morphology</groupId>
+            <artifactId>english</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene.morphology</groupId>
+            <artifactId>russian</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

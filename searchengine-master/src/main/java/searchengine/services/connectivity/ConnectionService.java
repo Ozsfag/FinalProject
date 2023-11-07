@@ -17,23 +17,23 @@ public class ConnectionService {
     Connection2Site connection2Site;
 
     public ConnectionResponse getConnection(String url){
-        Connection connection = Jsoup.connect(url)
-                .userAgent(connection2Site.getUserAgent())
-                .referrer(connection2Site.getReferrer());
-
+        Connection connection = null;
         Document document;
-        String content = null;
-        Elements urls = null;
+        String content;
+        Elements urls;
         try {
+            connection = Jsoup.connect(url)
+                    .userAgent(connection2Site.getUserAgent())
+                    .referrer(connection2Site.getReferrer());
             document = connection.get();
             content = document.select("html").text();
             urls = document.select("a[href]");
             int responseCode = connection.response().statusCode();
             return new ConnectionResponse(url, responseCode, content, urls, null);
         }catch (HttpStatusException e){
-            return new ConnectionResponse(url, e.getStatusCode(), content, urls, e.getLocalizedMessage());
+            return new ConnectionResponse(url, e.getStatusCode(), null, null, e.getLocalizedMessage());
         }catch (IOException e){
-            return new ConnectionResponse(url, connection.response().statusCode(), content, urls, e.getLocalizedMessage());
+            return new ConnectionResponse(url, connection.response().statusCode(), null, null, e.getLocalizedMessage());
         }
     }
 }

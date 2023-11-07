@@ -3,21 +3,22 @@ package searchengine.services.indexing;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import searchengine.config.Connection2Site;
 import searchengine.config.SitesList;
 import searchengine.dto.startIndexing.IndexingResponse;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
+import searchengine.model.repositories.IndexRepository;
+import searchengine.model.repositories.LemmaRepository;
 import searchengine.model.repositories.PageRepository;
 import searchengine.model.repositories.SiteRepository;
 import searchengine.services.connectivity.ConnectionResponse;
 import searchengine.services.connectivity.ConnectionService;
+import searchengine.services.components.FjpComponent;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
 @Service
@@ -31,10 +32,11 @@ public class IndexingImpl implements IndexingService {
     @Autowired
     PageRepository pageRepository;
     @Autowired
-    Connection2Site connection2Site;
+    LemmaRepository lemmaRepository;
+    @Autowired
+    IndexRepository indexRepository;
     @Autowired
     ConnectionService connectionService;
-    ForkJoinPool forkJoinPool = new ForkJoinPool();
     @Override
     public IndexingResponse startIndexing() {
         deleteAllData();
@@ -51,12 +53,12 @@ public class IndexingImpl implements IndexingService {
                 .forEach(siteModel -> {
                     siteRepository.saveAndFlush(siteModel);
                     try {
-                        forkJoinPool.invoke(new Parser(siteModel, siteModel.getUrl()));
+                        FjpComponent.getInstance().invoke(new Parser(siteModel, siteModel.getUrl()));
                         siteModel.setStatus(Status.INDEXED);
                         siteRepository.saveAndFlush(siteModel);
                     }catch (RuntimeException re){
                         siteModel.setStatus(Status.FAILED);
-                        siteModel.setLastError(re.getLocalizedMessage());
+                        siteModel.setLastError(re.toString());
                         siteRepository.saveAndFlush(siteModel);
                     }
                 })).start();
@@ -69,10 +71,10 @@ public class IndexingImpl implements IndexingService {
         private final SiteModel siteModel;
         private final String href;
         public static boolean isActive;
+        private ConnectionResponse connectionResponse = null;
         @Override
         protected  void compute() {
             List<Parser> taskList = new ArrayList<>();
-            ConnectionResponse connectionResponse = null;
             try {
                 connectionResponse = connectionService.getConnection(href);
                 if (isActive) {
@@ -89,8 +91,7 @@ public class IndexingImpl implements IndexingService {
                 } else {
                     throw new InterruptedException("stop indexing");
                 }
-            } catch (Exception e) {
-                pageRepository.saveAndFlush(new PageModel(siteModel, connectionResponse.getPath(), connectionResponse.getResponseCode(), connectionResponse.getContent()));
+            }catch (Exception e) {
                 throw new RuntimeException(connectionResponse.getErrorMessage());
             }
             taskList.forEach(RecursiveAction::fork);
@@ -101,15 +102,20 @@ public class IndexingImpl implements IndexingService {
     @Override
     public IndexingResponse stopIndexing() {
         Parser.isActive = false;
-        forkJoinPool.shutdownNow();
+        FjpComponent.getInstance().shutdownNow();
         return new IndexingResponse(false, "Индексация остановлена пользователем");
     }
 
     @Override
     public void deleteAllData(){
+        indexRepository.truncateTable();
+        lemmaRepository.truncateTable();
+        lemmaRepository.dropSitesFk();
         pageRepository.truncateTable();
-        pageRepository.dropFk();
+        pageRepository.dropSitesFk();
         siteRepository.truncateTable();
-        pageRepository.addFk();
+        lemmaRepository.addSitesFk();
+        lemmaRepository.addIndexFk();
+        pageRepository.addSitesFk();
     }
 }

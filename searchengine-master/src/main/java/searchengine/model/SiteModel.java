@@ -37,5 +37,10 @@ public class SiteModel {
     private String name;
 
     @OneToMany(mappedBy = "site", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<PageModel> pages;
+
+    @OneToMany(mappedBy = "site", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<LemmaModel> lemma;
 }
