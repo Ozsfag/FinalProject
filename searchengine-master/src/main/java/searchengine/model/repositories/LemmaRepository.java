@@ -27,19 +27,4 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
             FOREIGN KEY (site_id) REFERENCES sites (site_id);""", nativeQuery = true)
     void addSitesFk();
 
-    @Modifying
-    @Transactional
-    @Query(value = "ALTER TABLE lemma" +
-            " DROP FOREIGN KEY FKok0rkjnerywwe728klcfngo2u", nativeQuery = true)
-    void dropIndexFk();
-
-    @Modifying
-    @Transactional
-    @Query(value = """
-            ALTER TABLE lemma
-            ADD CONSTRAINT FKorarkcy0wi1akdr0mkhb75bf2
-            FOREIGN KEY (index_id) REFERENCES index (index_id);""", nativeQuery = true)
-    void addIndexFk();
-
-
 }

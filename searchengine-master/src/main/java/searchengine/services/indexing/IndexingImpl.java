@@ -108,14 +108,19 @@ public class IndexingImpl implements IndexingService {
 
     @Override
     public void deleteAllData(){
+        lemmaRepository.dropSitesFk();
+        pageRepository.dropSitesFk();
+        indexRepository.dropPagesFk();
+        indexRepository.dropLemmaFk();
+
         indexRepository.truncateTable();
         lemmaRepository.truncateTable();
-        lemmaRepository.dropSitesFk();
         pageRepository.truncateTable();
-        pageRepository.dropSitesFk();
         siteRepository.truncateTable();
+
         lemmaRepository.addSitesFk();
-        lemmaRepository.addIndexFk();
         pageRepository.addSitesFk();
+        indexRepository.addLemmaFk();
+        indexRepository.addPagesFk();
     }
 }
