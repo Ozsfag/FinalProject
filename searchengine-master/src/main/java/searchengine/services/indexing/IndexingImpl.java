@@ -2,9 +2,11 @@ package searchengine.services.indexing;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
 import searchengine.dto.startIndexing.IndexingResponse;
+import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
@@ -15,11 +17,13 @@ import searchengine.model.repositories.SiteRepository;
 import searchengine.services.connectivity.ConnectionResponse;
 import searchengine.services.connectivity.ConnectionService;
 import searchengine.services.components.FjpComponent;
+import searchengine.services.morphology.Morphology;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @RequiredArgsConstructor
@@ -37,11 +41,14 @@ public class IndexingImpl implements IndexingService {
     IndexRepository indexRepository;
     @Autowired
     ConnectionService connectionService;
+    @Autowired
+    Morphology morphology;
     @Override
     public IndexingResponse startIndexing() {
         deleteAllData();
         Parser.isActive = true;
-        new Thread(()-> sitesList.getSites()
+        ExecutorService executorService = Executors.newWorkStealingPool();
+        executorService.execute(()-> sitesList.getSites()
                 .parallelStream()
                 .map(site -> SiteModel.builder()
                         .status(Status.INDEXING)
@@ -61,7 +68,7 @@ public class IndexingImpl implements IndexingService {
                         siteModel.setLastError(re.toString());
                         siteRepository.saveAndFlush(siteModel);
                     }
-                })).start();
+                }));
 
         return new IndexingResponse(true, "Успешная индексация");
     }
@@ -84,6 +91,22 @@ public class IndexingImpl implements IndexingService {
                             .filter(page -> pageRepository.findByPath(page.getPath()) == null && page.getPath().startsWith(siteModel.getUrl()))
                             .forEach(pageModel -> {
                                 pageRepository.saveAndFlush(pageModel);
+                                morphology.wordCounter(pageModel.getContent())
+                                        .forEach((k, v) -> {
+
+                                            if (lemmaRepository.findByLemma(k) == null){
+                                                LemmaModel lemmaModel = new LemmaModel();
+                                                lemmaModel.setSite(siteModel);
+                                                lemmaModel.setLemma(k);
+                                                lemmaModel.setFrequency(v);
+                                                lemmaRepository.saveAndFlush(lemmaModel);
+                                            }
+                                            else {
+                                                LemmaModel lemmaModel = lemmaRepository.findByLemma(k);
+                                                lemmaModel.setFrequency(v + 1);
+                                                lemmaRepository.saveAndFlush(lemmaModel);
+                                            }
+                                        });
                                 siteModel.setStatusTime(new Date());
                                 siteRepository.saveAndFlush(siteModel);
                                 taskList.add(new Parser(siteModel, pageModel.getPath()));
@@ -102,9 +125,12 @@ public class IndexingImpl implements IndexingService {
     @Override
     public IndexingResponse stopIndexing() {
         Parser.isActive = false;
+        System.exit(-1);
         FjpComponent.getInstance().shutdownNow();
         return new IndexingResponse(false, "Индексация остановлена пользователем");
     }
+
+
 
     @Override
     public void deleteAllData(){

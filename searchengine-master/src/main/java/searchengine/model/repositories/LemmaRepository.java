@@ -5,11 +5,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import searchengine.model.LemmaModel;
+import searchengine.model.PageModel;
 
 import javax.transaction.Transactional;
 @Repository
 public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
-
+    LemmaModel findByLemma(String lemma);
     @Modifying
     @Transactional
     @Query(value = "TRUNCATE TABLE lemma;", nativeQuery = true)

@@ -1,26 +1,32 @@
 package searchengine.services.morphology;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import searchengine.model.repositories.LemmaRepository;
+import searchengine.services.components.RlmComponent;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
 public class Morphology {
+    @Autowired
+    LemmaRepository lemmaRepository;
+    private static final String[] particlesNames = {"МЕЖД", "ПРЕДЛ", "СОЮЗ"};
 
-    private Map<String, Integer> wordCounter(String sentence){
-        List<String> words = Arrays.asList(sentence.toLowerCase().replaceAll("[^а-я ]", "").split(" "));
+    public Map<String, Integer> wordCounter(String sentence) {
         Map<String, Integer> wordsByFrequency = new HashMap<>();
-        words.stream()
-                .filter(word -> word.length() > 2 || !word.isBlank())
-//                .map(word -> {
-//                    RlmComponent.getInstance().getNormalForms(word).stream().findAny().equals(word)
-//                })
-                .forEach(word -> {
-                    wordsByFrequency.putIfAbsent(word, wordsByFrequency.getOrDefault(word, 0) + 1);
-                });
+        Arrays.stream(sentence.toLowerCase().replaceAll("[^а-я]", " ").split("\\s+"))
+                .filter(this::isWordValid)
+                .map(RlmComponent.getInstance()::getNormalForms)
+                .filter(forms -> !forms.isEmpty())
+                .map(forms -> forms.get(0))
+                .forEach(lemmaWord -> wordsByFrequency.compute(lemmaWord, (k, v) -> wordsByFrequency.containsKey(k) ? v + 1 : 1));
         return wordsByFrequency;
+    }
+
+    boolean isWordValid(String word) {
+        return word.length() > 2 && !word.isBlank() && Arrays.stream(particlesNames).noneMatch(part -> RlmComponent.getInstance().getMorphInfo(word).contains(part));
     }
 }

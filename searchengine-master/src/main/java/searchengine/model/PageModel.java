@@ -7,8 +7,7 @@ import javax.persistence.*;
 @Entity
 @Table( name = "pages", schema = "search_engine",
         indexes = @Index(name = "path_index", columnList = "path", unique = true))
-@Getter
-@Setter
+@Data
 @NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @AllArgsConstructor

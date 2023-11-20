@@ -16,24 +16,31 @@ public class ConnectionService {
     @Autowired
     Connection2Site connection2Site;
 
-    public ConnectionResponse getConnection(String url){
-        Connection connection = null;
-        Document document;
-        String content;
-        Elements urls;
+    public ConnectionResponse getConnection(String url) {
         try {
-            connection = Jsoup.connect(url)
+            Connection connection = Jsoup.connect(url)
                     .userAgent(connection2Site.getUserAgent())
                     .referrer(connection2Site.getReferrer());
-            document = connection.get();
-            content = document.select("html").text();
-            urls = document.select("a[href]");
-            int responseCode = connection.response().statusCode();
-            return new ConnectionResponse(url, responseCode, content, urls, null);
-        }catch (HttpStatusException e){
-            return new ConnectionResponse(url, e.getStatusCode(), null, null, e.getLocalizedMessage());
-        }catch (IOException e){
-            return new ConnectionResponse(url, connection.response().statusCode(), null, null, e.getLocalizedMessage());
+
+            Document document = connection.get();
+            return buildConnectionResponse(connection, document);
+
+        } catch (HttpStatusException e) {
+            return buildErrorConnectionResponse(url, e.getStatusCode(), e.getLocalizedMessage());
+        } catch (IOException e) {
+            //connection object might be null, you should handle this situation.
+            return buildErrorConnectionResponse(url, -1, e.getLocalizedMessage());
         }
+    }
+
+    private ConnectionResponse buildConnectionResponse(Connection connection, Document document) {
+        String content = document.select("html").text();
+        Elements urls = document.select("a[href]");
+        int responseCode = connection.response().statusCode();
+        return new ConnectionResponse(connection.request().url().toString(), responseCode, content, urls, null);
+    }
+
+    private ConnectionResponse buildErrorConnectionResponse(String url, int statusCode, String errorMessage) {
+        return new ConnectionResponse(url, statusCode, null, null, errorMessage);
     }
 }

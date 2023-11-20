@@ -5,11 +5,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "lemma", schema = "search_engine")
-@Getter
-@Setter
+@Table(name = "lemma", schema = "search_engine",
+        indexes = @Index(name = "lemma_index", columnList = "lemma", unique = true))
+@Data
 @NoArgsConstructor(force = true)
-@RequiredArgsConstructor
 @AllArgsConstructor
 @ToString
 public class LemmaModel {
@@ -20,12 +19,15 @@ public class LemmaModel {
 
     @ManyToOne
     @JoinColumn(name = "site_id", nullable = false)
-    private final SiteModel site;
+    private SiteModel site;
 
     @Column(name = "lemma", nullable = false, columnDefinition = "VARCHAR(255)")
     private String lemma;
 
     @Column(name = "frequency", nullable = false, columnDefinition = "INT")
-    private Integer frequency;
+    private  Integer frequency;
 
+    public void setFrequency(Integer frequency) {
+        this.frequency = frequency;
+    }
 }

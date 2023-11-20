@@ -8,12 +8,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "sites", schema = "search_engine")
-@Setter
-@Getter
-@NoArgsConstructor(force = true)
-@AllArgsConstructor
+@Data
 @Builder
-@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class SiteModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
