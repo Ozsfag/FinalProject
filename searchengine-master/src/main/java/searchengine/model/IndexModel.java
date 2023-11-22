@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "index_model")
 @NoArgsConstructor
-public class IndexModel {
+public class IndexModel{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "index_id", nullable = false)

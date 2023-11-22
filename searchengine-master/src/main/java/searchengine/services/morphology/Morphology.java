@@ -2,8 +2,8 @@ package searchengine.services.morphology;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import searchengine.model.repositories.LemmaRepository;
-import searchengine.services.components.RlmComponent;
+import searchengine.repositories.LemmaRepository;
+import searchengine.config.RlmComponent;
 
 import java.util.Arrays;
 import java.util.HashMap;

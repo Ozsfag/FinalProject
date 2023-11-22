@@ -1,4 +1,4 @@
-package searchengine.services.components;
+package searchengine.config;
 
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.stereotype.Component;

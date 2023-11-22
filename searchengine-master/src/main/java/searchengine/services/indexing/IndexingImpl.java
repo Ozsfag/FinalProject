@@ -2,7 +2,6 @@ package searchengine.services.indexing;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
 import searchengine.dto.startIndexing.IndexingResponse;
@@ -10,20 +9,22 @@ import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
-import searchengine.model.repositories.IndexRepository;
-import searchengine.model.repositories.LemmaRepository;
-import searchengine.model.repositories.PageRepository;
-import searchengine.model.repositories.SiteRepository;
+import searchengine.repositories.IndexRepository;
+import searchengine.repositories.LemmaRepository;
+import searchengine.repositories.PageRepository;
+import searchengine.repositories.SiteRepository;
+import searchengine.config.FjpComponent;
 import searchengine.services.connectivity.ConnectionResponse;
 import searchengine.services.connectivity.ConnectionService;
-import searchengine.services.components.FjpComponent;
+import searchengine.services.deleting.Deleter;
 import searchengine.services.morphology.Morphology;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @RequiredArgsConstructor
@@ -43,9 +44,11 @@ public class IndexingImpl implements IndexingService {
     ConnectionService connectionService;
     @Autowired
     Morphology morphology;
+    @Autowired
+    Deleter deleter;
     @Override
     public IndexingResponse startIndexing() {
-        deleteAllData();
+        deleter.truncateTables();
         Parser.isActive = true;
         ExecutorService executorService = Executors.newWorkStealingPool();
         executorService.execute(()-> sitesList.getSites()
@@ -128,25 +131,5 @@ public class IndexingImpl implements IndexingService {
         System.exit(-1);
         FjpComponent.getInstance().shutdownNow();
         return new IndexingResponse(false, "Индексация остановлена пользователем");
-    }
-
-
-
-    @Override
-    public void deleteAllData(){
-        lemmaRepository.dropSitesFk();
-        pageRepository.dropSitesFk();
-        indexRepository.dropPagesFk();
-        indexRepository.dropLemmaFk();
-
-        indexRepository.truncateTable();
-        lemmaRepository.truncateTable();
-        pageRepository.truncateTable();
-        siteRepository.truncateTable();
-
-        lemmaRepository.addSitesFk();
-        pageRepository.addSitesFk();
-        indexRepository.addLemmaFk();
-        indexRepository.addPagesFk();
     }
 }
