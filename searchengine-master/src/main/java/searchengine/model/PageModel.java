@@ -9,7 +9,7 @@ import javax.persistence.*;
         indexes = @Index(name = "path_index", columnList = "path", unique = true))
 @Data
 @NoArgsConstructor(force = true)
-@RequiredArgsConstructor
+@Builder
 @AllArgsConstructor
 @ToString
 public class PageModel {
@@ -20,19 +20,19 @@ public class PageModel {
 
     @ManyToOne
     @JoinColumn(name = "site_id", nullable = false)
-    private final SiteModel site;
+    private SiteModel site;
 
 
     @Column(name = "path", nullable = false, columnDefinition = "TEXT")
-    private final String path;
+    private String path;
 
 
     @Column(nullable = false, columnDefinition = "INT")
-    private final int code;
+    private int code;
 
 
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
-    private final String content;
+    private String content;
 
 
 }

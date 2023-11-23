@@ -3,6 +3,8 @@ package searchengine.config;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+
 @Component
 public class FjpComponent {
     private static  volatile ForkJoinPool forkJoinPool;

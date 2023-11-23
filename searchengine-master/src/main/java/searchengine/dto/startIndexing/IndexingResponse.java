@@ -1,9 +1,10 @@
 package searchengine.dto.startIndexing;
-import lombok.RequiredArgsConstructor;
+
+import lombok.AllArgsConstructor;
 import lombok.Value;
 
 @Value
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class IndexingResponse {
     boolean result;
     String error;

@@ -27,15 +27,14 @@ public class ApiController {
         return ResponseEntity.ok(statisticsService.getStatistics());
     }
     @GetMapping("/startIndexing")
-    public ResponseEntity<IndexingResponse> startIndexing(){
+    public ResponseEntity<IndexingResponse> startIndexing() throws InterruptedException {
         return new ResponseEntity<>(indexingService.startIndexing(), HttpStatus.OK);
-//       return indexingService.startIndexing()?
-//              new ResponseEntity<>(new IndexingResponse(true, ""), HttpStatus.OK):
-//               new ResponseEntity<>(new IndexingResponse(false, "error: Индексация уже запущена"), HttpStatus.CONFLICT);
-
     }
     @GetMapping("/stopIndexing")
     public ResponseEntity<IndexingResponse> stopIndexing(){
         return new ResponseEntity<>(indexingService.stopIndexing(), HttpStatus.BAD_REQUEST);
     }
+
+//    @PostMapping("/indexPage")
+//    public ResponseEntity<>
 }
