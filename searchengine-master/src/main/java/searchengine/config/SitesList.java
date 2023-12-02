@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-import searchengine.dto.startIndexing.Site;
+import searchengine.dto.indexing.Site;
 
 import java.util.List;
 

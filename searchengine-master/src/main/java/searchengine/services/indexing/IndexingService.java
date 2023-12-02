@@ -1,8 +1,10 @@
 package searchengine.services.indexing;
 
-import searchengine.dto.startIndexing.IndexingResponse;
+import searchengine.dto.indexing.responseImpl.ResponseInterface;
 
 public interface IndexingService {
-    IndexingResponse startIndexing() throws InterruptedException;
-    IndexingResponse stopIndexing();
+    ResponseInterface startIndexing();
+    ResponseInterface stopIndexing();
+    void deleteData();
+    ResponseInterface indexPage(String url);
 }

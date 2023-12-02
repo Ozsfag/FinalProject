@@ -10,6 +10,7 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
+@Builder
 @ToString
 public class LemmaModel {
     @Id

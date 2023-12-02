@@ -2,10 +2,9 @@ package searchengine.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import searchengine.dto.startIndexing.IndexingResponse;
+import org.springframework.web.bind.annotation.*;
+import searchengine.dto.indexing.responseImpl.ResponseInterface;
+import searchengine.dto.indexing.requestImpl.PageIndexing;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.indexing.IndexingService;
 import searchengine.services.statistics.StatisticsService;
@@ -27,14 +26,18 @@ public class ApiController {
         return ResponseEntity.ok(statisticsService.getStatistics());
     }
     @GetMapping("/startIndexing")
-    public ResponseEntity<IndexingResponse> startIndexing() throws InterruptedException {
+    public ResponseEntity<ResponseInterface> startIndexing() {
+        indexingService.deleteData();
         return new ResponseEntity<>(indexingService.startIndexing(), HttpStatus.OK);
     }
     @GetMapping("/stopIndexing")
-    public ResponseEntity<IndexingResponse> stopIndexing(){
-        return new ResponseEntity<>(indexingService.stopIndexing(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ResponseInterface> stopIndexing(){
+        return new ResponseEntity<>(indexingService.stopIndexing(), HttpStatus.OK);
     }
 
-//    @PostMapping("/indexPage")
-//    public ResponseEntity<>
+    @PostMapping(value = "/indexPage")
+    @ResponseBody
+    public ResponseEntity<ResponseInterface> indexPage(PageIndexing pageIndexing){
+        return new ResponseEntity<>(indexingService.indexPage(pageIndexing.getUrl()), HttpStatus.OK);
+    }
 }

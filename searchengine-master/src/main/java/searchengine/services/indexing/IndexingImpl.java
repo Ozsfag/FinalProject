@@ -2,11 +2,11 @@ package searchengine.services.indexing;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import searchengine.config.FjpComponent;
 import searchengine.config.SitesList;
-import searchengine.dto.startIndexing.IndexingResponse;
-import searchengine.dto.startIndexing.Site;
+import searchengine.dto.indexing.responseImpl.*;
+import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
@@ -16,15 +16,18 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.services.connectivity.ConnectionResponse;
 import searchengine.services.connectivity.ConnectionService;
 import searchengine.services.deleting.Deleter;
-import searchengine.services.morphology.Morphology;
+import searchengine.services.entityCreation.EntityCreationService;
+import searchengine.services.morphology.LemmaFinder;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor
@@ -35,67 +38,62 @@ public class IndexingImpl implements IndexingService {
     private LemmaRepository lemmaRepository;
     private IndexRepository indexRepository;
     private ConnectionService connectionService;
-    private Morphology morphology;
+    private ForkJoinPool forkJoinPool;
+    private LemmaFinder morphology;
+    private EntityCreationService entityCreationService;
     private Deleter deleter;
-    volatile boolean isIndexing = false;
+    private final AtomicBoolean isIndexing = new AtomicBoolean(false);
 
     @Autowired
     public IndexingImpl(SitesList sitesList,
-                     SiteRepository siteRepository,
-                     PageRepository pageRepository,
-                     LemmaRepository lemmaRepository,
-                     IndexRepository indexRepository,
-                     ConnectionService connectionService,
-                     Morphology morphology,
-                     Deleter deleter) {
+                        SiteRepository siteRepository,
+                        PageRepository pageRepository,
+                        LemmaRepository lemmaRepository,
+                        IndexRepository indexRepository,
+                        ConnectionService connectionService,
+                        ForkJoinPool forkJoinPool,
+                        LemmaFinder morphology,
+                        EntityCreationService entityCreationService,
+                        Deleter deleter) {
         this.sitesList = sitesList;
         this.siteRepository = siteRepository;
         this.pageRepository = pageRepository;
         this.lemmaRepository = lemmaRepository;
         this.indexRepository = indexRepository;
         this.connectionService = connectionService;
+        this.forkJoinPool = forkJoinPool;
         this.morphology = morphology;
+        this.entityCreationService = entityCreationService;
         this.deleter = deleter;
     }
 
     @Override
-    public IndexingResponse startIndexing(){
-        if (isIndexing) {
-            return new IndexingResponse(false, "Индексация уже запущена");
+    public ResponseInterface startIndexing(){
+        if (isIndexing.get()) {
+            return new BadIndexing(false, "Индексация уже запущена");
         }
-        deleter.truncateTables();
-        isIndexing = true;
-        ExecutorService executorService = Executors.newWorkStealingPool();
-        executorService.submit(() -> {
-            try {
+        isIndexing.set(true);
+        CompletableFuture.runAsync(() -> {
+
                 sitesList.getSites()
                         .parallelStream()
-                        .map(this::createSiteModel)
+                        .map(site -> entityCreationService.createSiteModel(site))
                         .forEach(this::handleSite);
-            }finally {
-                isIndexing = false;
-            }
-        });
-        return new IndexingResponse(true, "");
-    }
-    private SiteModel createSiteModel(Site site) {
-        return SiteModel.builder()
-                .status(Status.INDEXING)
-                .url(site.getUrl())
-                .statusTime(new Date())
-                .lastError(null)
-                .name(site.getName())
-                .build();
+
+                isIndexing.set(false);
+
+        }, forkJoinPool);
+        return new SuccessfulIndexing(true);
     }
     private void handleSite(SiteModel siteModel) {
         try {
             siteRepository.saveAndFlush(siteModel);
-            FjpComponent.getInstance().invoke(new Parser(siteModel, siteModel.getUrl()));
+            forkJoinPool.invoke(new Parser(siteModel, siteModel.getUrl()));
             siteModel.setStatus(Status.INDEXED);
             siteRepository.saveAndFlush(siteModel);
         } catch (RuntimeException re) {
             siteModel.setStatus(Status.FAILED);
-            siteModel.setLastError(re.toString());
+            siteModel.setLastError(re.getLocalizedMessage());
             siteRepository.saveAndFlush(siteModel);
         }
     }
@@ -112,82 +110,94 @@ public class IndexingImpl implements IndexingService {
             List<Parser> taskList = new ArrayList<>();
             try {
                 connectionResponse = connectionService.getConnection(href);
-                if (!isIndexing) {
+                if (!isIndexing.get()) {
                     throw new StoppedExecutionException("Stop indexing signal received");
                 }
-                Thread.sleep(5000);
-                processConnectionResponse(taskList);
+                processUrls(taskList);
             }catch (Exception e) {
-                String errorMessage = connectionResponse != null ? connectionResponse.getErrorMessage() : e.getMessage();
-                throw new RuntimeException("Failed to process url " + href + " due to " + errorMessage);
+                String errorMessage = connectionResponse.getContent() == null? connectionResponse.getErrorMessage() : e.getLocalizedMessage();
+                throw new RuntimeException(errorMessage);
             }
             taskList.forEach(RecursiveAction::fork);
             taskList.forEach(RecursiveAction::join);
         }
 
-        private void processConnectionResponse(List<Parser> taskList){
+        private void processUrls(List<Parser> taskList){
             connectionResponse.getUrls().stream()
-                    .map(item -> PageModel.builder()
-                            .site(siteModel)
-                            .path(item.absUrl("href"))
-                            .code(connectionResponse.getResponseCode())
-                            .content(connectionResponse.getContent())
-                            .build()
-                    )
-                    .filter(page -> pageRepository.findByPath(page.getPath()) == null && page.getPath().startsWith(siteModel.getUrl()))
+                    .filter(url -> pageRepository.findByPath(url.absUrl("href")) == null && url.absUrl("href").startsWith(siteModel.getUrl()))
+                    .map(item -> entityCreationService.createPageModel(siteModel, item, connectionResponse))
                     .forEach(pageModel -> {
-                        pageRepository.saveAndFlush(pageModel);
                         try {
-                            processPageModel(pageModel, taskList);
+                            isActive(pageModel, taskList);
                         }catch (StoppedExecutionException stop){
-                            pageModel.setContent(stop.getMessage());
-                            pageModel.setCode(404);
-                            pageRepository.saveAndFlush(pageModel);
-                            throw new RuntimeException();
+                            isStopped(pageModel, stop);
                         }
 
                     });
         }
-
-        private void processPageModel(PageModel pageModel, List<Parser> taskList) throws StoppedExecutionException {
-            morphology.wordCounter(pageModel.getContent())
-                    .forEach(this::handleLemmaModel);
-            siteModel.setStatusTime(new Date());
-            siteRepository.saveAndFlush(siteModel);
-            if (isIndexing) {
-                taskList.add(new Parser(siteModel, pageModel.getPath()));
-            } else {
+        private void isActive(PageModel pageModel, List<Parser> taskList) throws StoppedExecutionException {
+            if (!isIndexing.get()) {
                 throw new StoppedExecutionException("Stop indexing signal received");
             }
+            pageRepository.saveAndFlush(pageModel);
+            siteModel.setStatusTime(new Date());
+            siteRepository.saveAndFlush(siteModel);
+            taskList.add(new Parser(siteModel, pageModel.getPath()));
         }
+        private void isStopped(PageModel pageModel, StoppedExecutionException stop){
+            pageModel.setContent(stop.getMessage());
+            pageModel.setCode(HttpStatus.SERVICE_UNAVAILABLE.value());
+            pageRepository.saveAndFlush(pageModel);
+            throw new RuntimeException(stop.getLocalizedMessage());
+        }
+    }
 
-        private void handleLemmaModel(String lemma, int frequency) {
-            LemmaModel lemmaModel = lemmaRepository.findByLemma(lemma);
-            if (lemmaModel == null) {
-                createNewLemmaModel(lemma, frequency);
-            } else {
-                updateExistingLemmaModel(lemmaModel, frequency);
+    @Override
+    public ResponseInterface stopIndexing(){
+        if (isIndexing.get()) {
+            isIndexing.set(false);
+            forkJoinPool.shutdownNow();
+            return new StopIndexing(true, "Индексация остановлена пользователем");
+        }else{
+            return new StopIndexing(false, "Индексация не запущена");
+        }
+    }
+
+    @Override
+    public void deleteData() {
+        deleter.truncateTables();
+    }
+
+    @Override
+    public ResponseInterface indexPage(String url) {
+        try{
+            if (isInSitesConfiguration(url) == null){
+                throw new OutOfSitesConfigurationException("Данная страница находится за пределами сайтов, указанных в" +
+                        " конфигурационном файле");
             }
+            morphology.wordCounter(url)
+                    .forEach(this::handleLemmaModel);
+            return new SuccessfulIndexing(true);
+        }catch (Exception ex){
+            return new BadIndexing(false, ex.getMessage());
         }
 
-        private void createNewLemmaModel(String lemma, int frequency) {
-            LemmaModel lemmaModel = new LemmaModel();
-            lemmaModel.setSite(siteModel);
-            lemmaModel.setLemma(lemma);
-            lemmaModel.setFrequency(frequency);
-            lemmaRepository.saveAndFlush(lemmaModel);
-        }
 
-        private void updateExistingLemmaModel(LemmaModel lemmaModel, int frequency) {
+
+    }
+    private void handleLemmaModel(String lemma, int frequency) {
+
+        LemmaModel lemmaModel = lemmaRepository.findByLemma(lemma);
+        if (lemmaModel == null) {
+//            lemmaRepository.saveAndFlush(entityCreationService.createLemmaModel(s\))
+        } else {
             lemmaModel.setFrequency(frequency + 1);
             lemmaRepository.saveAndFlush(lemmaModel);
         }
     }
 
-    @Override
-    public IndexingResponse stopIndexing(){
-        isIndexing = false;
-        FjpComponent.getInstance().shutdownNow();
-        return new IndexingResponse(false, "Индексация остановлена пользователем");
+    private SiteModel isInSitesConfiguration(String url){
+        String basePart = url.substring(0, url.indexOf("/" , url.indexOf("://") + 3) + 1);
+        return siteRepository.findByUrl(basePart);
     }
 }

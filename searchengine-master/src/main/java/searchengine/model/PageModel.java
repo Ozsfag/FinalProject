@@ -34,5 +34,4 @@ public class PageModel {
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String content;
 
-
 }

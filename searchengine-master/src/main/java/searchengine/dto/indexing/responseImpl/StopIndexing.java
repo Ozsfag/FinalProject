@@ -1,11 +1,11 @@
-package searchengine.dto.startIndexing;
+package searchengine.dto.indexing.responseImpl;
 
 import lombok.AllArgsConstructor;
 import lombok.Value;
 
 @Value
 @AllArgsConstructor
-public class IndexingResponse {
+public class StopIndexing implements ResponseInterface {
     boolean result;
     String error;
 }

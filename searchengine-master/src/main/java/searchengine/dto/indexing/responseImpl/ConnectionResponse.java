@@ -1,10 +1,13 @@
-package searchengine.services.connectivity;
+package searchengine.dto.indexing.responseImpl;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jsoup.select.Elements;
 @Data
-@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+
 public class ConnectionResponse {
     private String path;
     private int responseCode;
