@@ -3,6 +3,7 @@ package searchengine.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "lemma", schema = "search_engine",
@@ -28,7 +29,7 @@ public class LemmaModel {
     @Column(name = "frequency", nullable = false, columnDefinition = "INT")
     private  Integer frequency;
 
-    public void setFrequency(Integer frequency) {
-        this.frequency = frequency;
-    }
+    @OneToMany(mappedBy = "lemma", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<IndexModel> indexModels;
 }

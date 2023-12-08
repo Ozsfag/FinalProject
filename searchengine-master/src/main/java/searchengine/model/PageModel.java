@@ -3,6 +3,7 @@ package searchengine.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table( name = "pages", schema = "search_engine",
@@ -34,4 +35,7 @@ public class PageModel {
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String content;
 
+    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<IndexModel> indexModels;
 }

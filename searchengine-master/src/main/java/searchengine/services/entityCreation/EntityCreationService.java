@@ -1,14 +1,10 @@
 package searchengine.services.entityCreation;
 
-import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.dto.indexing.Site;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
-import searchengine.model.LemmaModel;
-import searchengine.model.PageModel;
-import searchengine.model.SiteModel;
-import searchengine.model.Status;
+import searchengine.model.*;
 
 import java.util.Date;
 
@@ -28,10 +24,10 @@ public class EntityCreationService {
                 .build();
     }
 
-    public PageModel createPageModel(SiteModel siteModel, Element item, ConnectionResponse connectionResponse) {
+    public PageModel createPageModel(SiteModel siteModel, String path, ConnectionResponse connectionResponse) {
         return PageModel.builder()
                 .site(siteModel)
-                .path(item.absUrl("href"))
+                .path(path)
                 .code(connectionResponse.getResponseCode())
                 .content(connectionResponse.getContent())
                 .build();
@@ -42,6 +38,14 @@ public class EntityCreationService {
                 .site(siteModel)
                 .lemma(lemma)
                 .frequency(frequency)
+                .build();
+    }
+
+    public IndexModel createIndexModel(PageModel pageModel, LemmaModel lemmaModel, Float ranking){
+        return IndexModel.builder()
+                .page(pageModel)
+                .lemma(lemmaModel)
+                .ranking(ranking)
                 .build();
     }
 }

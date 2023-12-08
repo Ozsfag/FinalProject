@@ -22,8 +22,7 @@ public class ConnectionService {
         try {
             Connection connection = Jsoup.connect(url)
                     .userAgent(connection2Site.getUserAgent())
-                    .referrer(connection2Site.getReferrer())
-                    .timeout(5000);
+                    .referrer(connection2Site.getReferrer());
 
             Document document = connection.get();
 
@@ -33,13 +32,13 @@ public class ConnectionService {
             return new ConnectionResponse(connection.request().url().toString(), responseCode, content, urls, null);
 
         } catch (HttpStatusException e) {
-            return buildErrorConnectionResponse(url, e.getStatusCode(), e.getMessage());
+            return buildErrorConnectionResponse(url, e.getStatusCode(),e.getMessage());
         } catch (IOException e) {
             return buildErrorConnectionResponse(url, HttpStatus.NOT_FOUND.value(), e.getMessage());
         }
     }
 
     ConnectionResponse buildErrorConnectionResponse(String url, int statusCode, String errorMessage) {
-        return new ConnectionResponse(url, statusCode, null, null, errorMessage);
+        return new ConnectionResponse(url, statusCode,"", null, errorMessage);
     }
 }
