@@ -10,6 +10,7 @@ import searchengine.dto.statistics.TotalStatistics;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
+import searchengine.services.indexing.IndexingImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         TotalStatistics total = new TotalStatistics();
         total.setSites(sites.getSites().size());
-        total.setIndexing(true);
+        total.setIndexing(IndexingImpl.isIndexing.get());
         total.setPages((int)pageRepository.count());
         total.setLemmas((int) lemmaRepository.count());
 

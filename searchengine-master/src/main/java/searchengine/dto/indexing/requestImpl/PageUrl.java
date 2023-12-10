@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class PageIndexing {
+public class PageUrl {
     private String url;
 }

@@ -9,4 +9,5 @@ public interface IndexingService {
     ResponseInterface stopIndexing();
     void deleteData();
     ResponseInterface indexPage(String url);
+    ResponseInterface search(String url);
 }

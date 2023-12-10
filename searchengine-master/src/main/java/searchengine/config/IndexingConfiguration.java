@@ -16,4 +16,5 @@ public class IndexingConfiguration {
     public ConnectionResponse connectionResponse(){
         return new ConnectionResponse();
     }
+
 }

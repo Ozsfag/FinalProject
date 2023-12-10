@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import searchengine.dto.indexing.requestImpl.PageIndexing;
+import searchengine.dto.indexing.requestImpl.PageUrl;
 import searchengine.dto.indexing.responseImpl.ResponseInterface;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.indexing.IndexingService;
@@ -36,7 +36,11 @@ public class ApiController {
 
     @PostMapping(value = "/indexPage")
     @ResponseBody
-    public ResponseEntity<ResponseInterface> indexPage(PageIndexing pageIndexing){
-        return ResponseEntity.ok(indexingService.indexPage(pageIndexing.getUrl()));
+    public ResponseEntity<ResponseInterface> indexPage(PageUrl pageUrl){
+        return ResponseEntity.ok(indexingService.indexPage(pageUrl.getUrl()));
+    }
+    @GetMapping("/search")
+    public ResponseEntity<ResponseInterface> search(PageUrl pageUrl){
+        return ResponseEntity.ok(indexingService.search(pageUrl.getUrl()));
     }
 }
