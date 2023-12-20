@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import searchengine.model.SiteModel;
 import searchengine.services.connectivity.ConnectionService;
 import searchengine.services.entityHandler.EntityHandlerService;
-import searchengine.services.morphology.LemmaFinder;
+import searchengine.services.morphology.MorphologyService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.concurrent.RecursiveAction;
 public class Parser extends RecursiveAction {
     private final EntityHandlerService entityHandlerService;
     private final ConnectionService connectionService;
-    private final LemmaFinder lemmaFinder;
+    private final MorphologyService morphologyService;
     private final SiteModel siteModel;
     private final String href;
 
@@ -27,8 +27,8 @@ public class Parser extends RecursiveAction {
                 .map(element -> element.absUrl("href"))
                 .map(href -> entityHandlerService.getIndexedPageModel(siteModel, href))
                 .forEach(page -> {
-                    lemmaFinder.handleLemmaModel(siteModel, page);
-                    taskQueue.add(new Parser(entityHandlerService, connectionService, lemmaFinder, siteModel, page.getPath()));
+                    morphologyService.entityHandlerService.handleIndexModel(page, siteModel, morphologyService);
+                    taskQueue.add(new Parser(entityHandlerService, connectionService, morphologyService, siteModel, page.getPath()));
                 });
         taskQueue.forEach(RecursiveAction::fork);
         taskQueue.forEach(RecursiveAction::join);

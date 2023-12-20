@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jsoup.select.Elements;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

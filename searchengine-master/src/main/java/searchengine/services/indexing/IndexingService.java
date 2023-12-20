@@ -1,13 +1,10 @@
 package searchengine.services.indexing;
 
-import searchengine.dto.indexing.responseImpl.ResponseInterface;
-
-import java.net.URISyntaxException;
+import searchengine.dto.ResponseInterface;
 
 public interface IndexingService {
-    ResponseInterface startIndexing() throws URISyntaxException;
+    ResponseInterface startIndexing();
     ResponseInterface stopIndexing();
     void deleteData();
     ResponseInterface indexPage(String url);
-    ResponseInterface search(String url);
 }

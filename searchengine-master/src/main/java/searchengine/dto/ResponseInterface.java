@@ -1,4 +1,4 @@
-package searchengine.dto.indexing.responseImpl;
+package searchengine.dto;
 
 public interface ResponseInterface {
     boolean result = true;

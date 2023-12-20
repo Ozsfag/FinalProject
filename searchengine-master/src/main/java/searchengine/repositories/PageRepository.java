@@ -7,4 +7,5 @@ import searchengine.model.PageModel;
 @Repository
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
     PageModel findByPath(String path);
+
 }

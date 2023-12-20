@@ -37,8 +37,22 @@ public class ConnectionService {
             return buildErrorConnectionResponse(url, HttpStatus.NOT_FOUND.value(), e.getMessage());
         }
     }
+    public String getTitle(String url){
+        try {
+            Connection connection = Jsoup.connect(url)
+                    .userAgent(connection2Site.getUserAgent())
+                    .referrer(connection2Site.getReferrer());
 
-    ConnectionResponse buildErrorConnectionResponse(String url, int statusCode, String errorMessage) {
+            Document document = connection.get();
+
+            return document.select("title").text();
+
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
+    private ConnectionResponse buildErrorConnectionResponse(String url, int statusCode, String errorMessage) {
         return new ConnectionResponse(url, statusCode,"", null, errorMessage);
     }
 }

@@ -2,20 +2,26 @@ package searchengine.services.entityHandler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
+import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.*;
+import searchengine.repositories.IndexRepository;
+import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.connectivity.ConnectionService;
+import searchengine.services.morphology.MorphologyService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.Optional;
 
 import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
@@ -23,49 +29,54 @@ import static searchengine.services.indexing.IndexingImpl.isIndexing;
 @RequiredArgsConstructor
 public class EntityHandlerService {
     @Autowired
+    private ConnectionResponse connectionResponse;
+    @Autowired
     private  ConnectionService connectionService;
+    @Autowired @Lazy
+    MorphologyService morphologyService;
     private final SitesList sitesList;
     private final SiteRepository siteRepository;
-
+    private final LemmaRepository lemmaRepository;
     private final PageRepository pageRepository;
+    private final IndexRepository indexRepository;
 
     public SiteModel getIndexedSiteModel(String href) {
         SiteModel siteModel = null;
         try {
-            String url = getValidUrl(href);
-            Site site = sitesList.getSites().stream().filter(oneOfSites -> url.startsWith(oneOfSites.getUrl())).findFirst().get();
-            if (sitesList.getSites().stream().anyMatch(oneOffSites -> url.startsWith(oneOffSites.getUrl()))) {
+            String url = getValidUrlComponents(href)[0];
+            Optional<Site> site = sitesList.getSites().stream()
+                    .filter(oneOfSites -> url.startsWith(oneOfSites.getUrl()))
+                    .findFirst();
+            if (site.isPresent()) {
                 siteModel = siteRepository.findByUrl(url);
                 if (siteModel == null) {
-                    siteModel = createSiteModel(site);
+                    siteModel = createSiteModel(site.get());
                 }
-                siteRepository.delete(siteModel);
+                siteModel.setStatusTime(new Date());
                 siteRepository.saveAndFlush(siteModel);
             } else {
-                throw new OutOfSitesConfigurationException("out");
+                throw new OutOfSitesConfigurationException("Out of sites");
             }
-        }catch (OutOfSitesConfigurationException out){
-            throw new RuntimeException("OutOfSitesConfigurationException");
-        }catch (URISyntaxException uri){
-            throw new RuntimeException("URISyntaxException");
-        }finally {
+        }catch (OutOfSitesConfigurationException | URISyntaxException out){
+            throw new RuntimeException(out.getLocalizedMessage());
+        } finally {
             return siteModel;
         }
     }
-    public String getValidUrl(String url) throws URISyntaxException {
+    public String[] getValidUrlComponents(String url) throws URISyntaxException {
         URI uri = new URI(url);
-        return uri.getScheme() + "://" + uri.getHost() + "/";
+
+        String schemeAndHost = uri.getScheme() + "://" + uri.getHost() + "/";
+        String path = uri.getPath();
+
+        return new String[]{schemeAndHost, path};
     }
     public PageModel getIndexedPageModel(SiteModel siteModel, String href){
 
-        PageModel pageModel = null;
+        PageModel pageModel = pageRepository.findByPath(href) == null? createPageModel(siteModel, href) :  pageRepository.findByPath(href);
         try {
             if (!isIndexing.get()) {
                 throw new StoppedExecutionException("Stop indexing signal received");
-            }
-            pageModel = pageRepository.findByPath(href);
-            if (pageModel == null) {
-                pageModel = createPageModel(siteModel, href);
             }
             pageRepository.delete(pageModel);
             pageRepository.saveAndFlush(pageModel);
@@ -78,10 +89,31 @@ public class EntityHandlerService {
             pageRepository.saveAndFlush(pageModel);
             throw new RuntimeException(stop.getLocalizedMessage());
         }
-//        catch (Exception e) {
-//            String errorMessage = connectionResponse.getContent() == null? connectionResponse.getErrorMessage() : e.getLocalizedMessage();
-//            throw new RuntimeException(errorMessage);
-//        }
+        catch (Exception e) {
+            String errorMessage = connectionResponse.getContent() == null? connectionResponse.getErrorMessage() : e.getLocalizedMessage();
+            throw new RuntimeException(errorMessage);
+        }
+    }
+    public LemmaModel getIndexedLemmaModel(SiteModel siteModel, String word, int frequency){
+           LemmaModel lemmaModel = lemmaRepository.findByLemma(word);
+           if (lemmaModel == null) {
+               lemmaModel = createLemmaModel(siteModel, word, frequency);
+           } else {
+               lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
+           }
+           lemmaRepository.saveAndFlush(lemmaModel);
+           return lemmaModel;
+    }
+    public void handleIndexModel(PageModel pageModel, SiteModel siteModel, MorphologyService morphologyService){
+
+        morphologyService.wordCounter(pageModel.getContent()).forEach((word, frequency) -> {
+            LemmaModel lemmaModel = getIndexedLemmaModel(siteModel, word, frequency);
+            IndexModel indexModel = indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId());
+            if (indexModel == null){
+                indexModel = createIndexModel(pageModel, lemmaModel, frequency.floatValue());
+                indexRepository.saveAndFlush(indexModel);
+            }
+        });
     }
 
     public SiteModel createSiteModel(Site site) {
@@ -95,11 +127,12 @@ public class EntityHandlerService {
     }
 
     public PageModel createPageModel(SiteModel siteModel, String path) {
+        ConnectionResponse connectionResponse = connectionService.getConnection(path);
         return PageModel.builder()
                 .site(siteModel)
                 .path(path)
-                .code(connectionService.getConnection(path).getResponseCode())
-                .content(connectionService.getConnection(path).getContent())
+                .code(connectionResponse.getResponseCode())
+                .content(connectionResponse.getContent())
                 .build();
     }
 
@@ -118,4 +151,6 @@ public class EntityHandlerService {
                 .ranking(ranking)
                 .build();
     }
+
+
 }

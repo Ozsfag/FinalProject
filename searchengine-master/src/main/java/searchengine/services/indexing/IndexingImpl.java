@@ -3,10 +3,10 @@ package searchengine.services.indexing;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
-import searchengine.dto.indexing.responseImpl.BadIndexing;
-import searchengine.dto.indexing.responseImpl.ResponseInterface;
-import searchengine.dto.indexing.responseImpl.StopIndexing;
-import searchengine.dto.indexing.responseImpl.SuccessfulIndexing;
+import searchengine.dto.ResponseInterface;
+import searchengine.dto.indexing.responseImpl.Bad;
+import searchengine.dto.indexing.responseImpl.Stop;
+import searchengine.dto.indexing.responseImpl.Successful;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
@@ -15,7 +15,7 @@ import searchengine.repositories.SiteRepository;
 import searchengine.services.connectivity.ConnectionService;
 import searchengine.services.deleting.Deleter;
 import searchengine.services.entityHandler.EntityHandlerService;
-import searchengine.services.morphology.LemmaFinder;
+import searchengine.services.morphology.MorphologyService;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
@@ -27,7 +27,7 @@ public class IndexingImpl implements IndexingService {
     private final SitesList sitesList;
     private final SiteRepository siteRepository;
     private final ForkJoinPool forkJoinPool;
-    private final LemmaFinder lemmaFinder;
+    private final MorphologyService morphologyService;
     private final EntityHandlerService entityHandlerService;
     private final Deleter deleter;
     private final PageRepository pageRepository;
@@ -38,7 +38,7 @@ public class IndexingImpl implements IndexingService {
     @Override
     public ResponseInterface startIndexing(){
         if (isIndexing.get()) {
-            return new BadIndexing(false, "Индексация уже запущена");
+            return new Bad(false, "Индексация уже запущена");
         }
         isIndexing.set(true);
         CompletableFuture.runAsync(() -> sitesList.getSites()
@@ -46,7 +46,7 @@ public class IndexingImpl implements IndexingService {
                 .map(site -> entityHandlerService.getIndexedSiteModel(site.getUrl()))
                 .forEach(siteModel -> {
                     try {
-                        forkJoinPool.invoke(new Parser(entityHandlerService, connectionService, lemmaFinder,siteModel, siteModel.getUrl()));
+                        forkJoinPool.invoke(new Parser(entityHandlerService, connectionService, morphologyService,siteModel, siteModel.getUrl()));
                         siteModel.setStatus(Status.INDEXED);
                         siteRepository.saveAndFlush(siteModel);
                     } catch (RuntimeException re) {
@@ -55,7 +55,7 @@ public class IndexingImpl implements IndexingService {
                         siteRepository.saveAndFlush(siteModel);
                     }
                 }), forkJoinPool).thenRun(() -> isIndexing.set(false));
-        return new SuccessfulIndexing(true);
+        return new Successful(true);
 
     }
 
@@ -63,9 +63,9 @@ public class IndexingImpl implements IndexingService {
     public ResponseInterface stopIndexing() {
         if (isIndexing.getAndSet(false)) {
             forkJoinPool.shutdownNow();
-            return new StopIndexing(true, "Индексация остановлена пользователем");
+            return new Stop(true, "Индексация остановлена пользователем");
         } else {
-            return new StopIndexing(false, "Индексация не запущена");
+            return new Stop(false, "Индексация не запущена");
         }
     }
 
@@ -75,18 +75,13 @@ public class IndexingImpl implements IndexingService {
     }
     @Override
     public ResponseInterface indexPage(String url) {
-        isIndexing.set(false);
+        isIndexing.set(true);
         SiteModel siteModel = entityHandlerService.getIndexedSiteModel(url);
         PageModel pageModel = entityHandlerService.getIndexedPageModel(siteModel, url);
         siteRepository.saveAndFlush(siteModel);
         pageRepository.saveAndFlush(pageModel);
-        lemmaFinder.handleLemmaModel(siteModel, pageModel);
-        return new SuccessfulIndexing(true);
-    }
-
-    @Override
-    public ResponseInterface search(String url) {
-        return null;
+        morphologyService.entityHandlerService.handleIndexModel(pageModel,siteModel, morphologyService);
+        return new Successful(true);
     }
 
 }

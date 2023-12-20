@@ -1,13 +1,12 @@
 package searchengine.controllers;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.requestImpl.PageUrl;
-import searchengine.dto.indexing.responseImpl.ResponseInterface;
-import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.indexing.IndexingService;
+import searchengine.services.searching.SearchingService;
 import searchengine.services.statistics.StatisticsService;
 
 @RestController
@@ -17,13 +16,13 @@ public class ApiController {
 
     private final StatisticsService statisticsService;
     private final IndexingService indexingService;
-
+    private final SearchingService searchingService;
 
     @GetMapping("/statistics")
-    public ResponseEntity<StatisticsResponse> statistics() {
+    public ResponseEntity<ResponseInterface> statistics() {
         return ResponseEntity.ok(statisticsService.getStatistics());
     }
-    @SneakyThrows
+
     @GetMapping("/startIndexing")
     public ResponseEntity<ResponseInterface> startIndexing() {
         indexingService.deleteData();
@@ -40,7 +39,8 @@ public class ApiController {
         return ResponseEntity.ok(indexingService.indexPage(pageUrl.getUrl()));
     }
     @GetMapping("/search")
-    public ResponseEntity<ResponseInterface> search(PageUrl pageUrl){
-        return ResponseEntity.ok(indexingService.search(pageUrl.getUrl()));
+    public ResponseEntity<ResponseInterface> search(@RequestParam("query")String query, @RequestParam(value = "site", required = false) String site,
+                                                    @RequestParam("offset") Integer offset, @RequestParam("limit") Integer limit){
+        return ResponseEntity.ok(searchingService.search(query, site, offset, limit));
     }
 }
