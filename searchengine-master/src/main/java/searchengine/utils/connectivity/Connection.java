@@ -1,26 +1,25 @@
-package searchengine.services.connectivity;
+package searchengine.utils.connectivity;
 
-import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import searchengine.config.Connection2Site;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
 import java.io.IOException;
 
-@Service
-public class ConnectionService {
+@Component
+public class Connection {
     @Autowired
     Connection2Site connection2Site;
 
     public ConnectionResponse getConnection(String url) {
         try {
-            Connection connection = Jsoup.connect(url)
+            org.jsoup.Connection connection = Jsoup.connect(url)
                     .userAgent(connection2Site.getUserAgent())
                     .referrer(connection2Site.getReferrer());
 
@@ -39,7 +38,7 @@ public class ConnectionService {
     }
     public String getTitle(String url){
         try {
-            Connection connection = Jsoup.connect(url)
+            org.jsoup.Connection connection = Jsoup.connect(url)
                     .userAgent(connection2Site.getUserAgent())
                     .referrer(connection2Site.getReferrer());
 

@@ -7,12 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 
 @Service
-public class Deleter {
+public class Deleter implements DeletingService{
         @Autowired
         private EntityManager em;
 
+        @Override
         @Transactional
-        public void truncateTables() {
+        public void deleteData() {
             String[] dropStatements = {
                     "ALTER TABLE lemma DROP FOREIGN KEY FKorarkcy0wi1akdr0mkhb75bf2;",
                     "ALTER TABLE pages DROP FOREIGN KEY FK33gexkhrwd3yvnxy0usw9y3p1;",

@@ -1,10 +1,10 @@
-package searchengine.services.morphology;
+package searchengine.utils.morphology;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.lucene.morphology.LuceneMorphology;
+import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import searchengine.services.entityHandler.EntityHandlerService;
+import org.springframework.stereotype.Component;
+import searchengine.utils.entityHandler.EntityHandler;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -12,12 +12,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class MorphologyService {
-    private final LuceneMorphology luceneMorphology;
+public class Morphology {
+    private final RussianLuceneMorphology luceneMorphology;
     @Lazy
-    public final EntityHandlerService entityHandlerService;
+    public final EntityHandler entityHandler;
 
     private static final String[] particlesNames = {"МЕЖД", "ПРЕДЛ", "СОЮЗ"};
 

@@ -11,9 +11,9 @@ import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.PageRepository;
-import searchengine.services.connectivity.ConnectionService;
-import searchengine.services.entityHandler.EntityHandlerService;
-import searchengine.services.morphology.MorphologyService;
+import searchengine.utils.connectivity.Connection;
+import searchengine.utils.entityHandler.EntityHandler;
+import searchengine.utils.morphology.Morphology;
 
 import java.net.URISyntaxException;
 import java.util.*;
@@ -23,18 +23,18 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SearchingImpl implements SearchingService {
-    private final EntityHandlerService entityHandlerService;
-    private final MorphologyService morphologyService;
+    private final EntityHandler entityHandler;
+    private final Morphology morphology;
     private final PageRepository pageRepository;
     private final IndexRepository indexRepository;
-    private final ConnectionService connectionService;
-    private static final int MAX_FREQUENCY = 50;
+    private final Connection connection;
+    private static final int MAX_FREQUENCY = 100;
     @Override
     public ResponseInterface search(String query, String site, int offset, int limit) {
-        SiteModel siteModel = site == null ? null : entityHandlerService.getIndexedSiteModel(site);
+        SiteModel siteModel = site == null ? null : entityHandler.getIndexedSiteModel(site);
 
         Set<IndexModel> uniqueSet = transformQueryToIndexModelSet(query, siteModel);
-        if (uniqueSet.isEmpty()){return new TotalEmptyResponse(false, "Incorrect request");}
+        if (uniqueSet.isEmpty()){return new TotalEmptyResponse(false, "Not found");}
 
         Map<Integer, Float> rel = getPageId2AbsRank(uniqueSet);
 
@@ -51,23 +51,24 @@ public class SearchingImpl implements SearchingService {
                     DetailedSearchResponse response = new DetailedSearchResponse();
                     try {
                         PageModel pageModel = pageRepository.findById(entry.getKey()).orElseThrow();
-                        String[] urlComponents = entityHandlerService.getValidUrlComponents(pageModel.getPath());
+                        String[] urlComponents = entityHandler.getValidUrlComponents(pageModel.getPath());
                         response.setUri(urlComponents[1]);
                         response.setSite(urlComponents[0]);
                         response.setSiteName(pageModel.getSite().getName());
                         response.setRelevance(entry.getValue());
-                        response.setTitle(connectionService.getTitle(pageModel.getPath()));
+                        response.setTitle(connection.getTitle(pageModel.getPath()));
                         response.setSnippet(getSnippet(uniqueSet, pageModel));
                     } catch (URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
                     return response;
                 })
+//                .filter(response -> !response.getSnippet().isEmpty())
                 .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
                 .collect(Collectors.toList());
     }
     private Set<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
-        return morphologyService.getLemmaSet(query).stream()
+        return morphology.getLemmaSet(query).stream()
                 .flatMap(queryWord -> siteModel == null ?
                         indexRepository.findIndexByParams(queryWord, MAX_FREQUENCY).stream() :
                         indexRepository.findIndexByParams(queryWord, MAX_FREQUENCY, siteModel.getId()).stream())
@@ -97,24 +98,22 @@ public class SearchingImpl implements SearchingService {
     }
     public String getSnippet(Set<IndexModel> uniqueSet, PageModel pageModel) {
         List<String> matchingSentences = new ArrayList<>();
-
         uniqueSet.stream()
                 .filter(item -> item.getPage().equals(pageModel))
                 .forEach(item -> {
-                    String content = item.getPage().getContent();
+                    String content = item.getPage().getContent().toLowerCase();
                     String word = item.getLemma().getLemma();
-                    Matcher matcher = Pattern.compile(word, Pattern.CASE_INSENSITIVE).matcher(content);
+                    Matcher matcher = Pattern.compile("\\.*" + word + "\\.*", Pattern.CASE_INSENSITIVE).matcher(content);
 
-                    while (matcher.find() && matchingSentences.size() < 3) {
+                    while (matcher.find()) {
                         int start = Math.max(matcher.start() - 100, 0);
                         int end = Math.min(matcher.end() + 100, content.length());
                         String matchingSentence = content.substring(start, end);
 
-                        matchingSentence = matchingSentence.replaceAll(word, "<b>" + word + "</b>");
+                        matchingSentence = matchingSentence.replaceAll(matcher.group(), "<b>" + matcher.group() + "</b>");
                         matchingSentences.add(matchingSentence);
                     }
                 });
-
         return String.join("... ", matchingSentences);
     }
 }

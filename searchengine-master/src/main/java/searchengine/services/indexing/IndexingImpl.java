@@ -12,10 +12,10 @@ import searchengine.model.SiteModel;
 import searchengine.model.Status;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.services.connectivity.ConnectionService;
-import searchengine.services.deleting.Deleter;
-import searchengine.services.entityHandler.EntityHandlerService;
-import searchengine.services.morphology.MorphologyService;
+import searchengine.utils.connectivity.Connection;
+import searchengine.utils.entityHandler.EntityHandler;
+import searchengine.utils.morphology.Morphology;
+import searchengine.utils.parser.Parser;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
@@ -27,11 +27,10 @@ public class IndexingImpl implements IndexingService {
     private final SitesList sitesList;
     private final SiteRepository siteRepository;
     private final ForkJoinPool forkJoinPool;
-    private final MorphologyService morphologyService;
-    private final EntityHandlerService entityHandlerService;
-    private final Deleter deleter;
+    private final Morphology morphology;
+    private final EntityHandler entityHandler;
     private final PageRepository pageRepository;
-    private final ConnectionService connectionService;
+    private final Connection connection;
     public static AtomicBoolean isIndexing = new AtomicBoolean(false);
 
 
@@ -43,10 +42,10 @@ public class IndexingImpl implements IndexingService {
         isIndexing.set(true);
         CompletableFuture.runAsync(() -> sitesList.getSites()
                 .parallelStream()
-                .map(site -> entityHandlerService.getIndexedSiteModel(site.getUrl()))
+                .map(site -> entityHandler.getIndexedSiteModel(site.getUrl()))
                 .forEach(siteModel -> {
                     try {
-                        forkJoinPool.invoke(new Parser(entityHandlerService, connectionService, morphologyService,siteModel, siteModel.getUrl()));
+                        forkJoinPool.invoke(new Parser(entityHandler, connection, morphology,siteModel, siteModel.getUrl()));
                         siteModel.setStatus(Status.INDEXED);
                         siteRepository.saveAndFlush(siteModel);
                     } catch (RuntimeException re) {
@@ -68,19 +67,14 @@ public class IndexingImpl implements IndexingService {
             return new Stop(false, "Индексация не запущена");
         }
     }
-
-    @Override
-    public void deleteData() {
-        deleter.truncateTables();
-    }
     @Override
     public ResponseInterface indexPage(String url) {
         isIndexing.set(true);
-        SiteModel siteModel = entityHandlerService.getIndexedSiteModel(url);
-        PageModel pageModel = entityHandlerService.getIndexedPageModel(siteModel, url);
+        SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
+        PageModel pageModel = entityHandler.getIndexedPageModel(siteModel, url);
         siteRepository.saveAndFlush(siteModel);
         pageRepository.saveAndFlush(pageModel);
-        morphologyService.entityHandlerService.handleIndexModel(pageModel,siteModel, morphologyService);
+        entityHandler.handleIndexModel(pageModel,siteModel, morphology);
         return new Successful(true);
     }
 

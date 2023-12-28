@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.requestImpl.PageUrl;
+import searchengine.services.deleting.DeletingService;
 import searchengine.services.indexing.IndexingService;
 import searchengine.services.searching.SearchingService;
 import searchengine.services.statistics.StatisticsService;
@@ -17,6 +18,7 @@ public class ApiController {
     private final StatisticsService statisticsService;
     private final IndexingService indexingService;
     private final SearchingService searchingService;
+    private final DeletingService deletingService;
 
     @GetMapping("/statistics")
     public ResponseEntity<ResponseInterface> statistics() {
@@ -25,7 +27,7 @@ public class ApiController {
 
     @GetMapping("/startIndexing")
     public ResponseEntity<ResponseInterface> startIndexing() {
-        indexingService.deleteData();
+        deletingService.deleteData();
         return ResponseEntity.ok(indexingService.startIndexing());
     }
     @GetMapping("/stopIndexing")

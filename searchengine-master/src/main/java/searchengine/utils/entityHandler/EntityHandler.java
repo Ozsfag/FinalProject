@@ -1,10 +1,10 @@
-package searchengine.services.entityHandler;
+package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
@@ -15,8 +15,8 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.services.connectivity.ConnectionService;
-import searchengine.services.morphology.MorphologyService;
+import searchengine.utils.connectivity.Connection;
+import searchengine.utils.morphology.Morphology;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,15 +25,15 @@ import java.util.Optional;
 
 import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class EntityHandlerService {
+public class EntityHandler {
     @Autowired
     private ConnectionResponse connectionResponse;
     @Autowired
-    private  ConnectionService connectionService;
+    private Connection connection;
     @Autowired @Lazy
-    MorphologyService morphologyService;
+    Morphology morphology;
     private final SitesList sitesList;
     private final SiteRepository siteRepository;
     private final LemmaRepository lemmaRepository;
@@ -104,9 +104,9 @@ public class EntityHandlerService {
            lemmaRepository.saveAndFlush(lemmaModel);
            return lemmaModel;
     }
-    public void handleIndexModel(PageModel pageModel, SiteModel siteModel, MorphologyService morphologyService){
+    public void handleIndexModel(PageModel pageModel, SiteModel siteModel, Morphology morphology){
 
-        morphologyService.wordCounter(pageModel.getContent()).forEach((word, frequency) -> {
+        morphology.wordCounter(pageModel.getContent()).forEach((word, frequency) -> {
             LemmaModel lemmaModel = getIndexedLemmaModel(siteModel, word, frequency);
             IndexModel indexModel = indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId());
             if (indexModel == null){
@@ -127,7 +127,7 @@ public class EntityHandlerService {
     }
 
     public PageModel createPageModel(SiteModel siteModel, String path) {
-        ConnectionResponse connectionResponse = connectionService.getConnection(path);
+        ConnectionResponse connectionResponse = connection.getConnection(path);
         return PageModel.builder()
                 .site(siteModel)
                 .path(path)
