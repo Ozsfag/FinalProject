@@ -63,9 +63,8 @@ public class SearchingImpl implements SearchingService {
                     }
                     return response;
                 })
-//                .filter(response -> !response.getSnippet().isEmpty())
                 .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(LinkedList::new));
     }
     private Set<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
         return morphology.getLemmaSet(query).stream()
@@ -103,7 +102,7 @@ public class SearchingImpl implements SearchingService {
                 .forEach(item -> {
                     String content = item.getPage().getContent().toLowerCase();
                     String word = item.getLemma().getLemma();
-                    Matcher matcher = Pattern.compile("\\.*" + word + "\\.*", Pattern.CASE_INSENSITIVE).matcher(content);
+                    Matcher matcher = Pattern.compile("\\.*" + word , Pattern.CASE_INSENSITIVE).matcher(content);
 
                     while (matcher.find()) {
                         int start = Math.max(matcher.start() - 100, 0);
