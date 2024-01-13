@@ -1,14 +1,15 @@
 package searchengine.utils.parser;
 
 import lombok.RequiredArgsConstructor;
+import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class Parser extends RecursiveAction {
@@ -19,18 +20,23 @@ public class Parser extends RecursiveAction {
     private final String href;
 
     @Override
-    protected  void compute() {
-        List<Parser> taskQueue = new ArrayList<>();
-
-        connection.getConnection(href).getUrls().stream()
-                .filter(url -> url.absUrl("href").startsWith(siteModel.getUrl()))
+    protected void compute() {
+        List<String> urlsToParse = connection.getConnection(href).getUrls().stream()
                 .map(element -> element.absUrl("href"))
-                .map(href -> entityHandler.getIndexedPageModel(siteModel, href))
-                .forEach(page -> {
-                    morphology.entityHandler.handleIndexModel(page, siteModel, morphology);
-                    taskQueue.add(new Parser(entityHandler, connection, morphology, siteModel, page.getPath()));
-                });
-        taskQueue.forEach(RecursiveAction::fork);
-        taskQueue.forEach(RecursiveAction::join);
+                .distinct()
+                .filter(url -> url.startsWith(siteModel.getUrl()))
+                .toList();
+
+        urlsToParse.forEach(url -> {
+            PageModel page = entityHandler.getIndexedPageModel(siteModel, url);
+            entityHandler.handleIndexModel(page, siteModel, morphology);
+        });
+
+
+        List<Parser> subtasks = urlsToParse.stream()
+                .map(url -> new Parser(entityHandler, connection, morphology, siteModel, url))
+                .collect(Collectors.toList());
+        invokeAll(subtasks);
     }
 }
+

@@ -1,45 +1,67 @@
 package searchengine.utils.morphology;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.lucene.morphology.LuceneMorphology;
+import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.utils.entityHandler.EntityHandler;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
 public class Morphology {
-    private final RussianLuceneMorphology luceneMorphology;
-    @Lazy
-    public final EntityHandler entityHandler;
-
-    private static final String[] particlesNames = {"–ú–ï–ñ–î", "–ü–†–ï–î–õ", "–°–û–Æ–ó"};
+    private final RussianLuceneMorphology russianLuceneMorphology;
+    private final EnglishLuceneMorphology englishLuceneMorphology;
+    private final EntityHandler entityHandler;
+    private final String[] russianParticleNAmes = {"Ã≈∆ƒ", "œ–≈ƒÀ", "—Œﬁ«"};
+    private final String[] englishParticlesNames = {"CONJ", "PREP", "ARTICLE", "INT", "PART"};
+    private final String notCyrillicLetters = "[^‡-ˇ]";
+    private final String notLatinLetters = "[^a-z]";
+    private final String onlyCyrillicLetters = "[‡-ˇ]+";
+    private final String onlyLatinLetters = "[a-z]+";
+    private final String splitter = "\\s+";
+    private final String emptyString = " ";
 
     public Map<String, Integer> wordCounter(String content) {
-        return Arrays.stream(content.toLowerCase().replaceAll("[^–∞-—è]", " ").split("\\s+"))
-                .filter(this::isNotParticle)
+        Map<String, Integer> russianCounter = wordFrequency(content, notCyrillicLetters, russianLuceneMorphology, russianParticleNAmes);
+        Map<String, Integer> englishCounter = wordFrequency(content, notLatinLetters, englishLuceneMorphology, englishParticlesNames);
+        return Stream.concat(russianCounter.entrySet().stream(), englishCounter.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<String, Integer> wordFrequency(String content, String regex, LuceneMorphology luceneMorphology, String[] particles){
+        return Arrays.stream(content.toLowerCase().replaceAll(regex, emptyString).split(splitter))
+                .filter(word -> isNotParticle(word, luceneMorphology, particles))
                 .map(luceneMorphology::getNormalForms)
                 .map(forms -> forms.get(0))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toMap(word -> word, word -> 1, Integer::sum));
     }
 
-
-    private boolean isNotParticle(String word) {
-        return word.length() > 2 && !word.isBlank() && Arrays.stream(particlesNames)
+    private boolean isNotParticle(String word, LuceneMorphology luceneMorphology, String[] particles) {
+        return word.length() > 2 && !word.isBlank() && Arrays.stream(particles)
                 .noneMatch(part -> luceneMorphology.getMorphInfo(word).contains(part));
     }
 
     public Set<String> getLemmaSet(String query) {
-        Set<String> uniqueLemma = new HashSet<>();
-        Arrays.stream(query.toLowerCase().replaceAll("([^–∞-—è\\s])", " ").split("\\s+"))
-                .filter(this::isNotParticle)
-                .forEach(queryWord -> uniqueLemma.addAll(luceneMorphology.getNormalForms(queryWord)));
+    Set<String> uniqueLemma = new HashSet<>();
+        Arrays.stream(query.toLowerCase(Locale.ROOT).replaceAll(notCyrillicLetters, emptyString).split(splitter))
+                .filter(word -> isNotParticle(word, russianLuceneMorphology, russianParticleNAmes))
+                .forEach(queryWord -> {
+                    if (queryWord.matches(onlyLatinLetters)) uniqueLemma.addAll(englishLuceneMorphology.getNormalForms(queryWord));
+                    uniqueLemma.addAll(russianLuceneMorphology.getNormalForms(queryWord));
+                });
+        Arrays.stream(query.toLowerCase().replaceAll(notLatinLetters, emptyString).split(splitter))
+                .filter(word -> isNotParticle(word, englishLuceneMorphology, englishParticlesNames))
+                .forEach(queryWord -> {
+                    if (queryWord.matches(onlyCyrillicLetters))  uniqueLemma.addAll(russianLuceneMorphology.getNormalForms(queryWord));
+                    uniqueLemma.addAll(englishLuceneMorphology.getNormalForms(queryWord));
+
+                });
         return uniqueLemma;
     }
 }

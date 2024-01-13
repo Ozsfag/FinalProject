@@ -35,47 +35,48 @@ public class IndexingImpl implements IndexingService {
 
 
     @Override
-    public ResponseInterface startIndexing(){
-        if (isIndexing.get()) {
+    public ResponseInterface startIndexing() {
+        if (!isIndexing.compareAndSet(false, true)) {
             return new Bad(false, "Индексация уже запущена");
         }
-        isIndexing.set(true);
         CompletableFuture.runAsync(() -> sitesList.getSites()
-                .parallelStream()
-                .map(site -> entityHandler.getIndexedSiteModel(site.getUrl()))
-                .forEach(siteModel -> {
-                    try {
-                        forkJoinPool.invoke(new Parser(entityHandler, connection, morphology,siteModel, siteModel.getUrl()));
-                        siteModel.setStatus(Status.INDEXED);
-                        siteRepository.saveAndFlush(siteModel);
-                    } catch (RuntimeException re) {
-                        siteModel.setStatus(Status.FAILED);
-                        siteModel.setLastError(re.getLocalizedMessage());
-                        siteRepository.saveAndFlush(siteModel);
-                    }
-                }), forkJoinPool).thenRun(() -> isIndexing.set(false));
+                            .parallelStream()
+                            .forEach(siteUrl -> processSite(siteUrl.getUrl())), forkJoinPool)
+                         .thenRun(() -> isIndexing.set(false));
         return new Successful(true);
-
     }
-
+    private void processSite(String siteUrl) {
+        SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl);
+        try {
+            forkJoinPool.invoke(new Parser(entityHandler, connection, morphology, siteModel, siteUrl));
+            siteModel.setStatus(Status.INDEXED);
+        } catch (RuntimeException re) {
+            siteModel.setStatus(Status.FAILED);
+            siteModel.setLastError(re.getLocalizedMessage());
+        } finally {
+            siteRepository.saveAndFlush(siteModel);
+        }
+    }
     @Override
     public ResponseInterface stopIndexing() {
-        if (isIndexing.getAndSet(false)) {
-            forkJoinPool.shutdownNow();
-            return new Stop(true, "Индексация остановлена пользователем");
-        } else {
+        if (!isIndexing.getAndSet(false)) {
             return new Stop(false, "Индексация не запущена");
         }
+        forkJoinPool.shutdownNow();
+        return new Stop(true, "Индексация остановлена пользователем");
     }
     @Override
     public ResponseInterface indexPage(String url) {
-        isIndexing.set(true);
-        SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
-        PageModel pageModel = entityHandler.getIndexedPageModel(siteModel, url);
-        siteRepository.saveAndFlush(siteModel);
-        pageRepository.saveAndFlush(pageModel);
-        entityHandler.handleIndexModel(pageModel,siteModel, morphology);
+        if (!isIndexing.compareAndSet(false, true)) {
+            return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
+        }
+        try {
+            SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
+            PageModel pageModel = entityHandler.getIndexedPageModel(siteModel, url);
+            entityHandler.handleIndexModel(pageModel, siteModel, morphology);
+        } finally {
+            isIndexing.set(false);
+        }
         return new Successful(true);
     }
-
 }

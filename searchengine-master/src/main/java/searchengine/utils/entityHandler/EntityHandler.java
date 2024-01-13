@@ -2,7 +2,6 @@ package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
@@ -21,7 +20,6 @@ import searchengine.utils.morphology.Morphology;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.Optional;
 
 import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
@@ -32,8 +30,7 @@ public class EntityHandler {
     private ConnectionResponse connectionResponse;
     @Autowired
     private Connection connection;
-    @Autowired @Lazy
-    Morphology morphology;
+
     private final SitesList sitesList;
     private final SiteRepository siteRepository;
     private final LemmaRepository lemmaRepository;
@@ -41,39 +38,36 @@ public class EntityHandler {
     private final IndexRepository indexRepository;
 
     public SiteModel getIndexedSiteModel(String href) {
-        SiteModel siteModel = null;
         try {
-            String url = getValidUrlComponents(href)[0];
-            Optional<Site> site = sitesList.getSites().stream()
-                    .filter(oneOfSites -> url.startsWith(oneOfSites.getUrl()))
-                    .findFirst();
-            if (site.isPresent()) {
-                siteModel = siteRepository.findByUrl(url);
-                if (siteModel == null) {
-                    siteModel = createSiteModel(site.get());
-                }
-                siteModel.setStatusTime(new Date());
-                siteRepository.saveAndFlush(siteModel);
-            } else {
-                throw new OutOfSitesConfigurationException("Out of sites");
+            String validatedUrl = getValidUrlComponents(href)[0];
+            Site site = sitesList.getSites().stream()
+                    .filter(s -> validatedUrl.startsWith(s.getUrl()))
+                    .findFirst()
+                    .orElseThrow(() -> new OutOfSitesConfigurationException("Out of sites"));
+
+            SiteModel siteModel = siteRepository.findByUrl(validatedUrl);
+            if (siteModel == null) {
+                siteModel = createSiteModel(site);
             }
-        }catch (OutOfSitesConfigurationException | URISyntaxException out){
-            throw new RuntimeException(out.getLocalizedMessage());
-        } finally {
-            return siteModel;
+            siteModel.setStatusTime(new Date());
+            return siteRepository.saveAndFlush(siteModel);
+
+        } catch (URISyntaxException | OutOfSitesConfigurationException e) {
+            throw new RuntimeException(e.getLocalizedMessage());
         }
     }
     public String[] getValidUrlComponents(String url) throws URISyntaxException {
         URI uri = new URI(url);
-
         String schemeAndHost = uri.getScheme() + "://" + uri.getHost() + "/";
         String path = uri.getPath();
-
         return new String[]{schemeAndHost, path};
     }
     public PageModel getIndexedPageModel(SiteModel siteModel, String href){
 
-        PageModel pageModel = pageRepository.findByPath(href) == null? createPageModel(siteModel, href) :  pageRepository.findByPath(href);
+        PageModel pageModel = pageRepository.findByPath(href) == null?
+                createPageModel(siteModel, href):
+                pageRepository.findByPath(href);
+
         try {
             if (!isIndexing.get()) {
                 throw new StoppedExecutionException("Stop indexing signal received");
@@ -90,19 +84,22 @@ public class EntityHandler {
             throw new RuntimeException(stop.getLocalizedMessage());
         }
         catch (Exception e) {
-            String errorMessage = connectionResponse.getContent() == null? connectionResponse.getErrorMessage() : e.getLocalizedMessage();
+
+            String errorMessage = connectionResponse.getContent() == null?
+                    connectionResponse.getErrorMessage():
+                    e.getLocalizedMessage();
+
             throw new RuntimeException(errorMessage);
         }
     }
-    public LemmaModel getIndexedLemmaModel(SiteModel siteModel, String word, int frequency){
+    private LemmaModel getIndexedLemmaModel(SiteModel siteModel, String word, int frequency){
            LemmaModel lemmaModel = lemmaRepository.findByLemma(word);
            if (lemmaModel == null) {
                lemmaModel = createLemmaModel(siteModel, word, frequency);
            } else {
                lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
            }
-           lemmaRepository.saveAndFlush(lemmaModel);
-           return lemmaModel;
+           return lemmaRepository.saveAndFlush(lemmaModel);
     }
     public void handleIndexModel(PageModel pageModel, SiteModel siteModel, Morphology morphology){
 
@@ -111,12 +108,12 @@ public class EntityHandler {
             IndexModel indexModel = indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId());
             if (indexModel == null){
                 indexModel = createIndexModel(pageModel, lemmaModel, frequency.floatValue());
-                indexRepository.saveAndFlush(indexModel);
             }
+            indexRepository.saveAndFlush(indexModel);
         });
     }
 
-    public SiteModel createSiteModel(Site site) {
+    private SiteModel createSiteModel(Site site) {
         return SiteModel.builder()
                 .status(Status.INDEXING)
                 .url(site.getUrl())
@@ -126,7 +123,7 @@ public class EntityHandler {
                 .build();
     }
 
-    public PageModel createPageModel(SiteModel siteModel, String path) {
+    private PageModel createPageModel(SiteModel siteModel, String path) {
         ConnectionResponse connectionResponse = connection.getConnection(path);
         return PageModel.builder()
                 .site(siteModel)
@@ -136,7 +133,7 @@ public class EntityHandler {
                 .build();
     }
 
-    public LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency){
+    private LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency){
         return LemmaModel.builder()
                 .site(siteModel)
                 .lemma(lemma)
@@ -144,7 +141,7 @@ public class EntityHandler {
                 .build();
     }
 
-    public IndexModel createIndexModel(PageModel pageModel, LemmaModel lemmaModel, Float ranking){
+    private IndexModel createIndexModel(PageModel pageModel, LemmaModel lemmaModel, Float ranking){
         return IndexModel.builder()
                 .page(pageModel)
                 .lemma(lemmaModel)

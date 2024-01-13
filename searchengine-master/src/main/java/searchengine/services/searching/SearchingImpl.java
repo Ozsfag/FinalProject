@@ -100,9 +100,9 @@ public class SearchingImpl implements SearchingService {
         uniqueSet.stream()
                 .filter(item -> item.getPage().equals(pageModel))
                 .forEach(item -> {
-                    String content = item.getPage().getContent().toLowerCase();
+                    String content = item.getPage().getContent().toLowerCase(Locale.ROOT);
                     String word = item.getLemma().getLemma();
-                    Matcher matcher = Pattern.compile("\\.*" + word , Pattern.CASE_INSENSITIVE).matcher(content);
+                    Matcher matcher = Pattern.compile("\\.*" + word + "\\s+" , Pattern.CASE_INSENSITIVE).matcher(content);
 
                     while (matcher.find()) {
                         int start = Math.max(matcher.start() - 100, 0);
