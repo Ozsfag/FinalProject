@@ -102,16 +102,16 @@ public class SearchingImpl implements SearchingService {
                 .forEach(item -> {
                     String content = item.getPage().getContent().toLowerCase(Locale.ROOT);
                     String word = item.getLemma().getLemma();
-                    Matcher matcher = Pattern.compile("\\.*" + word + "\\s+" , Pattern.CASE_INSENSITIVE).matcher(content);
-
+                    Matcher matcher = Pattern.compile(word).matcher(content);
+                    String matchingSentence = null;
                     while (matcher.find()) {
-                        int start = Math.max(matcher.start() - 100, 0);
-                        int end = Math.min(matcher.end() + 100, content.length());
-                        String matchingSentence = content.substring(start, end);
+                        int start = Math.max(matcher.start() - 20, 0);
+                        int end = Math.min(matcher.end() + 20, content.length());
+                        matchingSentence = content.substring(start, end);
 
                         matchingSentence = matchingSentence.replaceAll(matcher.group(), "<b>" + matcher.group() + "</b>");
-                        matchingSentences.add(matchingSentence);
                     }
+                    matchingSentences.add(matchingSentence);
                 });
         return String.join("... ", matchingSentences);
     }
