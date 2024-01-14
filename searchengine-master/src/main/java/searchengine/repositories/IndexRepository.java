@@ -11,7 +11,7 @@ import java.util.List;
 public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
     IndexModel findByLemma_idAndPage_id(Integer lemmaId, Integer pageId);
 
-    @Query("select i from IndexModel i where i.lemma.lemma = :lemma and i.lemma.frequency < :frequency order by i.lemma.frequency")
+    @Query("select i from IndexModel i where i.lemma.lemma = ?1 and i.lemma.frequency < ?2 order by i.lemma.frequency")
     List<IndexModel> findIndexByParams(String lemma, Integer frequency);
 
     @Query("""
