@@ -6,10 +6,7 @@ import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,7 +25,7 @@ public class Morphology {
     public Map<String, Integer> wordCounter(String content) {
         Map<String, Integer> russianCounter = wordFrequency(content, notCyrillicLetters, russianLuceneMorphology, russianParticleNames);
         Map<String, Integer> englishCounter = wordFrequency(content, notLatinLetters, englishLuceneMorphology, englishParticlesNames);
-        return Stream.concat(russianCounter.entrySet().stream(), englishCounter.entrySet().stream())
+        return Stream.concat(russianCounter.entrySet().parallelStream(), englishCounter.entrySet().parallelStream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -36,7 +33,7 @@ public class Morphology {
         return Arrays.stream(content.toLowerCase().replaceAll(regex, emptyString).split(splitter))
                 .filter(word -> isNotParticle(word, luceneMorphology, particles))
                 .map(luceneMorphology::getNormalForms)
-                .map(forms -> forms.get(0))
+                .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(word -> word, word -> 1, Integer::sum));
     }

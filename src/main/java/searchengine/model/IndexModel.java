@@ -5,7 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "index_model", schema = "search_engine")
+@Table(name = "index_model", schema = "search_engine",
+        indexes = @Index(name = "findByLemma_idAndPage_id_index", columnList = "lemma_id, page_id", unique = true))
 @AllArgsConstructor
 @Data
 @NoArgsConstructor

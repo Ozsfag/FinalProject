@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Arrays;
 
 @Service
 public class Deleter implements DeletingService{
@@ -39,8 +40,7 @@ public class Deleter implements DeletingService{
             executeStatements(addStatements);
         }
         private void executeStatements(String[] statements){
-            for (String statement : statements) {
-                em.createNativeQuery(statement).executeUpdate();
-            }
+            Arrays.stream(statements)
+                    .forEach(statement -> em.createNativeQuery(statement).executeUpdate());
         }
 }

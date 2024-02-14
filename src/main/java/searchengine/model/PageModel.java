@@ -7,7 +7,9 @@ import java.util.List;
 
 @Entity
 @Table( name = "pages", schema = "search_engine",
-        indexes = @Index(name = "path_index", columnList = "path", unique = true))
+        indexes = {
+        @Index(name = "path_index", columnList = "path", unique = true),
+        @Index(name = "code_index", columnList = "code")})
 @Data
 @NoArgsConstructor(force = true)
 @Builder

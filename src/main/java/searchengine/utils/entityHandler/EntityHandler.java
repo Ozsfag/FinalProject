@@ -1,7 +1,7 @@
 package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
@@ -20,34 +20,31 @@ import searchengine.utils.morphology.Morphology;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
 @Component
 @RequiredArgsConstructor
 public class EntityHandler {
-    @Autowired
-    private Connection connection;
-
+    private final Connection connection;
     private final SitesList sitesList;
     private final SiteRepository siteRepository;
     private final LemmaRepository lemmaRepository;
     private final PageRepository pageRepository;
     private final IndexRepository indexRepository;
-
     public SiteModel getIndexedSiteModel(String href) {
         try {
-            String validatedUrl = getValidUrlComponents(href)[0];
-            Site site = sitesList.getSites().stream()
+            final String validatedUrl = getValidUrlComponents(href)[0];
+            final Site site = sitesList.getSites().stream()
                     .filter(s -> validatedUrl.startsWith(s.getUrl()))
                     .findFirst()
                     .orElseThrow(() -> new OutOfSitesConfigurationException("Out of sites"));
 
-            SiteModel siteModel = siteRepository.findByUrl(validatedUrl);
-            if (siteModel == null) {
-                siteModel = createSiteModel(site);
-            }
-            siteModel.setStatusTime(new Date());
+            SiteModel siteModel = Optional.ofNullable(siteRepository.findByUrl(validatedUrl))
+                    .orElseGet(()-> createSiteModel(site));
+
             return siteRepository.saveAndFlush(siteModel);
 
         } catch (URISyntaxException | OutOfSitesConfigurationException e) {
@@ -55,57 +52,61 @@ public class EntityHandler {
         }
     }
     public String[] getValidUrlComponents(String url) throws URISyntaxException {
-        URI uri = new URI(url);
-        String schemeAndHost = uri.getScheme() + "://" + uri.getHost() + "/";
-        String path = uri.getPath();
+        final URI uri = new URI(url);
+        final String schemeAndHost = uri.getScheme() + "://" + uri.getHost() + "/";
+        final String path = uri.getPath();
         return new String[]{schemeAndHost, path};
     }
+    @Cacheable("pageModels")
     public PageModel getIndexedPageModel(SiteModel siteModel, String href){
-        PageModel pageModel = pageRepository.findByPath(href);
-        if (pageModel == null) {
-            pageModel = createPageModel(siteModel, href);
-        }
+        PageModel pageModel = Optional.ofNullable(pageRepository.findByPath(href))
+                .orElseGet(() -> createPageModel(siteModel, href));
 
         try {
+            siteModel.setStatusTime(new Date());
+            siteRepository.save(siteModel);
             if (!isIndexing.get()) {
                 throw new StoppedExecutionException("Stop indexing signal received");
             }
-            siteModel.setStatusTime(new Date());
-            siteRepository.saveAndFlush(siteModel);
-            return pageRepository.saveAndFlush(pageModel);
+            return pageModel;
         }
         catch (Exception e){
-            String errorMessage = connection.getConnection(href).getContent() == null?
-                    connection.getConnection(href).getErrorMessage():
-                    e.getLocalizedMessage();
-
-            pageModel.setContent(errorMessage);
+            pageModel.setContent(e.getLocalizedMessage());
             pageModel.setCode(HttpStatus.SERVICE_UNAVAILABLE.value());
             pageRepository.saveAndFlush(pageModel);
-            throw new RuntimeException(errorMessage);
+            throw new RuntimeException(e.getLocalizedMessage());
         }
     }
-    private LemmaModel getIndexedLemmaModel(SiteModel siteModel, String word, int frequency){
-           LemmaModel lemmaModel = lemmaRepository.findByLemma(word);
-           if (lemmaModel == null) {
-               lemmaModel = createLemmaModel(siteModel, word, frequency);
-           } else {
-               lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
-           }
-           return lemmaRepository.saveAndFlush(lemmaModel);
-    }
-    public void handleIndexModel(PageModel pageModel, SiteModel siteModel, Morphology morphology){
+    @Cacheable("lemmaModels")
+    private LemmaModel getLemmaModel(SiteModel siteModel, String word, int frequency){
+        LemmaModel lemmaModel = lemmaRepository.findByLemma(word);
 
-        morphology.wordCounter(pageModel.getContent()).forEach((word, frequency) -> {
-            LemmaModel lemmaModel = getIndexedLemmaModel(siteModel, word, frequency);
-            IndexModel indexModel = indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId());
-            if (indexModel == null){
-                indexModel = createIndexModel(pageModel, lemmaModel, frequency.floatValue());
-            }
-            indexRepository.saveAndFlush(indexModel);
-        });
+        if (lemmaModel == null) {
+            lemmaModel = createLemmaModel(siteModel, word, frequency);
+        } else {
+            lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
+        }
+        return lemmaModel;
     }
+    private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Integer frequency){
+        return Optional.ofNullable(indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId()))
+                .orElseGet(()-> createIndexModel(pageModel, lemmaModel, frequency.floatValue()));
+    }
+    public void handleIndexModelAndLemmaModel(PageModel pageModel, SiteModel siteModel, Morphology morphology){
 
+            List<LemmaModel> lemmas = morphology.wordCounter(pageModel.getContent())
+                    .entrySet().parallelStream()
+                    .map(indexModel -> getLemmaModel(siteModel, indexModel.getKey(), indexModel.getValue()))
+                    .toList();
+
+            lemmaRepository.saveAll(lemmas);
+
+            List<IndexModel> indexes = lemmas.parallelStream()
+                    .map(lemma -> getIndexModel(lemma, pageModel, lemma.getFrequency()))
+                    .toList();
+
+            indexRepository.saveAll(indexes);
+    }
     private SiteModel createSiteModel(Site site) {
         return SiteModel.builder()
                 .status(Status.INDEXING)
@@ -117,7 +118,7 @@ public class EntityHandler {
     }
 
     private PageModel createPageModel(SiteModel siteModel, String path) {
-        ConnectionResponse connectionResponse = connection.getConnection(path);
+        ConnectionResponse connectionResponse = connection.getConnectionResponse(path);
         return PageModel.builder()
                 .site(siteModel)
                 .path(path)
@@ -141,6 +142,4 @@ public class EntityHandler {
                 .ranking(ranking)
                 .build();
     }
-
-
 }

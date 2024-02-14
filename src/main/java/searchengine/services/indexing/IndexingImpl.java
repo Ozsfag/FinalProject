@@ -10,6 +10,7 @@ import searchengine.dto.indexing.responseImpl.Successful;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
+import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class IndexingImpl implements IndexingService {
     private final SitesList sitesList;
     private final SiteRepository siteRepository;
+    private final PageRepository pageRepository;
     private final ForkJoinPool forkJoinPool;
     private final Morphology morphology;
     private final EntityHandler entityHandler;
@@ -35,21 +37,26 @@ public class IndexingImpl implements IndexingService {
         if (!isIndexing.compareAndSet(false, true)) {
             return new Bad(false, "Индексация уже запущена");
         }
-        CompletableFuture.runAsync(() -> sitesList.getSites()
-                            .parallelStream()
-                            .forEach(siteUrl -> processSite(siteUrl.getUrl())), forkJoinPool)
-                         .thenRun(() -> isIndexing.set(false));
+
+        CompletableFuture.runAsync(() ->
+                sitesList.getSites()
+                        .parallelStream()
+                        .forEach(siteUrl -> processSite(siteUrl.getUrl())), forkJoinPool);
+
+        forkJoinPool.shutdown();
         return new Successful(true);
+
     }
     private void processSite(String siteUrl) {
         SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl);
+        pageRepository.save(entityHandler.getIndexedPageModel(siteModel, siteUrl));
         try {
-            forkJoinPool.invoke(new Parser(entityHandler, connection, morphology, siteModel, siteUrl));
+            forkJoinPool.invoke(new Parser(entityHandler, connection, morphology, siteModel, siteUrl, pageRepository));
             siteModel.setStatus(Status.INDEXED);
         } catch (RuntimeException re) {
             siteModel.setStatus(Status.FAILED);
             siteModel.setLastError(re.getLocalizedMessage());
-        } finally {
+        }finally {
             siteRepository.saveAndFlush(siteModel);
         }
     }
@@ -69,7 +76,8 @@ public class IndexingImpl implements IndexingService {
         try {
             SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
             PageModel pageModel = entityHandler.getIndexedPageModel(siteModel, url);
-            entityHandler.handleIndexModel(pageModel, siteModel, morphology);
+            pageRepository.save(pageModel);
+            entityHandler.handleIndexModelAndLemmaModel(pageModel, siteModel, morphology);
         } finally {
             isIndexing.set(false);
         }

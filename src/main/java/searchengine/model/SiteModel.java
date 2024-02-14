@@ -7,7 +7,10 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "sites", schema = "search_engine")
+@Table(name = "sites", schema = "search_engine",
+        indexes = {
+        @Index(name = "site_name_index", columnList = "name"),
+        @Index(name = "site_url_index", columnList = "url")})
 @Data
 @Builder
 @AllArgsConstructor

@@ -11,48 +11,50 @@ import searchengine.config.Connection2Site;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Component
 public class Connection {
     @Autowired
     Connection2Site connection2Site;
 
-    public ConnectionResponse getConnection(String url) {
+    public ConnectionResponse getConnectionResponse(String url) {
         try {
             org.jsoup.Connection connection = Jsoup.connect(url)
                     .userAgent(connection2Site.getUserAgent())
                     .referrer(connection2Site.getReferrer());
 
             Document document = connection.get();
-
             int responseCode = connection.response().statusCode();
-            String content = document.body().text();
+            String content = Optional.of(document.body().text()).orElseThrow();
             Elements urls = document.select("a[href]");
             return new ConnectionResponse(connection.request().url().toString(), responseCode, content, urls, null);
 
         } catch (HttpStatusException e) {
-            return buildErrorConnectionResponse(url, e.getStatusCode(),e.getMessage());
+            return getErrorConnectionResponse(url, e.getStatusCode(),e.getMessage());
         } catch (IOException e) {
-            return buildErrorConnectionResponse(url, HttpStatus.NOT_FOUND.value(), e.getMessage());
+            return getErrorConnectionResponse(url, HttpStatus.NOT_FOUND.value(), e.getMessage());
+        }catch (NoSuchElementException e){
+            return getErrorConnectionResponse(url, HttpStatus.NO_CONTENT.value(), e.getMessage());
         }
     }
+
     public String getTitle(String url){
+        org.jsoup.Connection connection = Jsoup.connect(url)
+                .userAgent(connection2Site.getUserAgent())
+                .referrer(connection2Site.getReferrer());
+
+        Document document;
         try {
-            org.jsoup.Connection connection = Jsoup.connect(url)
-                    .userAgent(connection2Site.getUserAgent())
-                    .referrer(connection2Site.getReferrer());
-
-            Document document = connection.get();
-
-            return document.select("title").text();
-
+            document = connection.get();
         } catch (IOException e) {
             return "";
         }
+        return document.select("title").text();
     }
 
-    private ConnectionResponse buildErrorConnectionResponse(String url, int statusCode, String errorMessage) {
-        return new ConnectionResponse(url, statusCode,"", null, errorMessage);
+    private ConnectionResponse getErrorConnectionResponse(String url, int statusCode, String errorMessage) {
+        return new ConnectionResponse(url, statusCode,"", new Elements().empty(), errorMessage);
     }
 }
