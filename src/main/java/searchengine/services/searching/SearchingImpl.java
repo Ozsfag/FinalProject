@@ -69,8 +69,8 @@ public class SearchingImpl implements SearchingService {
     private Set<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
         return morphology.getLemmaSet(query).stream()
                 .flatMap(queryWord -> siteModel == null ?
-                        indexRepository.findIndexByParams(queryWord, MAX_FREQUENCY).stream() :
-                        indexRepository.findIndexByParams(queryWord, MAX_FREQUENCY, siteModel.getId()).stream())
+                        indexRepository.findIndexBy2Params(queryWord, MAX_FREQUENCY).stream() :
+                        indexRepository.findIndexBy3Params(queryWord, MAX_FREQUENCY, siteModel.getId()).stream())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
     }

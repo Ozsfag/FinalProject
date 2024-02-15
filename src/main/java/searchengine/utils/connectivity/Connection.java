@@ -29,6 +29,7 @@ public class Connection {
             int responseCode = connection.response().statusCode();
             String content = Optional.of(document.body().text()).orElseThrow();
             Elements urls = document.select("a[href]");
+
             return new ConnectionResponse(connection.request().url().toString(), responseCode, content, urls, null);
 
         } catch (HttpStatusException e) {

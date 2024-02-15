@@ -58,13 +58,13 @@ public class EntityHandler {
         return new String[]{schemeAndHost, path};
     }
     @Cacheable("pageModels")
-    public PageModel getIndexedPageModel(SiteModel siteModel, String href){
-        PageModel pageModel = Optional.ofNullable(pageRepository.findByPath(href))
+    public PageModel getPageModel(SiteModel siteModel, String href){
+        PageModel pageModel = null;
+        try {
+            pageModel = Optional.ofNullable(pageRepository.findByPath(href))
                 .orElseGet(() -> createPageModel(siteModel, href));
 
-        try {
-            siteModel.setStatusTime(new Date());
-            siteRepository.save(siteModel);
+            siteRepository.updateStatusTimeBy(new Date());
             if (!isIndexing.get()) {
                 throw new StoppedExecutionException("Stop indexing signal received");
             }
@@ -88,24 +88,25 @@ public class EntityHandler {
         }
         return lemmaModel;
     }
+    @Cacheable("indexModels")
     private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Integer frequency){
         return Optional.ofNullable(indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId()))
                 .orElseGet(()-> createIndexModel(pageModel, lemmaModel, frequency.floatValue()));
     }
-    public void handleIndexModelAndLemmaModel(PageModel pageModel, SiteModel siteModel, Morphology morphology){
-
+    public synchronized List<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel, Morphology morphology){
             List<LemmaModel> lemmas = morphology.wordCounter(pageModel.getContent())
                     .entrySet().parallelStream()
                     .map(indexModel -> getLemmaModel(siteModel, indexModel.getKey(), indexModel.getValue()))
                     .toList();
 
-            lemmaRepository.saveAll(lemmas);
+           return lemmaRepository.saveAllAndFlush(lemmas);
+    }
+    public synchronized List<IndexModel> getIndexModelFromLemmaList(PageModel pageModel, List<LemmaModel> lemmas){
+        List<IndexModel> indexes = lemmas.parallelStream()
+                .map(lemma -> getIndexModel(lemma, pageModel, lemma.getFrequency()))
+                .toList();
 
-            List<IndexModel> indexes = lemmas.parallelStream()
-                    .map(lemma -> getIndexModel(lemma, pageModel, lemma.getFrequency()))
-                    .toList();
-
-            indexRepository.saveAll(indexes);
+        return indexRepository.saveAllAndFlush(indexes);
     }
     private SiteModel createSiteModel(Site site) {
         return SiteModel.builder()

@@ -10,7 +10,8 @@ import java.util.List;
 @Table(name = "sites", schema = "search_engine",
         indexes = {
         @Index(name = "site_name_index", columnList = "name"),
-        @Index(name = "site_url_index", columnList = "url")})
+        @Index(name = "site_url_index", columnList = "url"),
+        @Index(name = "status_time_index", columnList = "status_time")})
 @Data
 @Builder
 @AllArgsConstructor

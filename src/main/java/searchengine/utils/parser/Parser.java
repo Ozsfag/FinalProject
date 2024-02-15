@@ -1,6 +1,7 @@
 package searchengine.utils.parser;
 
 import lombok.RequiredArgsConstructor;
+import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
@@ -32,12 +33,15 @@ public class Parser extends RecursiveAction {
 
 
         List<PageModel> pages = urlsToParse.stream()
-                .map(url -> entityHandler.getIndexedPageModel(siteModel, url))
+                .map(url -> entityHandler.getPageModel(siteModel, url))
                 .collect(Collectors.toList());
 
-        pageRepository.saveAll(pages);
+        pageRepository.saveAllAndFlush(pages);
 
-        pages.forEach(page -> entityHandler.handleIndexModelAndLemmaModel(page, siteModel, morphology));
+        pages.forEach(page -> {
+            List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(page, siteModel, morphology);
+            entityHandler.getIndexModelFromLemmaList(page, lemmas);
+        });
 
         List<Parser> subtasks = urlsToParse.stream()
                 .filter(pageRepository::existsByPathIgnoreCase)

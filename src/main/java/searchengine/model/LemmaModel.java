@@ -22,8 +22,9 @@ public class LemmaModel {
     @Column(name = "lemma_id", columnDefinition = "INT")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
+    @ToString.Exclude
     private SiteModel site;
 
     @Column(name = "lemma", nullable = false, columnDefinition = "VARCHAR(255)")

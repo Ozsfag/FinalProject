@@ -7,9 +7,7 @@ import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
-import searchengine.model.PageModel;
-import searchengine.model.SiteModel;
-import searchengine.model.Status;
+import searchengine.model.*;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.connectivity.Connection;
@@ -17,6 +15,8 @@ import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.parser.Parser;
 
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,16 +48,11 @@ public class IndexingImpl implements IndexingService {
 
     }
     private void processSite(String siteUrl) {
-        SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl);
-        pageRepository.save(entityHandler.getIndexedPageModel(siteModel, siteUrl));
         try {
-            forkJoinPool.invoke(new Parser(entityHandler, connection, morphology, siteModel, siteUrl, pageRepository));
-            siteModel.setStatus(Status.INDEXED);
+            forkJoinPool.invoke(new Parser(entityHandler, connection, morphology, indexingProcessor(siteUrl), siteUrl, pageRepository));
+            siteRepository.updateStatusBy(Status.INDEXED);
         } catch (RuntimeException re) {
-            siteModel.setStatus(Status.FAILED);
-            siteModel.setLastError(re.getLocalizedMessage());
-        }finally {
-            siteRepository.saveAndFlush(siteModel);
+            siteRepository.updateStatusAndStatusTimeAndLastErrorBy(Status.FAILED, new Date(), re.getLocalizedMessage());
         }
     }
     @Override
@@ -73,14 +68,16 @@ public class IndexingImpl implements IndexingService {
         if (!isIndexing.compareAndSet(false, true)) {
             return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
         }
-        try {
-            SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
-            PageModel pageModel = entityHandler.getIndexedPageModel(siteModel, url);
-            pageRepository.save(pageModel);
-            entityHandler.handleIndexModelAndLemmaModel(pageModel, siteModel, morphology);
-        } finally {
-            isIndexing.set(false);
-        }
+        indexingProcessor(url);
+        isIndexing.set(false);
         return new Successful(true);
+    }
+    private SiteModel indexingProcessor(String url){
+        SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
+        PageModel pageModel = entityHandler.getPageModel(siteModel, url);
+        pageRepository.saveAndFlush(pageModel);
+        List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(pageModel, siteModel, morphology);
+        List<IndexModel> indexes = entityHandler.getIndexModelFromLemmaList(pageModel, lemmas);
+        return siteModel;
     }
 }
