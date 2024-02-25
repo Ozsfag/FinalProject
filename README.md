@@ -23,6 +23,7 @@
                     hibernate:
                         ddl-auto: update
                         show-sql: true
+                        
             indexing-settings:
                 sites:
                     - url: https://lenta.ru/
@@ -31,9 +32,29 @@
                       name: Skillbox
                     - url: http://www.playback.ru/
                       name: PlayBack.Ru
+                      
             connection-settings:
                 user-agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0
                 referrer: https://www.google.com
+                
+            morphology-settings:
+             russianParticleNames:
+              - МЕЖД
+              - ПРЕДЛ
+              - СОЮЗ
+             englishParticlesNames:
+              - CONJ
+              - PREP
+              - ARTICLE
+              - INT
+              - PART
+             notCyrillicLetters: "[^а-я]"
+             notLatinLetters: "[^a-z]"
+             splitter: "\\s+"
+             emptyString: " "
+             formats:
+              - .pdf
+              - .jpg
 <!-- TOC -->
 
 -[ ] Запустите приложение. В адресную строку введите http://localhost:8080/.
