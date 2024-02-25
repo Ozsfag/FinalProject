@@ -9,8 +9,8 @@ import java.util.List;
 @Entity
 @Table(name = "sites", schema = "search_engine",
         indexes = {
-        @Index(name = "site_name_index", columnList = "name"),
-        @Index(name = "site_url_index", columnList = "url"),
+        @Index(name = "site_name_index", columnList = "name", unique = true),
+        @Index(name = "site_url_index", columnList = "url", unique = true),
         @Index(name = "status_time_index", columnList = "status_time")})
 @Data
 @Builder

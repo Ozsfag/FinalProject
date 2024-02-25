@@ -25,8 +25,8 @@ indexing-settings:
       name: PlayBack.Ru
 #    - url: https://www.volochek.life/
 #      name: Volochek.ru
-#    - url: http://radiomv.ru/
-#      name: Radimov.ru
+    - url: http://radiomv.ru/
+      name: Radimov.ru
 #    - url: https://ipfran.ru/
 #      name: Ipfran.ru
 #    - url: https://dimonvideo.ru/
@@ -41,3 +41,22 @@ indexing-settings:
 connection-settings:
   user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
   referrer: https://www.google.com
+
+morphology-settings:
+  russianParticleNames:
+    - МЕЖД
+    - ПРЕДЛ
+    - СОЮЗ
+  englishParticlesNames:
+    - CONJ
+    - PREP
+    - ARTICLE
+    - INT
+    - PART
+  notCyrillicLetters: "[^а-я]"
+  notLatinLetters: "[^a-z]"
+  splitter: "\\s+"
+  emptyString: " "
+  formats:
+    - .pdf
+    - .jpg

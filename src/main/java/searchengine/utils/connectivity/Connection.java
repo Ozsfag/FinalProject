@@ -7,7 +7,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import searchengine.config.Connection2Site;
+import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
 import java.io.IOException;
@@ -17,34 +17,33 @@ import java.util.Optional;
 @Component
 public class Connection {
     @Autowired
-    Connection2Site connection2Site;
+    ConnectionSettings connectionSettings;
 
     public ConnectionResponse getConnectionResponse(String url) {
         try {
             org.jsoup.Connection connection = Jsoup.connect(url)
-                    .userAgent(connection2Site.getUserAgent())
-                    .referrer(connection2Site.getReferrer());
+                    .userAgent(connectionSettings.getUserAgent())
+                    .referrer(connectionSettings.getReferrer());
 
             Document document = connection.get();
             int responseCode = connection.response().statusCode();
             String content = Optional.of(document.body().text()).orElseThrow();
             Elements urls = document.select("a[href]");
 
-            return new ConnectionResponse(connection.request().url().toString(), responseCode, content, urls, null);
-
+            return new ConnectionResponse(url, responseCode, content, urls, "");
         } catch (HttpStatusException e) {
             return getErrorConnectionResponse(url, e.getStatusCode(),e.getMessage());
         } catch (IOException e) {
-            return getErrorConnectionResponse(url, HttpStatus.NOT_FOUND.value(), e.getMessage());
+            return getErrorConnectionResponse(url, HttpStatus.NOT_FOUND.value(), "Not found");
         }catch (NoSuchElementException e){
-            return getErrorConnectionResponse(url, HttpStatus.NO_CONTENT.value(), e.getMessage());
+            return getErrorConnectionResponse(url, HttpStatus.NO_CONTENT.value(), "No content");
         }
     }
 
     public String getTitle(String url){
         org.jsoup.Connection connection = Jsoup.connect(url)
-                .userAgent(connection2Site.getUserAgent())
-                .referrer(connection2Site.getReferrer());
+                .userAgent(connectionSettings.getUserAgent())
+                .referrer(connectionSettings.getReferrer());
 
         Document document;
         try {

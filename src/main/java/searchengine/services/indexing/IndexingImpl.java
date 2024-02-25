@@ -2,6 +2,7 @@ package searchengine.services.indexing;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import searchengine.config.MorphologySettings;
 import searchengine.config.SitesList;
 import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
@@ -31,12 +32,12 @@ public class IndexingImpl implements IndexingService {
     private final Morphology morphology;
     private final EntityHandler entityHandler;
     private final Connection connection;
+    private final MorphologySettings morphologySettings;
     public static AtomicBoolean isIndexing = new AtomicBoolean(false);
     @Override
     public ResponseInterface startIndexing() {
-        if (!isIndexing.compareAndSet(false, true)) {
-            return new Bad(false, "Индексация уже запущена");
-        }
+        if (!isIndexing.compareAndSet(false, true)) return new Bad(false, "Индексация уже запущена");
+
 
         CompletableFuture.runAsync(() ->
                 sitesList.getSites()
@@ -45,14 +46,16 @@ public class IndexingImpl implements IndexingService {
 
         forkJoinPool.shutdown();
         return new Successful(true);
-
     }
     private void processSite(String siteUrl) {
         try {
-            forkJoinPool.invoke(new Parser(entityHandler, connection, morphology, indexingProcessor(siteUrl), siteUrl, pageRepository));
-            siteRepository.updateStatusBy(Status.INDEXED);
+            Parser parser = new Parser(entityHandler, connection, morphology, indexingProcessor(siteUrl), siteUrl, pageRepository, morphologySettings);
+            forkJoinPool.execute(() -> {
+                forkJoinPool.invoke(parser);
+                siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl);
+            });
         } catch (RuntimeException re) {
-            siteRepository.updateStatusAndStatusTimeAndLastErrorBy(Status.FAILED, new Date(), re.getLocalizedMessage());
+            siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl);
         }
     }
     @Override

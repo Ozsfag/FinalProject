@@ -2,7 +2,6 @@ package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
@@ -36,8 +35,9 @@ public class EntityHandler {
     private final IndexRepository indexRepository;
     public SiteModel getIndexedSiteModel(String href) {
         try {
-            final String validatedUrl = getValidUrlComponents(href)[0];
-            final Site site = sitesList.getSites().stream()
+            String validatedUrl = getValidUrlComponents(href)[0];
+
+            Site site = sitesList.getSites().stream()
                     .filter(s -> validatedUrl.startsWith(s.getUrl()))
                     .findFirst()
                     .orElseThrow(() -> new OutOfSitesConfigurationException("Out of sites"));
@@ -58,21 +58,28 @@ public class EntityHandler {
         return new String[]{schemeAndHost, path};
     }
     @Cacheable("pageModels")
-    public PageModel getPageModel(SiteModel siteModel, String href){
+    public PageModel getPageModel(SiteModel siteModel, String href) {
         PageModel pageModel = null;
         try {
             pageModel = Optional.ofNullable(pageRepository.findByPath(href))
-                .orElseGet(() -> createPageModel(siteModel, href));
+                    .orElseGet(() -> createPageModel(siteModel, href));
 
-            siteRepository.updateStatusTimeBy(new Date());
-            if (!isIndexing.get()) {
-                throw new StoppedExecutionException("Stop indexing signal received");
+            siteRepository.updateStatusTimeByUrl(new Date(), href);
+
+            if (!isIndexing.get()) throw new StoppedExecutionException("Stop indexing signal received");
+
+            int responseCode = pageModel.getCode();
+
+            if (responseCode == 200) {
+                return pageModel;
+            } else if (responseCode == 404) {
+                throw new RuntimeException("Страница не найдена");
+            } else if (responseCode == 204) {
+                throw new RuntimeException("Нет контента на странице");
+            } else {
+                throw new RuntimeException("Ошибка при получении страницы");
             }
-            return pageModel;
-        }
-        catch (Exception e){
-            pageModel.setContent(e.getLocalizedMessage());
-            pageModel.setCode(HttpStatus.SERVICE_UNAVAILABLE.value());
+        } catch (Exception e) {
             pageRepository.saveAndFlush(pageModel);
             throw new RuntimeException(e.getLocalizedMessage());
         }
@@ -113,11 +120,10 @@ public class EntityHandler {
                 .status(Status.INDEXING)
                 .url(site.getUrl())
                 .statusTime(new Date())
-                .lastError(null)
+                .lastError("")
                 .name(site.getName())
                 .build();
     }
-
     private PageModel createPageModel(SiteModel siteModel, String path) {
         ConnectionResponse connectionResponse = connection.getConnectionResponse(path);
         return PageModel.builder()
@@ -127,7 +133,6 @@ public class EntityHandler {
                 .content(connectionResponse.getContent())
                 .build();
     }
-
     private LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency){
         return LemmaModel.builder()
                 .site(siteModel)
@@ -135,7 +140,6 @@ public class EntityHandler {
                 .frequency(frequency)
                 .build();
     }
-
     private IndexModel createIndexModel(PageModel pageModel, LemmaModel lemmaModel, Float ranking){
         return IndexModel.builder()
                 .page(pageModel)

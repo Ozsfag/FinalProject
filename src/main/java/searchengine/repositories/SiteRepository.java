@@ -17,18 +17,18 @@ public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
 
     @Transactional
     @Modifying
-    @Query("update SiteModel s set s.statusTime = ?1")
-    void updateStatusTimeBy(Date statusTime);
+    @Query("update SiteModel s set s.statusTime = ?1 where s.url = ?2")
+    void updateStatusTimeByUrl(Date statusTime, String url);
 
     @Transactional
     @Modifying
-    @Query("update SiteModel s set s.status = ?1, s.statusTime = ?2, s.lastError = ?3")
-    int updateStatusAndStatusTimeAndLastErrorBy(Status status, Date statusTime, String lastError);
+    @Query("update SiteModel s set s.status = ?1, s.statusTime = ?2, s.lastError = ?3 where s.url = ?4")
+    void updateStatusAndStatusTimeAndLastErrorByUrl(Status status, Date statusTime, String lastError, String url);
 
     @Transactional
     @Modifying
-    @Query("update SiteModel s set s.status = ?1")
-    int updateStatusBy(Status status);
+    @Query("update SiteModel s set s.status = ?1, s.statusTime = ?2 where s.url = ?3")
+    void updateStatusAndStatusTimeByUrl(Status status, Date statusTime, String url);
 
 
 }

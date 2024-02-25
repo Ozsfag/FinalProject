@@ -5,6 +5,7 @@ import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.stereotype.Component;
+import searchengine.config.MorphologySettings;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,22 +16,17 @@ import java.util.stream.Stream;
 public class Morphology {
     private final RussianLuceneMorphology russianLuceneMorphology;
     private final EnglishLuceneMorphology englishLuceneMorphology;
-    private final String[] russianParticleNames = {"����", "�����", "����"};
-    private final String[] englishParticlesNames = {"CONJ", "PREP", "ARTICLE", "INT", "PART"};
-    private final String notCyrillicLetters = "[^�-�]";
-    private final String notLatinLetters = "[^a-z]";
-    private final String splitter = "\\s+";
-    private final String emptyString = " ";
+    private final MorphologySettings morphologySettings;
 
     public Map<String, Integer> wordCounter(String content) {
-        Map<String, Integer> russianCounter = wordFrequency(content, notCyrillicLetters, russianLuceneMorphology, russianParticleNames);
-        Map<String, Integer> englishCounter = wordFrequency(content, notLatinLetters, englishLuceneMorphology, englishParticlesNames);
+        Map<String, Integer> russianCounter = wordFrequency(content, morphologySettings.getNotCyrillicLetters(), russianLuceneMorphology, morphologySettings.getRussianParticleNames());
+        Map<String, Integer> englishCounter = wordFrequency(content, morphologySettings.getNotLatinLetters(), englishLuceneMorphology, morphologySettings.getEnglishParticlesNames());
         return Stream.concat(russianCounter.entrySet().parallelStream(), englishCounter.entrySet().parallelStream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private Map<String, Integer> wordFrequency(String content, String regex, LuceneMorphology luceneMorphology, String[] particles){
-        return Arrays.stream(content.toLowerCase().replaceAll(regex, emptyString).split(splitter))
+        return Arrays.stream(content.toLowerCase().replaceAll(regex, morphologySettings.getEmptyString()).split(morphologySettings.getSplitter()))
                 .filter(word -> isNotParticle(word, luceneMorphology, particles))
                 .map(luceneMorphology::getNormalForms)
                 .flatMap(Collection::stream)
@@ -45,14 +41,14 @@ public class Morphology {
 
     public Set<String> getLemmaSet(String query) {
         String onlyLatinLetters = "[a-z]+";
-        Stream<String> russianLemmaStream = getLemmaStreamByLanguage(query, notCyrillicLetters, russianLuceneMorphology,englishLuceneMorphology, russianParticleNames, onlyLatinLetters);
-        String onlyCyrillicLetters = "[�-�]+";
-        Stream<String> englishLemmaStream = getLemmaStreamByLanguage(query, notLatinLetters, englishLuceneMorphology, russianLuceneMorphology, englishParticlesNames, onlyCyrillicLetters);
+        Stream<String> russianLemmaStream = getLemmaStreamByLanguage(query, morphologySettings.getNotCyrillicLetters(), russianLuceneMorphology,englishLuceneMorphology, morphologySettings.getRussianParticleNames(), onlyLatinLetters);
+        String onlyCyrillicLetters = "[а-я]+";
+        Stream<String> englishLemmaStream = getLemmaStreamByLanguage(query, morphologySettings.getNotLatinLetters(), englishLuceneMorphology, russianLuceneMorphology, morphologySettings.getEnglishParticlesNames(), onlyCyrillicLetters);
         return Stream.concat(russianLemmaStream, englishLemmaStream).collect(Collectors.toSet());
 
     }
     private Stream<String> getLemmaStreamByLanguage(String query, String nonLetters, LuceneMorphology luceneMorphology1, LuceneMorphology luceneMorphology2, String[] particles, String onlyLetters){
-        return Arrays.stream(query.toLowerCase().replaceAll(nonLetters, emptyString).split(splitter))
+        return Arrays.stream(query.toLowerCase().replaceAll(nonLetters, morphologySettings.getEmptyString()).split(morphologySettings.getSplitter()))
                 .filter(word -> isNotParticle(word, luceneMorphology1, particles))
                 .flatMap(queryWord -> queryWord.matches(onlyLetters)?
                         luceneMorphology2.getNormalForms(queryWord).stream():
