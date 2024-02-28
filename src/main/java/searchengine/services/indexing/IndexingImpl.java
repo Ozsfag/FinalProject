@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +32,10 @@ public class IndexingImpl implements IndexingService {
     private final EntityHandler entityHandler;
     private final Connection connection;
     private final MorphologySettings morphologySettings;
-    public static AtomicBoolean isIndexing = new AtomicBoolean(false);
+    public static volatile boolean isIndexing = true;
     @Override
     public ResponseInterface startIndexing() {
-        if (!isIndexing.compareAndSet(false, true)) return new Bad(false, "Индексация уже запущена");
-
+        if (!isIndexing) return new Bad(false, "Индексация уже запущена");
         CompletableFuture.runAsync(() ->
                 sitesList.getSites()
                         .parallelStream()
@@ -61,18 +59,17 @@ public class IndexingImpl implements IndexingService {
     }
     @Override
     public ResponseInterface stopIndexing() {
-        if (!isIndexing.compareAndSet(true,false)) {
-            return new Stop(false, "Индексация не запущена");
-        }
+        if (!isIndexing) return new Stop(false, "Индексация не запущена");
+        isIndexing = false;
         return new Stop(true, "Индексация остановлена пользователем");
     }
     @Override
     public ResponseInterface indexPage(String url) {
-        if (!isIndexing.compareAndSet(false, true)) {
+        if (isIndexing) {
             return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
         }
         indexingProcessor(url);
-        isIndexing.set(false);
+//        isIndexing = false;
         return new Successful(true);
     }
     private SiteModel indexingProcessor(String url){

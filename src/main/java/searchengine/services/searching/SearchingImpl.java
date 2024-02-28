@@ -40,7 +40,6 @@ public class SearchingImpl implements SearchingService {
 
         List<DetailedSearchResponse> detailedSearchResponse = getDetailedSearchResponses(rel, offset, limit, uniqueSet);
 
-
         return new TotalSearchResponse(true, rel.size(), detailedSearchResponse);
     }
     private List<DetailedSearchResponse> getDetailedSearchResponses(Map<Integer, Float> rel, int offset, int limit, Set<IndexModel> uniqueSet){
@@ -59,7 +58,7 @@ public class SearchingImpl implements SearchingService {
                         response.setTitle(connection.getTitle(pageModel.getPath()));
                         response.setSnippet(getSnippet(uniqueSet, pageModel));
                     } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException(e.getLocalizedMessage());
                     }
                     return response;
                 })

@@ -68,7 +68,7 @@ public class EntityHandler {
 
             int responseCode = pageModel.getCode();
 
-            if (!isIndexing.get())throw new StoppedExecutionException("Stop indexing signal received");
+            if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
             else if (responseCode == 200) return pageModel;
             else if (responseCode == 404) throw new RuntimeException("Страница не найдена");
             else if (responseCode == 204) throw new RuntimeException("Нет контента на странице");
@@ -80,35 +80,44 @@ public class EntityHandler {
         }
     }
     @Cacheable("lemmaModels")
-    private LemmaModel getLemmaModel(SiteModel siteModel, String word, int frequency){
+    private LemmaModel getLemmaModel(SiteModel siteModel, String word, int frequency) throws StoppedExecutionException {
         LemmaModel lemmaModel = lemmaRepository.findByLemma(word);
 
-        if (lemmaModel == null) {
-            lemmaModel = createLemmaModel(siteModel, word, frequency);
-        } else {
-            lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
-        }
+        if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
+
+        if (lemmaModel == null) lemmaModel = createLemmaModel(siteModel, word, frequency);
+        else lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
+
         return lemmaModel;
     }
     @Cacheable("indexModels")
-    private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Integer frequency){
+    private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Integer frequency) throws StoppedExecutionException {
+        if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
         return Optional.ofNullable(indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId()))
                 .orElseGet(()-> createIndexModel(pageModel, lemmaModel, frequency.floatValue()));
     }
-    public synchronized List<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel, Morphology morphology){
-            List<LemmaModel> lemmas = morphology.wordCounter(pageModel.getContent())
-                    .entrySet().parallelStream()
-                    .map(indexModel -> getLemmaModel(siteModel, indexModel.getKey(), indexModel.getValue()))
-                    .toList();
-
-           return lemmaRepository.saveAllAndFlush(lemmas);
+    public synchronized List<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel, Morphology morphology) {
+           return lemmaRepository.saveAllAndFlush(morphology.wordCounter(pageModel.getContent())
+                   .entrySet().parallelStream()
+                   .map(indexModel -> {
+                       try {
+                           return getLemmaModel(siteModel, indexModel.getKey(), indexModel.getValue());
+                       } catch (StoppedExecutionException e) {
+                           throw new RuntimeException(e.getLocalizedMessage());
+                       }
+                   })
+                   .toList());
     }
-    public synchronized List<IndexModel> getIndexModelFromLemmaList(PageModel pageModel, List<LemmaModel> lemmas){
-        List<IndexModel> indexes = lemmas.parallelStream()
-                .map(lemma -> getIndexModel(lemma, pageModel, lemma.getFrequency()))
-                .toList();
-
-        return indexRepository.saveAllAndFlush(indexes);
+    public synchronized List<IndexModel> getIndexModelFromLemmaList(PageModel pageModel, List<LemmaModel> lemmas) {
+        return indexRepository.saveAllAndFlush(lemmas.parallelStream()
+                .map(lemma -> {
+                    try {
+                        return getIndexModel(lemma, pageModel, lemma.getFrequency());
+                    } catch (StoppedExecutionException e) {
+                        throw new RuntimeException(e.getLocalizedMessage());
+                    }
+                })
+                .toList());
     }
     private SiteModel createSiteModel(Site site) {
         return SiteModel.builder()
