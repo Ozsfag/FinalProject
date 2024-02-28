@@ -40,7 +40,7 @@ public class SearchingImpl implements SearchingService {
 
         List<DetailedSearchResponse> detailedSearchResponse = getDetailedSearchResponses(rel, offset, limit, uniqueSet);
 
-        return new TotalSearchResponse(true, rel.size(), detailedSearchResponse);
+        return new TotalSearchResponse(true, detailedSearchResponse.size(), detailedSearchResponse);
     }
     private List<DetailedSearchResponse> getDetailedSearchResponses(Map<Integer, Float> rel, int offset, int limit, Set<IndexModel> uniqueSet){
         return rel.entrySet().stream()
@@ -62,11 +62,12 @@ public class SearchingImpl implements SearchingService {
                     }
                     return response;
                 })
+                .filter(response -> !response.getSnippet().isEmpty())
                 .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
     private Set<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
-        return morphology.getLemmaSet(query).stream()
+        return morphology.getLemmaSet(query).parallelStream()
                 .flatMap(queryWord -> siteModel == null ?
                         indexRepository.findIndexBy2Params(queryWord, MAX_FREQUENCY).stream() :
                         indexRepository.findIndexBy3Params(queryWord, MAX_FREQUENCY, siteModel.getId()).stream())
@@ -102,7 +103,7 @@ public class SearchingImpl implements SearchingService {
                     String content = item.getPage().getContent().toLowerCase(Locale.ROOT);
                     String word = item.getLemma().getLemma();
                     Matcher matcher = Pattern.compile(Pattern.quote(word)).matcher(content);
-                    String matchingSentence = null;
+                    String matchingSentence = "";
                     while (matcher.find()) {
                         int start = Math.max(matcher.start() - 100, 0);
                         int end = Math.min(matcher.end() + 100, content.length());

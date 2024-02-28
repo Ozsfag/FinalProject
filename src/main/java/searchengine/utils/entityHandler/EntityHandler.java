@@ -68,7 +68,7 @@ public class EntityHandler {
 
             int responseCode = pageModel.getCode();
 
-            if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
+            if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
             else if (responseCode == 200) return pageModel;
             else if (responseCode == 404) throw new RuntimeException("Страница не найдена");
             else if (responseCode == 204) throw new RuntimeException("Нет контента на странице");
@@ -83,7 +83,7 @@ public class EntityHandler {
     private LemmaModel getLemmaModel(SiteModel siteModel, String word, int frequency) throws StoppedExecutionException {
         LemmaModel lemmaModel = lemmaRepository.findByLemma(word);
 
-        if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
+        if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
 
         if (lemmaModel == null) lemmaModel = createLemmaModel(siteModel, word, frequency);
         else lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
@@ -92,7 +92,7 @@ public class EntityHandler {
     }
     @Cacheable("indexModels")
     private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Integer frequency) throws StoppedExecutionException {
-        if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
+        if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
         return Optional.ofNullable(indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId()))
                 .orElseGet(()-> createIndexModel(pageModel, lemmaModel, frequency.floatValue()));
     }
