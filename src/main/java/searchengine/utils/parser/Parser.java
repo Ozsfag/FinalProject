@@ -13,7 +13,6 @@ import searchengine.utils.morphology.Morphology;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class Parser extends RecursiveAction {
@@ -38,7 +37,7 @@ public class Parser extends RecursiveAction {
 
         List<PageModel> pages = urlsToParse.stream()
                 .map(url -> entityHandler.getPageModel(siteModel, url))
-                .collect(Collectors.toList());
+                .toList();
 
         pageRepository.saveAllAndFlush(pages);
 

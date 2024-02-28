@@ -38,7 +38,6 @@ public class IndexingImpl implements IndexingService {
     public ResponseInterface startIndexing() {
         if (!isIndexing.compareAndSet(false, true)) return new Bad(false, "Индексация уже запущена");
 
-
         CompletableFuture.runAsync(() ->
                 sitesList.getSites()
                         .parallelStream()
@@ -48,22 +47,23 @@ public class IndexingImpl implements IndexingService {
         return new Successful(true);
     }
     private void processSite(String siteUrl) {
-        try {
-            Parser parser = new Parser(entityHandler, connection, morphology, indexingProcessor(siteUrl), siteUrl, pageRepository, morphologySettings);
-            forkJoinPool.execute(() -> {
+
+        Parser parser = new Parser(entityHandler, connection, morphology, indexingProcessor(siteUrl), siteUrl, pageRepository, morphologySettings);
+        forkJoinPool.execute(() -> {
+            try {
                 forkJoinPool.invoke(parser);
                 siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl);
-            });
-        } catch (RuntimeException re) {
-            siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl);
-        }
+            } catch (Exception re) {
+                siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl);
+            }
+        });
+
     }
     @Override
     public ResponseInterface stopIndexing() {
-        if (!isIndexing.getAndSet(false)) {
+        if (!isIndexing.compareAndSet(true,false)) {
             return new Stop(false, "Индексация не запущена");
         }
-        forkJoinPool.shutdownNow();
         return new Stop(true, "Индексация остановлена пользователем");
     }
     @Override

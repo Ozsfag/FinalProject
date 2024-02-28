@@ -66,19 +66,14 @@ public class EntityHandler {
 
             siteRepository.updateStatusTimeByUrl(new Date(), href);
 
-            if (!isIndexing.get()) throw new StoppedExecutionException("Stop indexing signal received");
-
             int responseCode = pageModel.getCode();
 
-            if (responseCode == 200) {
-                return pageModel;
-            } else if (responseCode == 404) {
-                throw new RuntimeException("Страница не найдена");
-            } else if (responseCode == 204) {
-                throw new RuntimeException("Нет контента на странице");
-            } else {
-                throw new RuntimeException("Ошибка при получении страницы");
-            }
+            if (!isIndexing.get())throw new StoppedExecutionException("Stop indexing signal received");
+            else if (responseCode == 200) return pageModel;
+            else if (responseCode == 404) throw new RuntimeException("Страница не найдена");
+            else if (responseCode == 204) throw new RuntimeException("Нет контента на странице");
+            else throw new RuntimeException("Ошибка при получении страницы");
+
         } catch (Exception e) {
             pageRepository.saveAndFlush(pageModel);
             throw new RuntimeException(e.getLocalizedMessage());
