@@ -8,9 +8,7 @@ import java.util.List;
 @Entity
 @Table(name = "lemma", schema = "search_engine",
         indexes = {
-        @Index(name = "lemma_index", columnList = "lemma", unique = true),
-        @Index(name = "frequency_index", columnList = "frequency"),
-        @Index(name = "lemma_site_index", columnList = "site_id")})
+        @Index(name = "lemma_site_id_index", columnList = "lemma, site_id", unique = true)})
 @Data
 @NoArgsConstructor(force = true)
 @AllArgsConstructor

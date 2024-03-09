@@ -28,7 +28,7 @@ public class SearchingImpl implements SearchingService {
     private final PageRepository pageRepository;
     private final IndexRepository indexRepository;
     private final Connection connection;
-    private static final int MAX_FREQUENCY = 100;
+    private static final int MAX_FREQUENCY = 5000;
     @Override
     public ResponseInterface search(String query, String site, int offset, int limit) {
         SiteModel siteModel = site == null ? null : entityHandler.getIndexedSiteModel(site);
@@ -62,12 +62,12 @@ public class SearchingImpl implements SearchingService {
                     }
                     return response;
                 })
-                .filter(response -> !response.getSnippet().isEmpty())
-                .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
+//                .filter(response -> !response.getSnippet().isEmpty())
+//                .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
     private Set<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
-        return morphology.getLemmaSet(query).parallelStream()
+        return morphology.getLemmaSet(query).stream()
                 .flatMap(queryWord -> siteModel == null ?
                         indexRepository.findIndexBy2Params(queryWord, MAX_FREQUENCY).stream() :
                         indexRepository.findIndexBy3Params(queryWord, MAX_FREQUENCY, siteModel.getId()).stream())
@@ -79,7 +79,7 @@ public class SearchingImpl implements SearchingService {
 
         Map<Integer, Float> pageId2AbsRank = uniqueSet.stream()
                 .collect(Collectors.toMap(index -> index.getPage().getId(),
-                        IndexModel::getRanking,
+                        IndexModel::getRank,
                         Float::sum,
                         HashMap::new));
 
@@ -100,16 +100,16 @@ public class SearchingImpl implements SearchingService {
         uniqueSet.stream()
                 .filter(item -> item.getPage().equals(pageModel))
                 .forEach(item -> {
-                    String content = item.getPage().getContent().toLowerCase(Locale.ROOT);
+                    String content = pageModel.getContent().toLowerCase(Locale.ROOT);
                     String word = item.getLemma().getLemma();
                     Matcher matcher = Pattern.compile(Pattern.quote(word)).matcher(content);
                     String matchingSentence = "";
                     while (matcher.find()) {
                         int start = Math.max(matcher.start() - 100, 0);
                         int end = Math.min(matcher.end() + 100, content.length());
+                        word = matcher.group();
                         matchingSentence = content.substring(start, end);
-
-                        matchingSentence = matchingSentence.replaceAll(matcher.group(), "<b>" + matcher.group() + "</b>");
+                        matchingSentence = matchingSentence.replaceAll(word, "<b>" + word + "</b>");
                     }
                     matchingSentences.add(matchingSentence);
                 });

@@ -11,7 +11,6 @@ import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
 import java.io.IOException;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Component
@@ -35,8 +34,6 @@ public class Connection {
             return getErrorConnectionResponse(url, e.getStatusCode(),e.getMessage());
         } catch (IOException e) {
             return getErrorConnectionResponse(url, HttpStatus.NOT_FOUND.value(), "Not found");
-        }catch (NoSuchElementException e){
-            return getErrorConnectionResponse(url, HttpStatus.NO_CONTENT.value(), "No content");
         }
     }
 

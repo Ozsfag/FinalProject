@@ -58,66 +58,59 @@ public class EntityHandler {
         return new String[]{schemeAndHost, path};
     }
     @Cacheable("pageModels")
-    public PageModel getPageModel(SiteModel siteModel, String href) {
+    public PageModel getPageModel(SiteModel siteModel, String href) throws Exception {
         PageModel pageModel = null;
         try {
             pageModel = Optional.ofNullable(pageRepository.findByPath(href))
                     .orElseGet(() -> createPageModel(siteModel, href));
 
-            siteRepository.updateStatusTimeByUrl(new Date(), href);
-
-            int responseCode = pageModel.getCode();
+            siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
 
             if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
-            else if (responseCode == 200) return pageModel;
-            else if (responseCode == 404) throw new RuntimeException("Страница не найдена");
-            else if (responseCode == 204) throw new RuntimeException("Нет контента на странице");
-            else throw new RuntimeException("Ошибка при получении страницы");
+
+            return pageModel;
 
         } catch (Exception e) {
             pageRepository.saveAndFlush(pageModel);
-            throw new RuntimeException(e.getLocalizedMessage());
+            throw new Exception(e.getLocalizedMessage());
         }
     }
-    @Cacheable("lemmaModels")
-    private LemmaModel getLemmaModel(SiteModel siteModel, String word, int frequency) throws StoppedExecutionException {
-        LemmaModel lemmaModel = lemmaRepository.findByLemma(word);
-
-        if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
-
-        if (lemmaModel == null) lemmaModel = createLemmaModel(siteModel, word, frequency);
-        else lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
-
-        return lemmaModel;
-    }
-    @Cacheable("indexModels")
-    private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Integer frequency) throws StoppedExecutionException {
-        if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
-        return Optional.ofNullable(indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId()))
-                .orElseGet(()-> createIndexModel(pageModel, lemmaModel, frequency.floatValue()));
-    }
     public synchronized List<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel, Morphology morphology) {
-           return lemmaRepository.saveAllAndFlush(morphology.wordCounter(pageModel.getContent())
-                   .entrySet().parallelStream()
-                   .map(indexModel -> {
-                       try {
-                           return getLemmaModel(siteModel, indexModel.getKey(), indexModel.getValue());
-                       } catch (StoppedExecutionException e) {
-                           throw new RuntimeException(e.getLocalizedMessage());
-                       }
-                   })
-                   .toList());
-    }
-    public synchronized List<IndexModel> getIndexModelFromLemmaList(PageModel pageModel, List<LemmaModel> lemmas) {
-        return indexRepository.saveAllAndFlush(lemmas.parallelStream()
-                .map(lemma -> {
+        return lemmaRepository.saveAllAndFlush(morphology.wordCounter(pageModel.getContent())
+                .entrySet().parallelStream()
+                .map(word2Count -> {
                     try {
-                        return getIndexModel(lemma, pageModel, lemma.getFrequency());
+                        return getLemmaModel(siteModel, word2Count.getKey(), word2Count.getValue());
                     } catch (StoppedExecutionException e) {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
                 })
                 .toList());
+    }
+    @Cacheable("lemmaModels")
+    private LemmaModel getLemmaModel(SiteModel siteModel, String word, int frequency) throws StoppedExecutionException {
+        LemmaModel lemmaModel = lemmaRepository.findByLemmaAndSite_Id(word, siteModel.getId());
+        if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
+        if (lemmaModel == null) lemmaModel = createLemmaModel(siteModel, word, frequency);
+        else lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
+        return lemmaModel;
+    }
+    public synchronized List<IndexModel> getIndexModelFromLemmaList(PageModel pageModel, List<LemmaModel> lemmas) {
+        return indexRepository.saveAllAndFlush(lemmas.parallelStream()
+                .map(lemma -> {
+                    try {
+                        return getIndexModel(lemma, pageModel, 1f);
+                    } catch (StoppedExecutionException e) {
+                        throw new RuntimeException(e.getLocalizedMessage());
+                    }
+                })
+                .toList());
+    }
+    @Cacheable("indexModels")
+    private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {
+        if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
+        return Optional.ofNullable(indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId()))
+                .orElseGet(()-> createIndexModel(pageModel, lemmaModel, frequency));
     }
     private SiteModel createSiteModel(Site site) {
         return SiteModel.builder()
@@ -128,11 +121,10 @@ public class EntityHandler {
                 .name(site.getName())
                 .build();
     }
-    private PageModel createPageModel(SiteModel siteModel, String path) {
+    private PageModel createPageModel(SiteModel siteModel, String path){
         ConnectionResponse connectionResponse = connection.getConnectionResponse(path);
         return PageModel.builder()
-                .site(siteModel)
-                .path(path)
+                .site(siteModel).path(path)
                 .code(connectionResponse.getResponseCode())
                 .content(connectionResponse.getContent())
                 .build();
@@ -148,7 +140,7 @@ public class EntityHandler {
         return IndexModel.builder()
                 .page(pageModel)
                 .lemma(lemmaModel)
-                .ranking(ranking)
+                .rank(ranking)
                 .build();
     }
 }

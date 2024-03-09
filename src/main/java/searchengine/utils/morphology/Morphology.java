@@ -29,7 +29,8 @@ public class Morphology {
         return Arrays.stream(content.toLowerCase().replaceAll(regex, morphologySettings.getEmptyString()).split(morphologySettings.getSplitter()))
                 .filter(word -> isNotParticle(word, luceneMorphology, particles))
                 .map(luceneMorphology::getNormalForms)
-                .flatMap(Collection::stream)
+//                .flatMap(Collection::stream)
+                .map(forms -> forms.get(0))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(word -> word, word -> 1, Integer::sum));
     }

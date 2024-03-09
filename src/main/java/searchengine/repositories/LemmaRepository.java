@@ -8,8 +8,7 @@ import searchengine.model.LemmaModel;
 @Repository
 public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
 
-    LemmaModel findByLemma(String lemma);
-
+    LemmaModel findByLemmaAndSite_Id(String lemma, int id);
     int countBySite_Url(String url);
 
 }

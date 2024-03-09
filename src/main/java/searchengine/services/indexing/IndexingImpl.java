@@ -1,6 +1,7 @@
 package searchengine.services.indexing;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import searchengine.config.MorphologySettings;
 import searchengine.config.SitesList;
@@ -39,16 +40,16 @@ public class IndexingImpl implements IndexingService {
         CompletableFuture.runAsync(() ->
                 sitesList.getSites()
                         .parallelStream()
-                        .forEach(siteUrl -> processSite(siteUrl.getUrl())), forkJoinPool);
-
-        forkJoinPool.shutdown();
+                        .forEach(siteUrl -> processSite(siteUrl.getUrl())), forkJoinPool)
+                .thenRun(forkJoinPool::shutdown);
         return new Successful(true);
     }
     private void processSite(String siteUrl) {
 
-        Parser parser = new Parser(entityHandler, connection, morphology, indexingProcessor(siteUrl), siteUrl, pageRepository, morphologySettings);
         forkJoinPool.execute(() -> {
             try {
+                SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl);
+                Parser parser = new Parser(entityHandler, connection, morphology, siteModel, siteUrl, pageRepository, morphologySettings);
                 forkJoinPool.invoke(parser);
                 siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl);
             } catch (Exception re) {
@@ -63,21 +64,18 @@ public class IndexingImpl implements IndexingService {
         isIndexing = false;
         return new Stop(true, "Индексация остановлена пользователем");
     }
+    @SneakyThrows
     @Override
     public ResponseInterface indexPage(String url) {
         if (isIndexing) {
             return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
         }
-        indexingProcessor(url);
-//        isIndexing = false;
-        return new Successful(true);
-    }
-    private SiteModel indexingProcessor(String url){
         SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
         PageModel pageModel = entityHandler.getPageModel(siteModel, url);
         pageRepository.saveAndFlush(pageModel);
         List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(pageModel, siteModel, morphology);
         List<IndexModel> indexes = entityHandler.getIndexModelFromLemmaList(pageModel, lemmas);
-        return siteModel;
+        return new Successful(true);
     }
+
 }
