@@ -62,15 +62,14 @@ public class SearchingImpl implements SearchingService {
                     }
                     return response;
                 })
-//                .filter(response -> !response.getSnippet().isEmpty())
-//                .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
+                .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
     private Set<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
         return morphology.getLemmaSet(query).stream()
                 .flatMap(queryWord -> siteModel == null ?
                         indexRepository.findIndexBy2Params(queryWord, MAX_FREQUENCY).stream() :
-                        indexRepository.findIndexBy3Params(queryWord, MAX_FREQUENCY, siteModel.getId()).stream())
+                        indexRepository.findIndexBy3Params(queryWord, MAX_FREQUENCY, siteModel).stream())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
     }
@@ -87,13 +86,8 @@ public class SearchingImpl implements SearchingService {
                 .max(Float::compareTo)
                 .orElse(1f);
 
-
         return pageId2AbsRank.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        e -> e.getValue() / maxValues,
-                        (oldValue, newValue) -> oldValue,
-                        LinkedHashMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, id2AbsRank -> id2AbsRank.getValue() / maxValues));
     }
     public String getSnippet(Set<IndexModel> uniqueSet, PageModel pageModel) {
         List<String> matchingSentences = new ArrayList<>();
@@ -103,7 +97,7 @@ public class SearchingImpl implements SearchingService {
                     String content = pageModel.getContent().toLowerCase(Locale.ROOT);
                     String word = item.getLemma().getLemma();
                     Matcher matcher = Pattern.compile(Pattern.quote(word)).matcher(content);
-                    String matchingSentence = "";
+                    String matchingSentence = null;
                     while (matcher.find()) {
                         int start = Math.max(matcher.start() - 100, 0);
                         int end = Math.min(matcher.end() + 100, content.length());
@@ -113,6 +107,6 @@ public class SearchingImpl implements SearchingService {
                     }
                     matchingSentences.add(matchingSentence);
                 });
-        return String.join("... ", matchingSentences);
+        return String.join("............. ", matchingSentences);
     }
 }

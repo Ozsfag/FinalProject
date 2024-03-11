@@ -8,5 +8,4 @@ import searchengine.model.PageModel;
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
     PageModel findByPath(String path);
     boolean existsByPath(String path);
-
 }

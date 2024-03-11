@@ -33,6 +33,7 @@ public class EntityHandler {
     private final LemmaRepository lemmaRepository;
     private final PageRepository pageRepository;
     private final IndexRepository indexRepository;
+    private final Morphology morphology;
     public SiteModel getIndexedSiteModel(String href) {
         try {
             String validatedUrl = getValidUrlComponents(href)[0];
@@ -75,7 +76,7 @@ public class EntityHandler {
             throw new Exception(e.getLocalizedMessage());
         }
     }
-    public synchronized List<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel, Morphology morphology) {
+    public List<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel) {
         return lemmaRepository.saveAllAndFlush(morphology.wordCounter(pageModel.getContent())
                 .entrySet().parallelStream()
                 .map(word2Count -> {
@@ -95,11 +96,13 @@ public class EntityHandler {
         else lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
         return lemmaModel;
     }
-    public synchronized List<IndexModel> getIndexModelFromLemmaList(PageModel pageModel, List<LemmaModel> lemmas) {
-        return indexRepository.saveAllAndFlush(lemmas.parallelStream()
-                .map(lemma -> {
+    public void getIndexModelFromContent(PageModel pageModel, SiteModel siteModel, List<LemmaModel> lemmas) {
+        indexRepository.saveAllAndFlush(morphology.wordCounter(pageModel.getContent())
+                .entrySet().parallelStream()
+                .map(word2Count -> {
                     try {
-                        return getIndexModel(lemma, pageModel, 1f);
+                        LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
+                        return getIndexModel(lemmaModel, pageModel, (float) word2Count.getValue());
                     } catch (StoppedExecutionException e) {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
@@ -108,9 +111,11 @@ public class EntityHandler {
     }
     @Cacheable("indexModels")
     private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {
-        if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
-        return Optional.ofNullable(indexRepository.findByLemma_idAndPage_id(lemmaModel.getId(), pageModel.getId()))
-                .orElseGet(()-> createIndexModel(pageModel, lemmaModel, frequency));
+        IndexModel indexModel = indexRepository.findByLemmaAndPage(lemmaModel, pageModel);
+        if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
+        if (indexModel == null) indexModel = createIndexModel(pageModel, lemmaModel, frequency);
+        else indexModel.setRank(indexModel.getRank() + frequency);
+        return indexModel;
     }
     private SiteModel createSiteModel(Site site) {
         return SiteModel.builder()

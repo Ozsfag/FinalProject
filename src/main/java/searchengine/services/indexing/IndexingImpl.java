@@ -9,7 +9,10 @@ import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
-import searchengine.model.*;
+import searchengine.model.LemmaModel;
+import searchengine.model.PageModel;
+import searchengine.model.SiteModel;
+import searchengine.model.Status;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.connectivity.Connection;
@@ -73,8 +76,8 @@ public class IndexingImpl implements IndexingService {
         SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
         PageModel pageModel = entityHandler.getPageModel(siteModel, url);
         pageRepository.saveAndFlush(pageModel);
-        List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(pageModel, siteModel, morphology);
-        List<IndexModel> indexes = entityHandler.getIndexModelFromLemmaList(pageModel, lemmas);
+        List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(pageModel, siteModel);
+        entityHandler.getIndexModelFromContent(pageModel, siteModel, lemmas);
         return new Successful(true);
     }
 

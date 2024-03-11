@@ -17,14 +17,14 @@ spring:
 
 indexing-settings:
   sites:
-    - url: http://abramov28.ru/
-      name: Abramov28.ru
-#    - url: https://lenta.ru/
-#      name: Лента.ру
-#    - url: https://skillbox.ru/
-#      name: Skillbox
-#    - url: http://www.playback.ru/
-#      name: PlayBack.Ru
+#    - url: http://abramov28.ru/
+#      name: Abramov28.ru
+    - url: https://lenta.ru/
+      name: Лента.ру
+    - url: https://skillbox.ru/
+      name: Skillbox
+    - url: http://www.playback.ru/
+      name: PlayBack.Ru
 #    - url: https://www.volochek.life/
 #      name: Volochek.ru
 #    - url: http://radiomv.ru/

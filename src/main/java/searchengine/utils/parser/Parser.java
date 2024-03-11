@@ -59,8 +59,8 @@ public class Parser extends RecursiveTask<Void> {
     }
     private void indexingLemmaAndIndex(List<PageModel> pages){
         pages.forEach(page -> {
-            List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(page, siteModel, morphology);
-            entityHandler.getIndexModelFromLemmaList(page, lemmas);
+            List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(page, siteModel);
+            entityHandler.getIndexModelFromContent(page, siteModel, lemmas);
         });
     }
 }
