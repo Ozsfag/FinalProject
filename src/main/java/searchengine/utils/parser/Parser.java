@@ -14,6 +14,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.RecursiveTask;
 
+/**
+ * Recursiverly index page and it`s subpage.
+ * @author Ozsfag
+ */
 @RequiredArgsConstructor
 public class Parser extends RecursiveTask<Void> {
     private final EntityHandler entityHandler;
@@ -26,10 +30,9 @@ public class Parser extends RecursiveTask<Void> {
     @Override
     protected Void compute() {
         List<String> urlsToParse = getUrlsToParse();
-
         if (!urlsToParse.isEmpty()) {
-            List<PageModel> pages = getPages(urlsToParse);
-            indexingLemmaAndIndex(pageRepository.saveAllAndFlush(pages));
+            List<PageModel> pages = pageRepository.saveAllAndFlush(getPages(urlsToParse));
+            indexingLemmaAndIndex(pages);
             List<Parser> subtasks = urlsToParse.stream()
                     .map(url -> new Parser(entityHandler, connection, morphology, siteModel, url, pageRepository, morphologySettings))
                     .toList();
@@ -46,7 +49,7 @@ public class Parser extends RecursiveTask<Void> {
                 .filter(url -> !pageRepository.existsByPath(url))
                 .toList();
     }
-    private  List<PageModel> getPages(List<String> urlsToParse){
+    private List<PageModel> getPages(List<String> urlsToParse){
         return urlsToParse.stream()
                 .map(url -> {
                     try {

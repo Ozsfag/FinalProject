@@ -2,6 +2,10 @@ package searchengine.services.indexing;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.config.MorphologySettings;
 import searchengine.config.SitesList;
@@ -27,49 +31,60 @@ import java.util.concurrent.ForkJoinPool;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class IndexingImpl implements IndexingService {
     private final SitesList sitesList;
+    @Lazy
     private final SiteRepository siteRepository;
+    @Lazy
     private final PageRepository pageRepository;
     private final ForkJoinPool forkJoinPool;
+    @Lazy
     private final Morphology morphology;
     private final EntityHandler entityHandler;
     private final Connection connection;
     private final MorphologySettings morphologySettings;
     public static volatile boolean isIndexing = true;
+    public static final Logger logger = LoggerFactory.getLogger(IndexingImpl.class);
     @Override
     public ResponseInterface startIndexing() {
+        logger.debug("start indexing");
         if (!isIndexing) return new Bad(false, "Индексация уже запущена");
         CompletableFuture.runAsync(() ->
                 sitesList.getSites()
                         .parallelStream()
                         .forEach(siteUrl -> processSite(siteUrl.getUrl())), forkJoinPool)
-                .thenRun(forkJoinPool::shutdown);
+                .thenAccept(item -> forkJoinPool.shutdown());
+        logger.debug("all pages indexed successfully");
         return new Successful(true);
     }
-    private void processSite(String siteUrl) {
-
-        forkJoinPool.execute(() -> {
+    @SneakyThrows
+    private Object processSite(String siteUrl) {
+        return forkJoinPool.submit(() -> {
+            logger.debug("begining process Site: " + siteUrl);
             try {
                 SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl);
                 Parser parser = new Parser(entityHandler, connection, morphology, siteModel, siteUrl, pageRepository, morphologySettings);
                 forkJoinPool.invoke(parser);
                 siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl);
+                logger.debug("Site: " + siteUrl + " indexed successfully");
             } catch (Exception re) {
                 siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl);
+                logger.debug("indexing complete with error");
             }
-        });
-
+        }).get();
     }
     @Override
     public ResponseInterface stopIndexing() {
         if (!isIndexing) return new Stop(false, "Индексация не запущена");
         isIndexing = false;
+        logger.debug("indexing stopped");
         return new Stop(true, "Индексация остановлена пользователем");
     }
     @SneakyThrows
     @Override
     public ResponseInterface indexPage(String url) {
+        logger.debug("start indexing single page");
         if (isIndexing) {
             return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
         }
@@ -78,6 +93,7 @@ public class IndexingImpl implements IndexingService {
         pageRepository.saveAndFlush(pageModel);
         List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(pageModel, siteModel);
         entityHandler.getIndexModelFromContent(pageModel, siteModel, lemmas);
+        logger.debug("end indexing single page");
         return new Successful(true);
     }
 

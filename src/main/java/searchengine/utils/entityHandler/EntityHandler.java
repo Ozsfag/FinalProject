@@ -1,6 +1,7 @@
 package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
@@ -24,6 +25,10 @@ import java.util.Optional;
 
 import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
+/**
+ * Util that handle and process kind of entities
+ * @author Ozsfag
+ */
 @Component
 @RequiredArgsConstructor
 public class EntityHandler {
@@ -34,6 +39,11 @@ public class EntityHandler {
     private final PageRepository pageRepository;
     private final IndexRepository indexRepository;
     private final Morphology morphology;
+
+    /**
+     * @param href from application.yaml
+     * @return indexed siteModel
+     */
     public SiteModel getIndexedSiteModel(String href) {
         try {
             String validatedUrl = getValidUrlComponents(href)[0];
@@ -52,13 +62,28 @@ public class EntityHandler {
             throw new RuntimeException(e.getLocalizedMessage());
         }
     }
+
+    /**
+     * split transmitted link into scheme and host, and path
+     * @param url, page url
+     * @return valid url components
+     * @throws URISyntaxException
+     */
     public String[] getValidUrlComponents(String url) throws URISyntaxException {
         final URI uri = new URI(url);
         final String schemeAndHost = uri.getScheme() + "://" + uri.getHost() + "/";
         final String path = uri.getPath();
         return new String[]{schemeAndHost, path};
     }
-    @Cacheable("pageModels")
+
+    /**
+     * get indexed PageModel from Site content
+     * @param siteModel, from database
+     * @param href of page from site
+     * @return indexed pageModel
+     * @throws Exception
+     */
+    @CachePut(cacheNames="pageModels", key = "#href", cacheManager = "customCacheManager")
     public PageModel getPageModel(SiteModel siteModel, String href) throws Exception {
         PageModel pageModel = null;
         try {
@@ -76,9 +101,16 @@ public class EntityHandler {
             throw new Exception(e.getLocalizedMessage());
         }
     }
+
+    /**
+     *get indexed list of LemmaModel from PageModel content
+     * @param pageModel
+     * @param siteModel
+     * @return indexed list of LemmaModel from pageModel content
+     */
     public List<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel) {
         return lemmaRepository.saveAllAndFlush(morphology.wordCounter(pageModel.getContent())
-                .entrySet().parallelStream()
+                .entrySet().stream()
                 .map(word2Count -> {
                     try {
                         return getLemmaModel(siteModel, word2Count.getKey(), word2Count.getValue());
@@ -88,17 +120,24 @@ public class EntityHandler {
                 })
                 .toList());
     }
-    @Cacheable("lemmaModels")
+    @CachePut(cacheNames="lemmaModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
     private LemmaModel getLemmaModel(SiteModel siteModel, String word, int frequency) throws StoppedExecutionException {
         LemmaModel lemmaModel = lemmaRepository.findByLemmaAndSite_Id(word, siteModel.getId());
         if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
-        if (lemmaModel == null) lemmaModel = createLemmaModel(siteModel, word, frequency);
+        if (lemmaModel == null) return createLemmaModel(siteModel, word, frequency);
         else lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
         return lemmaModel;
     }
+
+    /**
+     * indexing List of IndexModel from PageModel content
+     * @param pageModel
+     * @param siteModel
+     * @param lemmas
+     */
     public void getIndexModelFromContent(PageModel pageModel, SiteModel siteModel, List<LemmaModel> lemmas) {
         indexRepository.saveAllAndFlush(morphology.wordCounter(pageModel.getContent())
-                .entrySet().parallelStream()
+                .entrySet().stream().parallel()
                 .map(word2Count -> {
                     try {
                         LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
@@ -109,11 +148,11 @@ public class EntityHandler {
                 })
                 .toList());
     }
-    @Cacheable("indexModels")
+    @CachePut(cacheNames="indexModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
     private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {
         IndexModel indexModel = indexRepository.findByLemmaAndPage(lemmaModel, pageModel);
         if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
-        if (indexModel == null) indexModel = createIndexModel(pageModel, lemmaModel, frequency);
+        if (indexModel == null) return createIndexModel(pageModel, lemmaModel, frequency);
         else indexModel.setRank(indexModel.getRank() + frequency);
         return indexModel;
     }
@@ -126,6 +165,7 @@ public class EntityHandler {
                 .name(site.getName())
                 .build();
     }
+    @Cacheable(cacheNames = "pageModels", key = "#path", cacheManager = "customCacheManager")
     private PageModel createPageModel(SiteModel siteModel, String path){
         ConnectionResponse connectionResponse = connection.getConnectionResponse(path);
         return PageModel.builder()
@@ -134,6 +174,7 @@ public class EntityHandler {
                 .content(connectionResponse.getContent())
                 .build();
     }
+    @Cacheable(cacheNames = "lemmaModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
     private LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency){
         return LemmaModel.builder()
                 .site(siteModel)
@@ -141,6 +182,7 @@ public class EntityHandler {
                 .frequency(frequency)
                 .build();
     }
+    @Cacheable(cacheNames = "indexModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
     private IndexModel createIndexModel(PageModel pageModel, LemmaModel lemmaModel, Float ranking){
         return IndexModel.builder()
                 .page(pageModel)

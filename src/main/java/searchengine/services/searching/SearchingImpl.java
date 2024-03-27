@@ -1,6 +1,7 @@
 package searchengine.services.searching;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.dto.ResponseInterface;
 import searchengine.dto.searching.responseImpl.DetailedSearchResponse;
@@ -21,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 @Service
+@Lazy
 @RequiredArgsConstructor
 public class SearchingImpl implements SearchingService {
     private final EntityHandler entityHandler;

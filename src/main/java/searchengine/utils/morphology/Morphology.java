@@ -4,20 +4,28 @@ import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+/**
+ * Util that responsible for morphology transformation
+ * @author Ozsfag
+ */
 @Component
 @RequiredArgsConstructor
 public class Morphology {
     private final RussianLuceneMorphology russianLuceneMorphology;
     private final EnglishLuceneMorphology englishLuceneMorphology;
     private final MorphologySettings morphologySettings;
-
+    /**
+     * counts words in the transmitted text
+     * @param content from page
+     * @return the amount of words at page
+     */
     public Map<String, Integer> wordCounter(String content) {
         Map<String, Integer> russianCounter = wordFrequency(content, morphologySettings.getNotCyrillicLetters(), russianLuceneMorphology, morphologySettings.getRussianParticleNames());
         Map<String, Integer> englishCounter = wordFrequency(content, morphologySettings.getNotLatinLetters(), englishLuceneMorphology, morphologySettings.getEnglishParticlesNames());
@@ -30,12 +38,16 @@ public class Morphology {
                 .filter(word -> isNotParticle(word, luceneMorphology, particles))
                 .collect(Collectors.toMap(word -> word, word -> 1, Integer::sum));
     }
-
+    @Cacheable(cacheNames = "isNotParticle", key = "#word")
     private boolean isNotParticle(String word, LuceneMorphology luceneMorphology, String[] particles) {
         return word.length() > 2 && !word.isBlank() && Arrays.stream(particles)
                 .noneMatch(part -> luceneMorphology.getMorphInfo(word).contains(part));
     }
-
+    /**
+     * get unique words set from query
+     * @param query, search query
+     * @return unique set of lemma
+     */
     public Set<String> getLemmaSet(String query) {
         String onlyLatinLetters = "[a-z]+";
         Stream<String> russianLemmaStream = getLemmaStreamByLanguage(query, morphologySettings.getNotCyrillicLetters(), russianLuceneMorphology,englishLuceneMorphology, morphologySettings.getRussianParticleNames(), onlyLatinLetters);

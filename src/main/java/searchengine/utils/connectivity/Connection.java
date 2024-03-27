@@ -13,11 +13,20 @@ import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * a util that parses a page
+ * @author Ozsfag
+ */
 @Component
 public class Connection {
     @Autowired
     ConnectionSettings connectionSettings;
 
+    /**
+     * get connection to url
+     * @param url, link that needs to be parsed
+     * @return ConnectionResponse
+     */
     public ConnectionResponse getConnectionResponse(String url) {
         try {
             org.jsoup.Connection connection = Jsoup.connect(url)
@@ -37,6 +46,11 @@ public class Connection {
         }
     }
 
+    /**
+     *
+     * @param url, link that needs to find title
+     * @return title of page
+     */
     public String getTitle(String url){
         org.jsoup.Connection connection = Jsoup.connect(url)
                 .userAgent(connectionSettings.getUserAgent())

@@ -1,6 +1,7 @@
 package searchengine.services.statistics;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
 import searchengine.dto.statistics.DetailedStatisticsItem;
@@ -18,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Lazy
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
     private final PageRepository pageRepository;

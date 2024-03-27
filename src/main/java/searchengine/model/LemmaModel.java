@@ -6,11 +6,12 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "lemma", schema = "search_engine",
-        indexes = {
-        @Index(name = "lemma_site_id_index", columnList = "lemma, site_id", unique = true)})
+@Table(name = "lemmas", schema = "search_engine", indexes = {
+        @Index(name = "idx_lemmamodel_lemma_site_id", columnList = "lemma, site_id", unique = true)})
 @Data
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
 @Builder
 @ToString
@@ -34,4 +35,9 @@ public class LemmaModel {
     @OneToMany(mappedBy = "lemma", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<IndexModel> indexModels;
+
+    @Version
+    @Column(name = "version")
+    private Integer version;
+
 }

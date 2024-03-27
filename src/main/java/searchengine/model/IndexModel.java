@@ -5,7 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "index_model", schema = "search_engine",
+@Table(name = "`indexes`", schema = "search_engine",
         indexes = {
         @Index(name = "findByLemma_idAndPage_id_index", columnList = "lemma_id, page_id", unique = true)})
 @AllArgsConstructor
@@ -29,5 +29,8 @@ public class IndexModel{
     @Column(name = "`rank`", nullable = false, columnDefinition = "FLOAT")
     private Float rank;
 
+    @Version
+    @Column(name = "version")
+    private Integer version;
 
 }
