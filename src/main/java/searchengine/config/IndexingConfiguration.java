@@ -10,7 +10,7 @@ import java.util.concurrent.ForkJoinPool;
 public class IndexingConfiguration {
     @Bean
     public ForkJoinPool forkJoinPool(){
-        return ForkJoinPool.commonPool();
+        return new ForkJoinPool();
     }
     @Bean
     public ConnectionResponse connectionResponse(){

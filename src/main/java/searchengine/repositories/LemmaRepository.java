@@ -15,8 +15,8 @@ import javax.persistence.LockModeType;
 @Repository
 public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
-    @Query("SELECT l FROM LemmaModel l WHERE l.lemma = :lemma AND l.site.id = :siteId")
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT l FROM LemmaModel l WHERE l.site.id = :siteId AND l.lemma = :lemma")
     LemmaModel findByLemmaAndSite_Id(@Param("lemma") String lemma, @Param("siteId") int siteId);
     int countBySite_Url(String url);
 }

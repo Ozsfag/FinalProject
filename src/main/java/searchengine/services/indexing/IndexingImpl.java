@@ -17,6 +17,8 @@ import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
+import searchengine.repositories.IndexRepository;
+import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.connectivity.Connection;
@@ -38,12 +40,20 @@ public class IndexingImpl implements IndexingService {
     private final SiteRepository siteRepository;
     @Lazy
     private final PageRepository pageRepository;
+    @Lazy
     private final ForkJoinPool forkJoinPool;
     @Lazy
     private final Morphology morphology;
+    @Lazy
     private final EntityHandler entityHandler;
+    @Lazy
     private final Connection connection;
+    @Lazy
     private final MorphologySettings morphologySettings;
+    @Lazy
+    private final LemmaRepository lemmaRepository;
+    @Lazy
+    private final IndexRepository indexRepository;
     public static volatile boolean isIndexing = true;
     public static final Logger logger = LoggerFactory.getLogger(IndexingImpl.class);
     @Override
@@ -61,13 +71,13 @@ public class IndexingImpl implements IndexingService {
     @SneakyThrows
     private Object processSite(String siteUrl) {
         return forkJoinPool.submit(() -> {
-            logger.debug("begining process Site: " + siteUrl);
+            logger.debug("begining process Site: {}", siteUrl);
             try {
                 SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl);
-                Parser parser = new Parser(entityHandler, connection, morphology, siteModel, siteUrl, pageRepository, morphologySettings);
+                Parser parser = new Parser(entityHandler, connection, morphology, siteModel, siteUrl, pageRepository, morphologySettings,lemmaRepository, indexRepository);
                 forkJoinPool.invoke(parser);
                 siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl);
-                logger.debug("Site: " + siteUrl + " indexed successfully");
+                logger.debug("Site: {} indexed successfully", siteUrl);
             } catch (Exception re) {
                 siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl);
                 logger.debug("indexing complete with error");

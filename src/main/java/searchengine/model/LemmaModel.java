@@ -35,9 +35,4 @@ public class LemmaModel {
     @OneToMany(mappedBy = "lemma", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<IndexModel> indexModels;
-
-    @Version
-    @Column(name = "version")
-    private Integer version;
-
 }

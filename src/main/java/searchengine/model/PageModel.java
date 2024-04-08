@@ -33,7 +33,7 @@ public class PageModel {
     private int code;
 
 
-    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @OneToMany(mappedBy = "page", cascade = CascadeType.ALL)

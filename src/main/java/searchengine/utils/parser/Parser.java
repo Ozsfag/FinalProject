@@ -2,9 +2,12 @@ package searchengine.utils.parser;
 
 import lombok.RequiredArgsConstructor;
 import searchengine.config.MorphologySettings;
+import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
+import searchengine.repositories.IndexRepository;
+import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
@@ -27,6 +30,8 @@ public class Parser extends RecursiveTask<Void> {
     private final String href;
     private final PageRepository pageRepository;
     private final MorphologySettings morphologySettings;
+    private final LemmaRepository lemmaRepository;
+    private final IndexRepository indexRepository;
     @Override
     protected Void compute() {
         List<String> urlsToParse = getUrlsToParse();
@@ -34,14 +39,14 @@ public class Parser extends RecursiveTask<Void> {
             List<PageModel> pages = pageRepository.saveAllAndFlush(getPages(urlsToParse));
             indexingLemmaAndIndex(pages);
             List<Parser> subtasks = urlsToParse.stream()
-                    .map(url -> new Parser(entityHandler, connection, morphology, siteModel, url, pageRepository, morphologySettings))
+                    .map(url -> new Parser(entityHandler, connection, morphology, siteModel, url, pageRepository, morphologySettings, lemmaRepository, indexRepository))
                     .toList();
             invokeAll(subtasks);
         }
         return null;
     }
     private List<String> getUrlsToParse(){
-        return connection.getConnectionResponse(href).getUrls().stream()
+        return connection.getConnectionResponse(href).getUrls().stream().parallel()
                 .map(element -> element.absUrl("href"))
                 .distinct()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
@@ -61,9 +66,11 @@ public class Parser extends RecursiveTask<Void> {
                 .toList();
     }
     private void indexingLemmaAndIndex(List<PageModel> pages){
-        pages.forEach(page -> {
+        pages.parallelStream().forEach(page -> {
             List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(page, siteModel);
-            entityHandler.getIndexModelFromContent(page, siteModel, lemmas);
+            lemmaRepository.saveAllAndFlush(lemmas);
+            List<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, siteModel, lemmas);
+            indexRepository.saveAllAndFlush(indexes);
         });
     }
 }

@@ -108,9 +108,10 @@ public class EntityHandler {
      * @param siteModel
      * @return indexed list of LemmaModel from pageModel content
      */
+
     public List<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel) {
-        return lemmaRepository.saveAllAndFlush(morphology.wordCounter(pageModel.getContent())
-                .entrySet().stream()
+        return morphology.wordCounter(pageModel.getContent())
+                .entrySet().stream().parallel()
                 .map(word2Count -> {
                     try {
                         return getLemmaModel(siteModel, word2Count.getKey(), word2Count.getValue());
@@ -118,7 +119,7 @@ public class EntityHandler {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
                 })
-                .toList());
+                .toList();
     }
     @CachePut(cacheNames="lemmaModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
     private LemmaModel getLemmaModel(SiteModel siteModel, String word, int frequency) throws StoppedExecutionException {
@@ -135,8 +136,8 @@ public class EntityHandler {
      * @param siteModel
      * @param lemmas
      */
-    public void getIndexModelFromContent(PageModel pageModel, SiteModel siteModel, List<LemmaModel> lemmas) {
-        indexRepository.saveAllAndFlush(morphology.wordCounter(pageModel.getContent())
+    public List<IndexModel> getIndexModelFromContent(PageModel pageModel, SiteModel siteModel, List<LemmaModel> lemmas) {
+        return morphology.wordCounter(pageModel.getContent())
                 .entrySet().stream().parallel()
                 .map(word2Count -> {
                     try {
@@ -146,7 +147,7 @@ public class EntityHandler {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
                 })
-                .toList());
+                .toList();
     }
     @CachePut(cacheNames="indexModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
     private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {

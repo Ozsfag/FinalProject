@@ -4,42 +4,36 @@ server:
 
 spring:
   datasource:
-    driverClassName: com.mysql.cj.jdbc.Driver
-    username: root
+    driver-class-name: org.postgresql.Driver
     password: 30091998As!
-    url: jdbc:mysql://localhost:3306/search_engine?useUnicode=true&characterEncoding=UTF-8&useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:postgresql://localhost:5432/search_engine
+    username: postgres
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 2
+      idle-timeout: 600000
+      maximum-pool-size: 10
+      auto-commit: true
+      pool-name: HikariCorePool
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: true
 
 indexing-settings:
   sites:
-#    - url: http://abramov28.ru/
-#      name: Abramov28.ru
     - url: https://lenta.ru/
       name: Лента.ру
     - url: https://skillbox.ru/
       name: Skillbox
     - url: http://www.playback.ru/
       name: PlayBack.Ru
-#    - url: https://www.volochek.life/
-#      name: Volochek.ru
-#    - url: http://radiomv.ru/
-#      name: Radimov.ru
-#    - url: https://ipfran.ru/
-#      name: Ipfran.ru
-#    - url: https://dimonvideo.ru/
-#      name: Dimonvideo.ru
-#    - url: https://et-cetera.ru/mobile/
-#      name: Et-cetera.ru
-#    - url: https://www.lutherancathedral.ru/
-#      name: Lutherancathedral.ru
-#    - url: https://dombulgakova.ru/
-#      name: Dombulgakova.ru
 
 connection-settings:
   user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36

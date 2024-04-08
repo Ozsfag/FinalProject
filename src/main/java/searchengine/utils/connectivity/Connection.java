@@ -1,6 +1,5 @@
 package searchengine.utils.connectivity;
 
-import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -31,7 +30,8 @@ public class Connection {
         try {
             org.jsoup.Connection connection = Jsoup.connect(url)
                     .userAgent(connectionSettings.getUserAgent())
-                    .referrer(connectionSettings.getReferrer());
+                    .referrer(connectionSettings.getReferrer())
+                    .ignoreHttpErrors(true);
 
             Document document = connection.get();
             int responseCode = connection.response().statusCode();
@@ -39,10 +39,8 @@ public class Connection {
             Elements urls = document.select("a[href]");
 
             return new ConnectionResponse(url, responseCode, content, urls, "");
-        } catch (HttpStatusException e) {
-            return getErrorConnectionResponse(url, e.getStatusCode(),e.getMessage());
         } catch (IOException e) {
-            return getErrorConnectionResponse(url, HttpStatus.NOT_FOUND.value(), "Not found");
+            return new ConnectionResponse(url, HttpStatus.NOT_FOUND.value(),"", new Elements().empty(), HttpStatus.NOT_FOUND.getReasonPhrase());
         }
     }
 
@@ -63,9 +61,5 @@ public class Connection {
             return "";
         }
         return document.select("title").text();
-    }
-
-    private ConnectionResponse getErrorConnectionResponse(String url, int statusCode, String errorMessage) {
-        return new ConnectionResponse(url, statusCode,"", new Elements().empty(), errorMessage);
     }
 }

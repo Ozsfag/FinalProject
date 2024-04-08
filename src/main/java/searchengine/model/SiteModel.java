@@ -23,19 +23,19 @@ public class SiteModel {
     private Integer id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "ENUM('INDEXING', 'INDEXED', 'FAILED')")
+    @Column(nullable = false)
     private Status status;
 
-    @Column(name = "status_time", nullable = false, columnDefinition = "DATETIME")
+    @Column(name = "status_time", nullable = false)
     private Date statusTime;
 
-    @Column(name = "last_error", columnDefinition = "TEXT")
+    @Column(name = "last_error")
     private String lastError;
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(nullable = false)
     private String url;
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(nullable = false)
     private String name;
 
     @OneToMany(mappedBy = "site", cascade = CascadeType.ALL)
