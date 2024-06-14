@@ -52,7 +52,7 @@ public class SearchingImpl implements SearchingService {
                     DetailedSearchResponse response = new DetailedSearchResponse();
                     try {
                         PageModel pageModel = pageRepository.findById(entry.getKey()).orElseThrow();
-                        String[] urlComponents = entityHandler.getValidUrlComponents(pageModel.getPath());
+                        String[] urlComponents = morphology.getValidUrlComponents(pageModel.getPath());
                         response.setUri(urlComponents[1]);
                         response.setSite(urlComponents[0]);
                         response.setSiteName(pageModel.getSite().getName());

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
@@ -13,6 +14,7 @@ import java.util.Date;
 
 @Repository
 public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     SiteModel findByUrl(String path);
 
     @Transactional

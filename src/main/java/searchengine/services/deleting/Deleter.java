@@ -17,7 +17,7 @@ public class Deleter implements DeletingService{
         @Transactional
         public void deleteData() {
             String sql =
-                    "TRUNCATE TABLE search_engine.lemmas Cascade; " +
+                    "TRUNCATE TABLE search_engine.lemmas Cascade;" +
                     "TRUNCATE TABLE search_engine.pages Cascade;" +
                     "TRUNCATE TABLE search_engine.sites Cascade;" +
                     "TRUNCATE TABLE search_engine.indexes Cascade;";

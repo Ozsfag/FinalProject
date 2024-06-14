@@ -13,8 +13,7 @@ import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.RecursiveTask;
 
 /**
@@ -32,9 +31,10 @@ public class Parser extends RecursiveTask<Void> {
     private final MorphologySettings morphologySettings;
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
+
     @Override
     protected Void compute() {
-        List<String> urlsToParse = getUrlsToParse();
+        List<String> urlsToParse = getUrlsToParse(pageRepository.findAllPathssBySite(siteModel));
         if (!urlsToParse.isEmpty()) {
             List<PageModel> pages = pageRepository.saveAllAndFlush(getPages(urlsToParse));
             indexingLemmaAndIndex(pages);
@@ -45,17 +45,25 @@ public class Parser extends RecursiveTask<Void> {
         }
         return null;
     }
-    private List<String> getUrlsToParse(){
+
+    /**
+     * Retrieves a list of URLs to parse based on the provided list of all URLs by site.
+     *
+     * @param  allUrlsBySite   list of all URLs by site
+     * @return                 list of URLs to parse
+     */
+    private List<String> getUrlsToParse(List<String> allUrlsBySite) {
         return connection.getConnectionResponse(href).getUrls().stream().parallel()
                 .map(element -> element.absUrl("href"))
                 .distinct()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
-                .filter(url -> !pageRepository.existsByPath(url))
+                .filter(url -> !allUrlsBySite.contains(url))
                 .toList();
     }
-    private List<PageModel> getPages(List<String> urlsToParse){
-        return urlsToParse.stream()
+
+    private List<PageModel> getPages(List<String> urlsToParse) {
+        return urlsToParse.parallelStream()
                 .map(url -> {
                     try {
                         return entityHandler.getPageModel(siteModel, url);
@@ -65,13 +73,15 @@ public class Parser extends RecursiveTask<Void> {
                 })
                 .toList();
     }
-    private void indexingLemmaAndIndex(List<PageModel> pages){
-        pages.parallelStream().forEach(page -> {
-            List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(page, siteModel);
+
+    private void indexingLemmaAndIndex(List<PageModel> pages) {
+        pages.forEach(page -> {
+            Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
+
+            List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(page, siteModel, wordCountMap);
             lemmaRepository.saveAllAndFlush(lemmas);
-            List<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, siteModel, lemmas);
+            List<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, siteModel, lemmas, wordCountMap);
             indexRepository.saveAllAndFlush(indexes);
         });
     }
 }
-

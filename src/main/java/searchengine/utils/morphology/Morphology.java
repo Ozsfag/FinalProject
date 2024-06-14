@@ -7,6 +7,8 @@ import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,6 +66,19 @@ public class Morphology {
                 .flatMap(queryWord -> queryWord.matches(onlyLetters)?
                         luceneMorphology2.getNormalForms(queryWord).stream():
                         luceneMorphology1.getNormalForms(queryWord).stream());
+    }
+
+    /**
+     * split transmitted link into scheme and host, and path
+     *
+     * @param url@return valid url components
+     * @throws URISyntaxException
+     */
+    public String[] getValidUrlComponents(String url) throws URISyntaxException {
+        final URI uri = new URI(url);
+        final String schemeAndHost = uri.getScheme() + "://" + uri.getHost() + "/";
+        final String path = uri.getPath();
+        return new String[]{schemeAndHost, path};
     }
 }
 

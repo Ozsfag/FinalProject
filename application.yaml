@@ -1,6 +1,10 @@
 server:
   port: 8080
   max-http-header-size: 20000
+  tomcat:
+    threads:
+      max: 200
+
 
 spring:
   datasource:
@@ -22,6 +26,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        cache:
+          use_second_level_cache: true
+          region:
+            factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
     hibernate:
       ddl-auto: update
     show-sql: true

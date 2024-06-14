@@ -34,11 +34,10 @@ public class Connection {
                     .ignoreHttpErrors(true);
 
             Document document = connection.get();
-            int responseCode = connection.response().statusCode();
             String content = Optional.of(document.body().text()).orElseThrow();
             Elements urls = document.select("a[href]");
 
-            return new ConnectionResponse(url, responseCode, content, urls, "");
+            return new ConnectionResponse(url, HttpStatus.OK.value(), content, urls, "");
         } catch (IOException e) {
             return new ConnectionResponse(url, HttpStatus.NOT_FOUND.value(),"", new Elements().empty(), HttpStatus.NOT_FOUND.getReasonPhrase());
         }

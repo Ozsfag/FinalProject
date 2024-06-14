@@ -26,8 +26,7 @@ import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.parser.Parser;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
@@ -54,7 +53,9 @@ public class IndexingImpl implements IndexingService {
     private final LemmaRepository lemmaRepository;
     @Lazy
     private final IndexRepository indexRepository;
+    @Lazy
     public static volatile boolean isIndexing = true;
+    @Lazy
     public static final Logger logger = LoggerFactory.getLogger(IndexingImpl.class);
     @Override
     public ResponseInterface startIndexing() {
@@ -101,8 +102,9 @@ public class IndexingImpl implements IndexingService {
         SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
         PageModel pageModel = entityHandler.getPageModel(siteModel, url);
         pageRepository.saveAndFlush(pageModel);
-        List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(pageModel, siteModel);
-        entityHandler.getIndexModelFromContent(pageModel, siteModel, lemmas);
+        Map<String, Integer> wordCountMap = morphology.wordCounter(pageModel.getContent());
+        List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(pageModel, siteModel, wordCountMap);
+        entityHandler.getIndexModelFromContent(pageModel, siteModel, lemmas, wordCountMap);
         logger.debug("end indexing single page");
         return new Successful(true);
     }
