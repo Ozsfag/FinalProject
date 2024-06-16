@@ -32,9 +32,14 @@ public class Parser extends RecursiveTask<Void> {
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
 
+    /**
+     * Computes the result of the computation by recursively parsing URLs and indexing their content.
+     *
+     * @return          null, as this method does not return a value
+     */
     @Override
     protected Void compute() {
-        List<String> urlsToParse = getUrlsToParse(pageRepository.findAllPathssBySite(siteModel));
+        List<String> urlsToParse = getUrlsToParse(pageRepository.findAllPathsBySite(siteModel.getId()));
         if (!urlsToParse.isEmpty()) {
             List<PageModel> pages = pageRepository.saveAllAndFlush(getPages(urlsToParse));
             indexingLemmaAndIndex(pages);
@@ -61,7 +66,12 @@ public class Parser extends RecursiveTask<Void> {
                 .filter(url -> !allUrlsBySite.contains(url))
                 .toList();
     }
-
+    /**
+     * Retrieves a list of PageModel objects from the provided list of URLs to parse.
+     *
+     * @param  urlsToParse  the list of URLs to parse
+     * @return              a list of PageModel objects representing the pages parsed from the URLs
+     */
     private List<PageModel> getPages(List<String> urlsToParse) {
         return urlsToParse.parallelStream()
                 .map(url -> {
@@ -73,11 +83,14 @@ public class Parser extends RecursiveTask<Void> {
                 })
                 .toList();
     }
-
+    /**
+     * Indexes the lemmas and indexes for a list of pages.
+     *
+     * @param  pages   the list of pages to index
+     */
     private void indexingLemmaAndIndex(List<PageModel> pages) {
         pages.forEach(page -> {
             Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
-
             List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(page, siteModel, wordCountMap);
             lemmaRepository.saveAllAndFlush(lemmas);
             List<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, siteModel, lemmas, wordCountMap);

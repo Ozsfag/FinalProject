@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.IndexModel;
-import searchengine.model.LemmaModel;
-import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 
 import java.util.Set;
@@ -16,8 +14,8 @@ import java.util.Set;
 @Repository
 public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Query("select i from IndexModel i where i.page = :page and i.lemma = :lemma")
-    IndexModel findByLemmaAndPage(@Param("lemma")LemmaModel lemma, @Param("page")PageModel page);
+    @Query("select i from IndexModel i where i.page.id = :pageId and i.lemma.id = :lemmaId")
+    IndexModel findByLemmaAndPage(@Param("pageId") Integer pageId, @Param("lemmaId") Integer lemmaId);
 
     @Query("select i from IndexModel i where i.lemma.lemma = ?1 and i.lemma.frequency < ?2")
     Set<IndexModel> findIndexBy2Params(String lemma, int frequency);

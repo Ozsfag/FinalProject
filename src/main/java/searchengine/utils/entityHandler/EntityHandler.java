@@ -67,7 +67,6 @@ public class EntityHandler {
      * @param siteModel, from database
      * @param href of page from site
      * @return indexed pageModel
-     * @throws Exception
      */
     @CachePut(cacheNames="pageModels", key = "#href", cacheManager = "customCacheManager")
     public PageModel getPageModel(SiteModel siteModel, String href) throws Exception {
@@ -84,9 +83,11 @@ public class EntityHandler {
     }
 
     /**
-     *get indexed list of LemmaModel from PageModel content
+     * get indexed list of LemmaModel from PageModel content
+     *
      * @param pageModel
      * @param siteModel
+     * @param wordCountMap
      * @return indexed list of LemmaModel from pageModel content
      */
 
@@ -130,7 +131,7 @@ public class EntityHandler {
     }
     private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {
         if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
-        return Optional.ofNullable(indexRepository.findByLemmaAndPage(lemmaModel, pageModel))
+        return Optional.ofNullable(indexRepository.findByLemmaAndPage(lemmaModel.getId(), pageModel.getId()))
                 .map(indexModel -> {
                     indexModel.setRank(indexModel.getRank() + frequency);
                     return indexModel;})
