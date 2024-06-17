@@ -146,7 +146,7 @@ public class EntityHandler {
                 .name(site.getName())
                 .build();
     }
-    @Cacheable(cacheNames = "pageModels", key = "#path", cacheManager = "customCacheManager")
+//    @Cacheable(cacheNames = "pageModels", key = "#path", cacheManager = "customCacheManager")
     private PageModel createPageModel(SiteModel siteModel, String path){
         ConnectionResponse connectionResponse = connection.getConnectionResponse(path);
         return PageModel.builder()
@@ -155,7 +155,7 @@ public class EntityHandler {
                 .content(connectionResponse.getContent())
                 .build();
     }
-    @Cacheable(cacheNames = "lemmaModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
+//    @Cacheable(cacheNames = "lemmaModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
     private LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency){
         return LemmaModel.builder()
                 .site(siteModel)

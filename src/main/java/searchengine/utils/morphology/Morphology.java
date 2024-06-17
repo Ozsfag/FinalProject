@@ -31,11 +31,13 @@ public class Morphology {
         Map<String, Integer> russianCounter = wordFrequency(content, morphologySettings.getNotCyrillicLetters(), russianLuceneMorphology, morphologySettings.getRussianParticleNames());
         Map<String, Integer> englishCounter = wordFrequency(content, morphologySettings.getNotLatinLetters(), englishLuceneMorphology, morphologySettings.getEnglishParticlesNames());
         return Stream.concat(russianCounter.entrySet().parallelStream(), englishCounter.entrySet().parallelStream())
+                .parallel()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private Map<String, Integer> wordFrequency(String content, String regex, LuceneMorphology luceneMorphology, String[] particles){
         return Arrays.stream(content.toLowerCase().replaceAll(regex, morphologySettings.getEmptyString()).split(morphologySettings.getSplitter()))
+                .parallel()
                 .filter(word -> isNotParticle(word, luceneMorphology, particles))
 //                .map(luceneMorphology::getNormalForms)
 //                .flatMap(Collection::stream)
@@ -57,7 +59,7 @@ public class Morphology {
         Stream<String> russianLemmaStream = getLemmaStreamByLanguage(query, morphologySettings.getNotCyrillicLetters(), russianLuceneMorphology,englishLuceneMorphology, morphologySettings.getRussianParticleNames(), onlyLatinLetters);
         String onlyCyrillicLetters = "[а-я]+";
         Stream<String> englishLemmaStream = getLemmaStreamByLanguage(query, morphologySettings.getNotLatinLetters(), englishLuceneMorphology, russianLuceneMorphology, morphologySettings.getEnglishParticlesNames(), onlyCyrillicLetters);
-        return Stream.concat(russianLemmaStream, englishLemmaStream).collect(Collectors.toSet());
+        return Stream.concat(russianLemmaStream.parallel(), englishLemmaStream.parallel()).collect(Collectors.toSet());
 
     }
     private Stream<String> getLemmaStreamByLanguage(String query, String nonLetters, LuceneMorphology luceneMorphology1, LuceneMorphology luceneMorphology2, String[] particles, String onlyLetters){
