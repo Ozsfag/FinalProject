@@ -20,7 +20,7 @@ spring:
       auto-commit: true
       pool-name: HikariCorePool
       max-lifetime: 3600000
-      connection-timeout: 30000
+      connection-timeout: 300000
 
   jpa:
     properties:
