@@ -42,7 +42,7 @@ public class EntityHandler {
      * @param href from application.yaml
      * @return indexed siteModel
      */
-    @Cacheable(cacheNames = "siteModels", key = "#href", cacheManager = "customCacheManager")
+//    @Cacheable(cacheNames = "siteModels", key = "#href", cacheManager = "customCacheManager")
     public SiteModel getIndexedSiteModel(String href) {
         try {
             String validatedUrl = morphology.getValidUrlComponents(href)[0];
@@ -52,8 +52,7 @@ public class EntityHandler {
                     .findFirst()
                     .orElseThrow(() -> new OutOfSitesConfigurationException("Out of sites"));
 
-            SiteModel siteModel = Optional.ofNullable(siteRepository.findByUrl(validatedUrl))
-                    .orElseGet(()-> createSiteModel(site));
+            SiteModel siteModel = createSiteModel(site);
 
             return siteRepository.saveAndFlush(siteModel);
 
@@ -68,7 +67,7 @@ public class EntityHandler {
      * @param href of page from site
      * @return indexed pageModel
      */
-    @CachePut(cacheNames="pageModels", key = "#href", cacheManager = "customCacheManager")
+//    @CachePut(cacheNames="pageModels", key = "#href", cacheManager = "customCacheManager")
     public PageModel getPageModel(SiteModel siteModel, String href) throws Exception {
         PageModel pageModel = null;
         try {
@@ -121,22 +120,41 @@ public class EntityHandler {
         return wordCountMap.entrySet().stream().parallel()
                 .map(word2Count -> {
                     try {
-                        LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
-                        return getIndexModel(lemmaModel, pageModel, (float) word2Count.getValue());
+//                        LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
+                        return getIndexModel(lemmas, pageModel, (float) word2Count.getValue());
                     } catch (StoppedExecutionException e) {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
                 })
                 .toList();
     }
-    private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {
+    private IndexModel getIndexModel(List <LemmaModel> lemmas, PageModel pageModel, Float frequency) throws StoppedExecutionException {
         if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
-        return Optional.ofNullable(indexRepository.findByLemmaAndPage(lemmaModel.getId(), pageModel.getId()))
-                .map(indexModel -> {
-                    indexModel.setRank(indexModel.getRank() + frequency);
-                    return indexModel;})
-                .orElseGet(() -> createIndexModel(pageModel, lemmaModel, frequency));
+//        return Optional.ofNullable(indexRepository.findByLemmaAndPage(lemmaModel.getId(), pageModel.getId()))
+//                .map(indexModel -> {
+//                    indexModel.setRank(indexModel.getRank() + frequency);
+//                    return indexModel;})
+//                .orElseGet(() -> createIndexModel(pageModel, lemmaModel, frequency));
+
+        Map<String, IndexModel> existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
+                .stream()
+                .collect(Collectors.toMap(indexModel -> indexModel.getLemma().getLemma(), indexModel -> indexModel));
+
+
+        return wordCountMap.entrySet().parallelStream().map(entry -> {
+            String word = entry.getKey();
+            int frequency = entry.getValue();
+
+            return Optional.ofNullable(existingLemmaModels.get(word))
+                    .map(lemmaModel -> {
+                        lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
+                        return lemmaModel;
+                    })
+                    .orElseGet(() ->createLemmaModel(siteModel, word, frequency));
+
+        }).collect(Collectors.toList());
     }
+    @Cacheable(cacheNames = "siteModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
     private SiteModel createSiteModel(Site site) {
         return SiteModel.builder()
                 .status(Status.INDEXING)
