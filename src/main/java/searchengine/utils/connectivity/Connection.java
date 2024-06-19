@@ -10,6 +10,7 @@ import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
 import java.io.IOException;
+import java.net.CookieStore;
 import java.util.Optional;
 
 /**
@@ -28,12 +29,14 @@ public class Connection {
      */
     public ConnectionResponse getConnectionResponse(String url) {
         try {
+
             org.jsoup.Connection connection = Jsoup.connect(url)
                     .userAgent(connectionSettings.getUserAgent())
                     .referrer(connectionSettings.getReferrer())
                     .ignoreHttpErrors(true);
 
             Document document = connection.get();
+            CookieStore cookieStore = connection.cookieStore().getCookies();
             String content = Optional.of(document.body().text()).orElseThrow();
             Elements urls = document.select("a[href]");
 

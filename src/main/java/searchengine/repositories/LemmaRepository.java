@@ -20,14 +20,17 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
 //    @Query("SELECT l FROM LemmaModel l JOIN FETCH l.site s WHERE s.id = :siteId AND l.lemma = :lemma")
 //    LemmaModel findByLemmaAndSite_Id(@Param("lemma") String lemma, @Param("siteId") int siteId);
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Retryable(maxAttempts = 15)
     int countBySite_Url(String url);
 
-//    @Override
-//    @Transactional(isolation = Isolation.READ_COMMITTED)
-//    long count();
+    @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    @Retryable()
+    @Retryable(maxAttempts = 15)
+    long count();
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Retryable(maxAttempts = 15)
     @Query("SELECT l FROM LemmaModel l JOIN FETCH l.site s WHERE s.id = :siteId AND l.lemma IN :lemmata")
     List<LemmaModel> findByLemmaInAndSite_Id(@Param("lemmata") Collection<String> lemmata, @Param("siteId") Integer siteId);
 }

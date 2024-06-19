@@ -76,9 +76,9 @@ public class EntityHandler {
             if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
             return pageModel;
 
-        } catch (Exception e) {
+        } catch (StoppedExecutionException e) {
             pageRepository.saveAndFlush(pageModel);
-            throw new Exception(e.getLocalizedMessage());
+            throw new StoppedExecutionException(e.getLocalizedMessage());
         }
     }
 

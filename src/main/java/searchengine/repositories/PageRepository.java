@@ -17,13 +17,13 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
 //    @Retryable()
 //    PageModel findByPath(String path);
 
-//    @Override
-//    @Transactional(isolation = Isolation.REPEATABLE_READ)
-//    @Retryable()
-//    long count();
+    @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Retryable(maxAttempts = 15)
+    long count();
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable()
+    @Retryable(maxAttempts = 15)
     @Query("SELECT p.path FROM PageModel p JOIN SiteModel s ON p.site = s.id WHERE s.id = :siteId")
     List<String> findAllPathsBySite(@Param("siteId") int siteId);
 
