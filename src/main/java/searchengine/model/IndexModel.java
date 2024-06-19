@@ -7,7 +7,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "`indexes`", schema = "search_engine",
         indexes = {
-        @Index(name = "findByLemma_idAndPage_id_index", columnList = "lemma_id, page_id", unique = true)})
+        @Index(name = "findByLemma_idAndPage_id_index", columnList = "lemma_id, page_id")})
 @AllArgsConstructor
 @Data
 @NoArgsConstructor

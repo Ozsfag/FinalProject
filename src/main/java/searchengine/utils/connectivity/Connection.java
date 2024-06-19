@@ -36,7 +36,6 @@ public class Connection {
                     .ignoreHttpErrors(true);
 
             Document document = connection.get();
-            CookieStore cookieStore = connection.cookieStore().getCookies();
             String content = Optional.of(document.body().text()).orElseThrow();
             Elements urls = document.select("a[href]");
 

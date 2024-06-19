@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "lemmas", schema = "search_engine", indexes = {
-        @Index(name = "idx_lemmamodel_lemma_site_id", columnList = "lemma, site_id", unique = true)})
+        @Index(name = "idx_lemma_lemma_site_id", columnList = "lemma, site_id")})
 @Data
 @NoArgsConstructor
 @Getter

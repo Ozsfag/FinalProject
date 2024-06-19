@@ -2,6 +2,7 @@ package searchengine.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,4 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Query("select i from IndexModel i where i.page.id = ?1 and i.lemma in ?2")
     List<IndexModel> findByPage_IdAndLemmaIn(Integer id, Collection<LemmaModel> lemmas);
-
-
 }

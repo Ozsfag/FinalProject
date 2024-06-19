@@ -14,13 +14,14 @@ import java.util.Date;
 
 @Repository
 public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
+
     @Transactional(isolation = Isolation.READ_COMMITTED)
     SiteModel findByUrl(String path);
 
-    @Transactional
-    @Modifying
-    @Query("update SiteModel s set s.statusTime = ?1 where s.url = ?2")
-    void updateStatusTimeByUrl(Date statusTime, String url);
+//    @Transactional
+//    @Modifying
+//    @Query("update SiteModel s set s.statusTime = ?1 where s.url = ?2")
+//    void updateStatusTimeByUrl(Date statusTime, String url);
 
     @Transactional
     @Modifying
