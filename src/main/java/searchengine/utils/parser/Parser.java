@@ -42,10 +42,6 @@ public class Parser extends RecursiveTask<Void> {
         List<String> urlsToParse = getUrlsToParse(pageRepository.findAllPathsBySite(siteModel.getId()));
         if (!urlsToParse.isEmpty()) {
             List<PageModel> pages = getPages(urlsToParse);
-//            pages.stream().filter(page -> !pageRepository.existsById(page.getId()));
-//            pages = pageRepository.saveAllAndFlush(pages);
-            pages = pageRepository.findDistinctByIdNotIn(pages);
-            // continue from improvements this part of code
             indexingLemmaAndIndex(pageRepository.saveAllAndFlush(pages));
             List<Parser> subtasks = urlsToParse.stream()
                     .map(url -> new Parser(entityHandler, connection, morphology, siteModel, url, pageRepository, morphologySettings, lemmaRepository, indexRepository))
@@ -77,7 +73,18 @@ public class Parser extends RecursiveTask<Void> {
      * @return              a list of PageModel objects representing the pages parsed from the URLs
      */
     private List<PageModel> getPages(List<String> urlsToParse) {
-        return urlsToParse.stream()
+       List<String> checkedUrls =  pageRepository.findDistinctPathsNotInDatabaseAndInList(urlsToParse);
+        return checkedUrls.isEmpty() ?
+                urlsToParse.stream()
+                        .map(url -> {
+                            try {
+                                return entityHandler.getPageModel(siteModel, url);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e.getLocalizedMessage());
+                            }
+                        })
+                        .toList() :
+                checkedUrls.stream()
                 .map(url -> {
                     try {
                         return entityHandler.getPageModel(siteModel, url);

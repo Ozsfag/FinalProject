@@ -15,12 +15,6 @@ import java.util.List;
 
 @Repository
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
-//    @Transactional(isolation = Isolation.REPEATABLE_READ)
-//    @Retryable()
-//    PageModel findByPath(String path);
-
-    @Override
-    boolean existsById(Integer integer);
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -34,6 +28,7 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
 
     @Transactional
     @Modifying
-    @Query("SELECT p FROM PageModel p WHERE p NOT IN (SELECT p FROM p WHERE p IN :pages)")
-    List<PageModel> findDistinctByIdNotIn(@Param("pages") Collection<PageModel> pages);
+    @Query("SELECT DISTINCT p.path FROM PageModel p WHERE p.path NOT IN (SELECT p2.path FROM PageModel p2 WHERE p2.path IS NOT NULL) AND p.path IN :pages")
+    List<String> findDistinctPathsNotInDatabaseAndInList(@Param("pages") Collection<String> pages);
+
 }
