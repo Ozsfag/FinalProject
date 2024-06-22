@@ -39,10 +39,10 @@ public class Parser extends RecursiveTask<Void> {
      */
     @Override
     protected Void compute() {
-        List<String> urlsToParse = getUrlsToParse(pageRepository.findAllPathsBySite(siteModel.getId()));
+        List<String> urlsToParse = getUrlsToParse();
         if (!urlsToParse.isEmpty()) {
-            List<PageModel> pages = getPages(urlsToParse);
-            indexingLemmaAndIndex(pageRepository.saveAllAndFlush(pages));
+            List<PageModel> pages = pageRepository.saveAllAndFlush(getPages(urlsToParse));
+            indexingLemmaAndIndex(pages);
             List<Parser> subtasks = urlsToParse.stream()
                     .map(url -> new Parser(entityHandler, connection, morphology, siteModel, url, pageRepository, morphologySettings, lemmaRepository, indexRepository))
                     .toList();
@@ -54,16 +54,16 @@ public class Parser extends RecursiveTask<Void> {
     /**
      * Retrieves a list of URLs to parse based on the provided list of all URLs by site.
      *
-     * @param  allUrlsBySite   list of all URLs by site
      * @return                 list of URLs to parse
      */
-    private List<String> getUrlsToParse(List<String> allUrlsBySite) {
-        return connection.getConnectionResponse(href).getUrls().stream().parallel()
-                .map(element -> element.absUrl("href"))
-                .distinct()
+    private List<String> getUrlsToParse() {
+        List<String> allUrlsBySite = pageRepository.findAllPathsBySite(siteModel.getId());
+        List<String> urls = connection.getConnectionResponse(href).getUrls();
+        urls.removeAll(allUrlsBySite);
+        return urls.parallelStream()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
-                .filter(url -> !allUrlsBySite.contains(url))
+//                .filter(url -> allUrlsBySite.stream().noneMatch(href -> href.equals(url)))
                 .toList();
     }
     /**
@@ -73,18 +73,7 @@ public class Parser extends RecursiveTask<Void> {
      * @return              a list of PageModel objects representing the pages parsed from the URLs
      */
     private List<PageModel> getPages(List<String> urlsToParse) {
-       List<String> checkedUrls =  pageRepository.findDistinctPathsNotInDatabaseAndInList(urlsToParse);
-        return checkedUrls.isEmpty() ?
-                urlsToParse.stream()
-                        .map(url -> {
-                            try {
-                                return entityHandler.getPageModel(siteModel, url);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e.getLocalizedMessage());
-                            }
-                        })
-                        .toList() :
-                checkedUrls.stream()
+        return urlsToParse.stream()
                 .map(url -> {
                     try {
                         return entityHandler.getPageModel(siteModel, url);

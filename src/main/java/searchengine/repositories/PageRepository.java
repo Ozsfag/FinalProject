@@ -28,7 +28,9 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
 
     @Transactional
     @Modifying
-    @Query("SELECT DISTINCT p.path FROM PageModel p WHERE p.path NOT IN (SELECT p2.path FROM PageModel p2 WHERE p2.path IS NOT NULL) AND p.path IN :pages")
-    List<String> findDistinctPathsNotInDatabaseAndInList(@Param("pages") Collection<String> pages);
+    @Query("SELECT p.path " +
+            "FROM PageModel p " +
+            "WHERE p.path NOT IN (SELECT p2.path FROM PageModel p2 WHERE p2.path IN :pages)")
+    List<String> findPathsNotInDatabaseAndInList(@Param("pages") Collection<String> pages);
 
 }

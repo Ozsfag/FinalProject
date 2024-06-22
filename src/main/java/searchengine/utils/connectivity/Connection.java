@@ -2,7 +2,6 @@ package searchengine.utils.connectivity;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -10,7 +9,8 @@ import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
 import java.io.IOException;
-import java.net.CookieStore;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -37,11 +37,14 @@ public class Connection {
 
             Document document = connection.get();
             String content = Optional.of(document.body().text()).orElseThrow();
-            Elements urls = document.select("a[href]");
+            List<String> urls = document.select("a[href]").stream()
+                    .map(element -> element.absUrl("href"))
+                    .distinct()
+                    .toList();
 
             return new ConnectionResponse(url, HttpStatus.OK.value(), content, urls, "");
         } catch (IOException e) {
-            return new ConnectionResponse(url, HttpStatus.NOT_FOUND.value(),"", new Elements().empty(), HttpStatus.NOT_FOUND.getReasonPhrase());
+            return new ConnectionResponse(url, HttpStatus.NOT_FOUND.value(),"", new ArrayList<>(), HttpStatus.NOT_FOUND.getReasonPhrase());
         }
     }
 

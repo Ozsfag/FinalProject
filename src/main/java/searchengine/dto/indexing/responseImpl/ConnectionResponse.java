@@ -3,7 +3,8 @@ package searchengine.dto.indexing.responseImpl;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jsoup.select.Elements;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -13,6 +14,6 @@ public class ConnectionResponse {
     private String path;
     private int responseCode;
     private String content;
-    private Elements urls;
+    private List<String> urls;
     private String errorMessage;
 }
