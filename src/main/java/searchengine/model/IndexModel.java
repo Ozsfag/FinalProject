@@ -3,6 +3,7 @@ package searchengine.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "`indexes`", schema = "search_engine",
@@ -12,7 +13,7 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @Builder
-public class IndexModel{
+public class IndexModel  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "index_id",columnDefinition = "INT")

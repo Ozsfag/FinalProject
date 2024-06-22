@@ -10,8 +10,10 @@ import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * a util that parses a page
@@ -37,14 +39,13 @@ public class Connection {
 
             Document document = connection.get();
             String content = Optional.of(document.body().text()).orElseThrow();
-            List<String> urls = document.select("a[href]").stream()
+            Set<String> urls = document.select("a[href]").stream()
                     .map(element -> element.absUrl("href"))
-                    .distinct()
-                    .toList();
+                    .collect(Collectors.toCollection(HashSet::new));
 
             return new ConnectionResponse(url, HttpStatus.OK.value(), content, urls, "");
         } catch (IOException e) {
-            return new ConnectionResponse(url, HttpStatus.NOT_FOUND.value(),"", new ArrayList<>(), HttpStatus.NOT_FOUND.getReasonPhrase());
+            return new ConnectionResponse(url, HttpStatus.NOT_FOUND.value(),"", new HashSet<>(), HttpStatus.NOT_FOUND.getReasonPhrase());
         }
     }
 

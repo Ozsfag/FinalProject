@@ -91,9 +91,9 @@ public class EntityHandler {
      * @return indexed list of LemmaModel from pageModel content
      */
 
-    public List<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel, Map<String, Integer> wordCountMap) {
+    public Set<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel, Map<String, Integer> wordCountMap) {
         Map<String, LemmaModel> existingLemmaModels = lemmaRepository.findByLemmaInAndSite_Id(new ArrayList<>(wordCountMap.keySet()), siteModel.getId())
-                .stream()
+                .parallelStream()
                 .collect(Collectors.toMap(LemmaModel::getLemma, lemmaModel -> lemmaModel));
 
 
@@ -108,17 +108,16 @@ public class EntityHandler {
                     })
                     .orElseGet(() ->createLemmaModel(siteModel, word, frequency));
 
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toSet());
     }
 
     /**
      * indexing List of IndexModel from PageModel content
      * @param pageModel
-     * @param siteModel
      * @param lemmas
      */
-    public List<IndexModel> getIndexModelFromContent(PageModel pageModel, SiteModel siteModel, List<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
-        List<IndexModel> indexes = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas);
+    public List<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
+        Set<IndexModel> indexes = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas);
         return indexes.isEmpty() ?
                 lemmas.parallelStream()
                         .map(lemma -> createIndexModel(pageModel, lemma, (float)lemma.getFrequency()))

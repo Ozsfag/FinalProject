@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -14,6 +14,6 @@ public class ConnectionResponse {
     private String path;
     private int responseCode;
     private String content;
-    private List<String> urls;
+    private Set<String> urls;
     private String errorMessage;
 }

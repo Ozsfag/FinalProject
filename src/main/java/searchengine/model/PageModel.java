@@ -3,7 +3,9 @@ package searchengine.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table( name = "pages", schema = "search_engine",
@@ -13,7 +15,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @ToString
-public class PageModel {
+public class PageModel{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "page_id", columnDefinition = "INT")
@@ -38,5 +40,6 @@ public class PageModel {
 
     @OneToMany(mappedBy = "page", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<IndexModel> indexModels;
+    @EqualsAndHashCode.Exclude
+    private Set<IndexModel> indexModels;
 }

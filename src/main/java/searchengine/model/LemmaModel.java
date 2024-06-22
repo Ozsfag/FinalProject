@@ -1,9 +1,13 @@
 package searchengine.model;
 
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.util.List;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "lemmas", schema = "search_engine", indexes = {
@@ -15,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-public class LemmaModel {
+public class LemmaModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lemma_id", columnDefinition = "INT")
@@ -34,5 +38,10 @@ public class LemmaModel {
 
     @OneToMany(mappedBy = "lemma", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<IndexModel> indexModels;
+    @EqualsAndHashCode.Exclude
+    private Set<IndexModel> indexModels;
+
+    @Version
+    @Column(name = "version")
+    private Integer version;
 }

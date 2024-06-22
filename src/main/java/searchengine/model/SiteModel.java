@@ -3,8 +3,11 @@ package searchengine.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "sites", schema = "search_engine",
@@ -40,9 +43,11 @@ public class SiteModel {
 
     @OneToMany(mappedBy = "site", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<PageModel> pages;
+    @EqualsAndHashCode.Exclude
+    private Set<PageModel> pages;
 
     @OneToMany(mappedBy = "site", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<LemmaModel> lemma;
+    @EqualsAndHashCode.Exclude
+    private Set<LemmaModel> lemma;
 }

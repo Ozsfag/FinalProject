@@ -3,6 +3,9 @@ package searchengine.services.indexing;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.JDBCException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.LockAcquisitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -72,10 +75,10 @@ public class IndexingImpl implements IndexingService {
     @SneakyThrows
     private Object processSite(String siteUrl) {
         return forkJoinPool.submit(() -> {
-            logger.debug("begining process Site: {}", siteUrl);
+            logger.debug("beginning process Site: {}", siteUrl);
             try {
                 SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl);
-                Parser parser = new Parser(entityHandler, connection, morphology, siteModel, siteUrl, pageRepository, morphologySettings,lemmaRepository, indexRepository);
+                Parser parser = getParser(siteModel, siteUrl);
                 forkJoinPool.invoke(parser);
                 siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl);
                 logger.debug("Site: {} indexed successfully", siteUrl);
@@ -84,6 +87,19 @@ public class IndexingImpl implements IndexingService {
                 logger.debug("indexing complete with error");
             }
         }).get();
+    }
+    private Parser getParser(SiteModel siteModel, String siteUrl){
+        return new Parser(
+                entityHandler,
+                connection,
+                morphology,
+                siteModel,
+                siteUrl,
+                pageRepository,
+                morphologySettings,
+                lemmaRepository,
+                indexRepository,
+                siteRepository);
     }
     @Override
     public ResponseInterface stopIndexing() {
@@ -103,8 +119,8 @@ public class IndexingImpl implements IndexingService {
         PageModel pageModel = entityHandler.getPageModel(siteModel, url);
         pageRepository.saveAndFlush(pageModel);
         Map<String, Integer> wordCountMap = morphology.wordCounter(pageModel.getContent());
-        List<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(pageModel, siteModel, wordCountMap);
-        entityHandler.getIndexModelFromContent(pageModel, siteModel, lemmas, wordCountMap);
+        Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(pageModel, siteModel, wordCountMap);
+        entityHandler.getIndexModelFromContent(pageModel, lemmas, wordCountMap);
         logger.debug("end indexing single page");
         return new Successful(true);
     }
