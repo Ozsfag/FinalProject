@@ -1,7 +1,6 @@
 package searchengine.utils.parser;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.JDBCException;
 import searchengine.config.MorphologySettings;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -15,7 +14,6 @@ import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.RecursiveTask;
 
@@ -37,9 +35,9 @@ public class Parser extends RecursiveTask<Void> {
     private final SiteRepository siteRepository;
 
     /**
-     * Computes the result of the computation by recursively parsing URLs and indexing their content.
+     * Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed.
      *
-     * @return          null, as this method does not return a value
+     * @return         	null
      */
     @Override
     protected Void compute() {
@@ -95,7 +93,7 @@ public class Parser extends RecursiveTask<Void> {
     private void indexingLemmaAndIndex(List<PageModel> pages) {
         pages.forEach(page -> {
             Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
-            Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(page, siteModel, wordCountMap);
+            Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
             lemmaRepository.saveAllAndFlush(lemmas);
             List<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
             indexRepository.saveAllAndFlush(indexes);

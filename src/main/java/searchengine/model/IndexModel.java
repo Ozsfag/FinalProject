@@ -3,7 +3,6 @@ package searchengine.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Table(name = "`indexes`", schema = "search_engine",

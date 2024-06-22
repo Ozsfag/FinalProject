@@ -42,7 +42,6 @@ public class EntityHandler {
      * @param href from application.yaml
      * @return indexed siteModel
      */
-    @Cacheable(cacheNames = "siteModels", key = "#href", cacheManager = "customCacheManager")
     public SiteModel getIndexedSiteModel(String href) {
         try {
             String validatedUrl = morphology.getValidUrlComponents(href)[0];
@@ -82,16 +81,15 @@ public class EntityHandler {
         }
     }
 
-    /**
-     * get indexed list of LemmaModel from PageModel content
-     *
-     * @param pageModel
-     * @param siteModel
-     * @param wordCountMap
-     * @return indexed list of LemmaModel from pageModel content
-     */
 
-    public Set<LemmaModel> getIndexedLemmaModelListFromContent(PageModel pageModel, SiteModel siteModel, Map<String, Integer> wordCountMap) {
+    /**
+     * Retrieves the indexed LemmaModel list from the content of a SiteModel.
+     *
+     * @param  siteModel    the SiteModel containing the content
+     * @param  wordCountMap a map of word frequencies in the content
+     * @return              the set of indexed LemmaModels
+     */
+    public Set<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
         Map<String, LemmaModel> existingLemmaModels = lemmaRepository.findByLemmaInAndSite_Id(new ArrayList<>(wordCountMap.keySet()), siteModel.getId())
                 .parallelStream()
                 .collect(Collectors.toMap(LemmaModel::getLemma, lemmaModel -> lemmaModel));
@@ -112,9 +110,12 @@ public class EntityHandler {
     }
 
     /**
-     * indexing List of IndexModel from PageModel content
-     * @param pageModel
-     * @param lemmas
+     * Retrieves the IndexModel list from the content of a PageModel.
+     *
+     * @param  pageModel    the PageModel to retrieve indexes from
+     * @param  lemmas       the set of LemmaModels to search for in the content
+     * @param  wordCountMap a map of word frequencies in the content
+     * @return the list of IndexModels generated from the content
      */
     public List<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
         Set<IndexModel> indexes = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas);
@@ -152,7 +153,6 @@ public class EntityHandler {
                 .name(site.getName())
                 .build();
     }
-//    @Cacheable(cacheNames = "pageModels", key = "#path", cacheManager = "customCacheManager")
     private PageModel createPageModel(SiteModel siteModel, String path){
         ConnectionResponse connectionResponse = connection.getConnectionResponse(path);
         return PageModel.builder()
@@ -161,7 +161,6 @@ public class EntityHandler {
                 .content(connectionResponse.getContent())
                 .build();
     }
-//    @Cacheable(cacheNames = "lemmaModels", keyGenerator = "customKeyGenerator", cacheManager = "customCacheManager")
     private LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency){
         return LemmaModel.builder()
                 .site(siteModel)

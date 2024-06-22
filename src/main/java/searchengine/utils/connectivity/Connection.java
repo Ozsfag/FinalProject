@@ -9,7 +9,6 @@ import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -25,9 +24,10 @@ public class Connection {
     ConnectionSettings connectionSettings;
 
     /**
-     * get connection to url
-     * @param url, link that needs to be parsed
-     * @return ConnectionResponse
+     * Retrieves the connection response for the specified URL.
+     *
+     * @param  url   the URL to establish a connection with
+     * @return       the ConnectionResponse containing URL, HTTP status, content, URLs, and an empty string
      */
     public ConnectionResponse getConnectionResponse(String url) {
         try {
