@@ -67,7 +67,6 @@ public class EntityHandler {
      * @param href of page from site
      * @return indexed pageModel
      */
-    @CachePut(cacheNames="pageModels", key = "#href", cacheManager = "customCacheManager")
     public PageModel getPageModel(SiteModel siteModel, String href) throws Exception {
         PageModel pageModel = null;
         try {
@@ -76,7 +75,7 @@ public class EntityHandler {
             return pageModel;
 
         } catch (StoppedExecutionException e) {
-            pageRepository.saveAndFlush(pageModel);
+//            pageRepository.saveAndFlush(pageModel);
             throw new StoppedExecutionException(e.getLocalizedMessage());
         }
     }
