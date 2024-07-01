@@ -1,8 +1,6 @@
 package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
@@ -34,7 +32,6 @@ public class EntityHandler {
     private final SitesList sitesList;
     private final SiteRepository siteRepository;
     private final LemmaRepository lemmaRepository;
-    private final PageRepository pageRepository;
     private final IndexRepository indexRepository;
     public final Morphology morphology;
 
@@ -117,30 +114,23 @@ public class EntityHandler {
      * @return the list of IndexModels generated from the content
      */
     public List<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
-        Set<IndexModel> indexes = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas);
-        return indexes.isEmpty() ?
-                lemmas.parallelStream()
-                        .map(lemma -> createIndexModel(pageModel, lemma, (float)lemma.getFrequency()))
-                        .collect(Collectors.toList()) :
-                indexes.parallelStream()
-                        .map(index -> {
-                            LemmaModel lemma = index.getLemma();
-                            Float value = (float) wordCountMap.get(index.getLemma().getLemma());
-                            try {
-                                return getIndexModel(index, lemma, index.getPage(), value);
-                            } catch (StoppedExecutionException e) {
-                                throw new RuntimeException(e);
-                            }
-                        })
-                        .toList();
-
+        return wordCountMap.entrySet().stream().parallel()
+                .map(word2Count -> {
+                    try {
+                        LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
+                        return getIndexModel(lemmaModel, pageModel, (float) word2Count.getValue());
+                    } catch (StoppedExecutionException e) {
+                        throw new RuntimeException(e.getLocalizedMessage());
+                    }
+                })
+                .toList();
     }
-    private IndexModel getIndexModel(IndexModel indexModel, LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {
+    private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {
         if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
-        return Optional.ofNullable(indexModel)
-                .map(index -> {
-                    index.setRank(index.getRank() + frequency);
-                    return index;})
+        return Optional.ofNullable(indexRepository.findByLemmaAndPage(pageModel.getId(), lemmaModel.getId()))
+                .map(indexModel -> {
+                    indexModel.setRank(indexModel.getRank() + frequency);
+                    return indexModel;})
                 .orElseGet(() -> createIndexModel(pageModel, lemmaModel, frequency));
     }
     private SiteModel createSiteModel(Site site) {

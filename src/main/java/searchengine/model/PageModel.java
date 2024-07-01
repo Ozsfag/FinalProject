@@ -8,7 +8,9 @@ import java.util.Set;
 @Entity
 @Table( name = "pages", schema = "search_engine",
         indexes = @Index(name = "path_index", columnList = "path", unique = true))
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @NoArgsConstructor(force = true)
 @Builder
 @AllArgsConstructor
@@ -40,4 +42,8 @@ public class PageModel{
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<IndexModel> indexModels;
+
+    @Version
+    @Column(name = "version")
+    private Integer version;
 }
