@@ -8,10 +8,9 @@ import java.util.Set;
 @Entity
 @Table( name = "pages", schema = "search_engine",
         indexes = @Index(name = "path_index", columnList = "path", unique = true))
-@Getter
-@Setter
+@Data
 @RequiredArgsConstructor
-@NoArgsConstructor(force = true)
+//@NoArgsConstructor(force = true)
 @Builder
 @AllArgsConstructor
 @ToString

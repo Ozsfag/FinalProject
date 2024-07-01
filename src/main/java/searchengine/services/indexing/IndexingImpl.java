@@ -3,8 +3,6 @@ package searchengine.services.indexing;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.config.MorphologySettings;
@@ -13,6 +11,7 @@ import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
+import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
@@ -55,8 +54,6 @@ public class IndexingImpl implements IndexingService {
     private final IndexRepository indexRepository;
     @Lazy
     public static volatile boolean isIndexing = true;
-    @Lazy
-    public static final Logger logger = LoggerFactory.getLogger(IndexingImpl.class);
     /**
      * Starts the indexing process.
      *
@@ -64,14 +61,12 @@ public class IndexingImpl implements IndexingService {
      */
     @Override
     public ResponseInterface startIndexing() {
-        logger.debug("start indexing");
         if (!isIndexing) return new Bad(false, "Индексация уже запущена");
         CompletableFuture.runAsync(() ->
                 sitesList.getSites()
                         .parallelStream()
                         .forEach(siteUrl -> processSite(siteUrl.getUrl())), forkJoinPool)
                 .thenAccept(item -> forkJoinPool.shutdown());
-        logger.debug("all pages indexed successfully");
         return new Successful(true);
     }
     /**
@@ -88,16 +83,13 @@ public class IndexingImpl implements IndexingService {
     @SneakyThrows
     private Object processSite(String siteUrl) {
         return forkJoinPool.submit(() -> {
-            logger.debug("beginning process Site: {}", siteUrl);
             try {
                 SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl);
                 Parser parser = getParser(siteModel, siteUrl);
                 forkJoinPool.invoke(parser);
                 siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl);
-                logger.debug("Site: {} indexed successfully", siteUrl);
             } catch (Exception re) {
                 siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl);
-                logger.debug("indexing complete with error");
             }
         }).get();
     }
@@ -130,7 +122,6 @@ public class IndexingImpl implements IndexingService {
     public ResponseInterface stopIndexing() {
         if (!isIndexing) return new Stop(false, "Индексация не запущена");
         isIndexing = false;
-        logger.debug("indexing stopped");
         return new Stop(true, "Индексация остановлена пользователем");
     }
     /**
@@ -138,12 +129,10 @@ public class IndexingImpl implements IndexingService {
      *
      * @param  url   the URL of the page to be indexed
      * @return       a ResponseInterface object indicating the success or failure of the indexing process
-     * @throws Exception if an error occurs during the indexing process
      */
     @SneakyThrows
     @Override
     public ResponseInterface indexPage(String url) {
-        logger.debug("start indexing single page");
         if (isIndexing) {
             return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
         }
@@ -153,7 +142,6 @@ public class IndexingImpl implements IndexingService {
         Map<String, Integer> wordCountMap = morphology.wordCounter(pageModel.getContent());
         Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
         entityHandler.getIndexModelFromContent(pageModel, lemmas, wordCountMap);
-        logger.debug("end indexing single page");
         return new Successful(true);
     }
 
