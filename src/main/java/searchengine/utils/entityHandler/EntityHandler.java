@@ -34,6 +34,7 @@ public class EntityHandler {
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
     public final Morphology morphology;
+    private final PageRepository pageRepository;
 
     /**
      * @param href from application.yaml
@@ -72,7 +73,7 @@ public class EntityHandler {
             return pageModel;
 
         } catch (StoppedExecutionException e) {
-//            pageRepository.saveAndFlush(pageModel);
+            pageRepository.saveAndFlush(pageModel);
             throw new StoppedExecutionException(e.getLocalizedMessage());
         }
     }

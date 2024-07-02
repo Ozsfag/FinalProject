@@ -46,7 +46,7 @@ public class Parser extends RecursiveTask<Void> {
                 List<PageModel> pages = pageRepository.saveAllAndFlush(getPages(urlsToParse));
                 indexingLemmaAndIndex(pages);
                 siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
-            List<Parser> subtasks = urlsToParse.stream()
+            List<Parser> subtasks = urlsToParse.parallelStream()
                     .map(url -> new Parser(entityHandler, connection, morphology, siteModel, url, pageRepository, morphologySettings, lemmaRepository, indexRepository, siteRepository))
                     .toList();
             invokeAll(subtasks);
@@ -63,7 +63,7 @@ public class Parser extends RecursiveTask<Void> {
         Set <String> allUrlsBySite = pageRepository.findAllPathsBySite(siteModel.getId());
         Set <String> urls = connection.getConnectionResponse(href).getUrls();
         urls.removeAll(allUrlsBySite);
-        return urls.parallelStream()
+        return urls.stream()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
                 .toList();

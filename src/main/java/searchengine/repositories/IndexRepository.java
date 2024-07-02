@@ -15,7 +15,6 @@ import java.util.Set;
 
 @Repository
 public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Query("select i from IndexModel i where i.page.id = :pageId and i.lemma.id = :lemmaId")
     IndexModel findByLemmaAndPage(@Param("pageId") Integer pageId, @Param("lemmaId") Integer lemmaId);
 

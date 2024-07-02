@@ -36,14 +36,14 @@ spring:
 
 indexing-settings:
   sites:
-#    - url: https://lenta.ru/
-#      name: Лента.ру
-#    - url: https://skillbox.ru/
-#      name: Skillbox
-#    - url: http://www.playback.ru/
-#      name: PlayBack.Ru
-    - url: https://volochek.life/
-      name: Волочек.Лайф
+    - url: https://lenta.ru/
+      name: Лента.ру
+    - url: https://skillbox.ru/
+      name: Skillbox
+    - url: http://www.playback.ru/
+      name: PlayBack.Ru
+#    - url: https://volochek.life/
+#      name: Волочек.Лайф
 #    - url: https://ipfran.ru/
 #      name: Ипфрэн
 #    - url: https://dimonvideo.ru/

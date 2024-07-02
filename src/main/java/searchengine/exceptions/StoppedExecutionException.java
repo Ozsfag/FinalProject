@@ -1,6 +1,6 @@
 package searchengine.exceptions;
 
-public class StoppedExecutionException extends Exception{
+public class StoppedExecutionException extends RuntimeException{
     public StoppedExecutionException(String message) {
         super(message);
     }

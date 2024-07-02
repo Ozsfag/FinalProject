@@ -88,7 +88,7 @@ public class IndexingImpl implements IndexingService {
                 Parser parser = getParser(siteModel, siteUrl);
                 forkJoinPool.invoke(parser);
                 siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl);
-            } catch (Exception re) {
+            } catch (RuntimeException re) {
                 siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl);
             }
         }).get();
