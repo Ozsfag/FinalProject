@@ -12,10 +12,12 @@ import java.util.Set;
         @Index(name = "site_name_index", columnList = "name", unique = true),
         @Index(name = "site_url_index", columnList = "url", unique = true),
         @Index(name = "status_time_index", columnList = "status_time")})
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class SiteModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

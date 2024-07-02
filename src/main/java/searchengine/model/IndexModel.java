@@ -9,8 +9,10 @@ import javax.persistence.*;
         indexes = {
         @Index(name = "findByLemma_idAndPage_id_index", columnList = "lemma_id, page_id")})
 @AllArgsConstructor
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Builder
 public class IndexModel  {
     @Id
@@ -20,10 +22,12 @@ public class IndexModel  {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "page_id", nullable = false)
+    @ToString.Exclude
     private PageModel page;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lemma_id", nullable = false)
+    @ToString.Exclude
     private LemmaModel lemma;
 
     @Column(name = "`rank`", nullable = false, columnDefinition = "FLOAT")

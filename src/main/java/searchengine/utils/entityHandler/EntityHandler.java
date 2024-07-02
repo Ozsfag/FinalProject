@@ -65,7 +65,7 @@ public class EntityHandler {
      * @param href of page from site
      * @return indexed pageModel
      */
-    public PageModel getPageModel(SiteModel siteModel, String href) throws Exception {
+    public PageModel getPageModel(SiteModel siteModel, String href) {
         PageModel pageModel = null;
         try {
             pageModel = createPageModel(siteModel, href);
@@ -73,7 +73,7 @@ public class EntityHandler {
             return pageModel;
 
         } catch (StoppedExecutionException e) {
-            pageRepository.saveAndFlush(pageModel);
+            pageRepository.saveAndFlush(Objects.requireNonNull(pageModel));
             throw new StoppedExecutionException(e.getLocalizedMessage());
         }
     }
@@ -87,6 +87,7 @@ public class EntityHandler {
      * @return              the set of indexed LemmaModels
      */
     public Set<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
+
         Map<String, LemmaModel> existingLemmaModels = lemmaRepository.findByLemmaInAndSite_Id(new ArrayList<>(wordCountMap.keySet()), siteModel.getId())
                 .parallelStream()
                 .collect(Collectors.toMap(LemmaModel::getLemma, lemmaModel -> lemmaModel));
