@@ -88,7 +88,7 @@ public class EntityHandler {
      */
     public Set<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
 
-        Map<String, LemmaModel> existingLemmaModels = lemmaRepository.findByLemmaInAndSite_Id(new ArrayList<>(wordCountMap.keySet()), siteModel.getId())
+        Map<String, LemmaModel> existingLemmaModels = lemmaRepository.findByLemmaInAndSite_IdWithMerge(new ArrayList<>(wordCountMap.keySet()), siteModel.getId())
                 .parallelStream()
                 .collect(Collectors.toMap(LemmaModel::getLemma, lemmaModel -> lemmaModel));
 

@@ -11,7 +11,6 @@ import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
-import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
@@ -22,7 +21,6 @@ import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
-import searchengine.utils.errorHandling.LemmaErrorHandler;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.parser.Parser;
 
@@ -55,7 +53,6 @@ public class IndexingImpl implements IndexingService {
     private final IndexRepository indexRepository;
     @Lazy
     public static volatile boolean isIndexing = true;
-    private final LemmaErrorHandler lemmaErrorHandler;
     /**
      * Starts the indexing process.
      *
@@ -113,8 +110,7 @@ public class IndexingImpl implements IndexingService {
                 morphologySettings,
                 lemmaRepository,
                 indexRepository,
-                siteRepository,
-                lemmaErrorHandler);
+                siteRepository);
     }
     /**
      * Stops the indexing process if it is currently running.

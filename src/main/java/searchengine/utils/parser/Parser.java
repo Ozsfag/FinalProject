@@ -12,7 +12,6 @@ import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
-import searchengine.utils.errorHandling.LemmaErrorHandler;
 import searchengine.utils.morphology.Morphology;
 
 import java.util.*;
@@ -34,7 +33,6 @@ public class Parser extends RecursiveTask<Void> {
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
     private final SiteRepository siteRepository;
-    private final LemmaErrorHandler lemmaErrorHandler;
 
     /**
      * Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed.
@@ -59,8 +57,7 @@ public class Parser extends RecursiveTask<Void> {
                             morphologySettings,
                             lemmaRepository,
                             indexRepository,
-                            siteRepository,
-                            lemmaErrorHandler)
+                            siteRepository)
                     )
                     .toList();
             invokeAll(subtasks);
@@ -108,13 +105,7 @@ public class Parser extends RecursiveTask<Void> {
         pages.forEach(page -> {
             Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
             Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
-            try {
-               lemmaErrorHandler.saveBatchOnly(lemmas);
-            }catch (Exception e){
-                lemmas.forEach(l -> {
-                    lemmaRepository.saveAndFlush(l);
-                });
-            }
+            lemmaRepository.saveAllAndFlush(lemmas);
             List<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
             indexRepository.saveAllAndFlush(indexes);
         });
