@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.RecursiveTask;
 
 /**
- * Recursiverly index page and it`s subpage.
+ * Recursively index page and it`s subpage.
  * @author Ozsfag
  */
 @RequiredArgsConstructor
@@ -74,7 +74,7 @@ public class Parser extends RecursiveTask<Void> {
         Set <String> allUrlsBySite = pageRepository.findAllPathsBySite(siteModel.getId());
         Set <String> urls = connection.getConnectionResponse(href).getUrls();
         urls.removeAll(allUrlsBySite);
-        return urls.stream()
+        return urls.parallelStream()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
                 .toList();

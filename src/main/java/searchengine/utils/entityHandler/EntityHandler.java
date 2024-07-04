@@ -17,6 +17,7 @@ import searchengine.utils.morphology.Morphology;
 
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static searchengine.services.indexing.IndexingImpl.isIndexing;
@@ -88,23 +89,33 @@ public class EntityHandler {
      */
     public Set<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
 
-        Map<String, LemmaModel> existingLemmaModels = lemmaRepository.findByLemmaInAndSite_IdWithMerge(new ArrayList<>(wordCountMap.keySet()), siteModel.getId())
-                .parallelStream()
-                .collect(Collectors.toMap(LemmaModel::getLemma, lemmaModel -> lemmaModel));
+        Map<String, LemmaModel> existingLemmaModels =
+                lemmaRepository.findByLemmaInAndSite_Id(new ArrayList<>(wordCountMap.keySet()), siteModel.getId())
+                .stream()
+                .collect(Collectors.toMap(
+                        lemmaModel -> lemmaModel.getLemma() + "_" + lemmaModel.getSite().getId(),
+                        Function.identity(),
+                        (existing, newOne) -> {
+                            lemmaRepository.mergeLemmaModel(newOne.getLemma(), newOne.getSite().getId(), newOne.getFrequency());
+                            return existing;
+                        }));
 
+//        Set<LemmaModel> lemmaModels = lemmaRepository.findByLemmaInAndSite_Id(new ArrayList<>(wordCountMap.keySet()), siteModel.getId());
+//        Map<String, LemmaModel> existingLemmaModels = new HashMap<>();
+//        for (LemmaModel lemmaModel : lemmaModels) {
+//            String lemmaKey = lemmaModel.getLemma() + "_" + lemmaModel.getSite().getId();
+//            if (existingLemmaModels.containsKey(lemmaKey)) {
+//               lemmaRepository.mergeLemmaModel(lemmaModel.getLemma(), lemmaModel.getSite().getId(), lemmaModel.getFrequency());
+//            } else {
+//                existingLemmaModels.put(lemmaKey, lemmaModel);
+//            }
+//        }
 
-        return wordCountMap.entrySet().parallelStream().map(entry -> {
-            String word = entry.getKey();
-            int frequency = entry.getValue();
+        wordCountMap.entrySet().removeIf(entry -> existingLemmaModels.containsKey(entry.getKey() + "_" + siteModel.getId()));
 
-            return Optional.ofNullable(existingLemmaModels.get(word))
-                    .map(lemmaModel -> {
-                        lemmaModel.setFrequency(lemmaModel.getFrequency() + frequency);
-                        return lemmaModel;
-                    })
-                    .orElseGet(() ->createLemmaModel(siteModel, word, frequency));
-
-        }).collect(Collectors.toSet());
+        return wordCountMap.entrySet().parallelStream()
+                .map(entry -> createLemmaModel(siteModel, entry.getKey(), entry.getValue()))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -127,6 +138,15 @@ public class EntityHandler {
                 })
                 .toList();
     }
+    /**
+     * Retrieves the IndexModel based on the provided LemmaModel, PageModel, and frequency.
+     *
+     * @param  lemmaModel  the LemmaModel for indexing
+     * @param  pageModel   the PageModel containing the content
+     * @param  frequency   the frequency of the index
+     * @return             the retrieved or newly created IndexModel
+     * @throws StoppedExecutionException if indexing is stopped
+     */
     private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {
         if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
         return Optional.ofNullable(indexRepository.findByLemmaAndPage(pageModel.getId(), lemmaModel.getId()))
@@ -135,6 +155,12 @@ public class EntityHandler {
                     return indexModel;})
                 .orElseGet(() -> createIndexModel(pageModel, lemmaModel, frequency));
     }
+    /**
+     * Creates a new SiteModel object with the provided site information.
+     *
+     * @param  site  the Site object to create the SiteModel from
+     * @return       the newly created SiteModel object
+     */
     private SiteModel createSiteModel(Site site) {
         return SiteModel.builder()
                 .status(Status.INDEXING)
@@ -144,6 +170,13 @@ public class EntityHandler {
                 .name(site.getName())
                 .build();
     }
+    /**
+     * Creates a new PageModel object with the provided siteModel and path.
+     *
+     * @param  siteModel  the SiteModel for the PageModel
+     * @param  path       the path of the page
+     * @return             the newly created PageModel object
+     */
     private PageModel createPageModel(SiteModel siteModel, String path){
         ConnectionResponse connectionResponse = connection.getConnectionResponse(path);
         return PageModel.builder()
@@ -152,6 +185,14 @@ public class EntityHandler {
                 .content(connectionResponse.getContent())
                 .build();
     }
+    /**
+     * Creates a new LemmaModel object with the provided siteModel, lemma, and frequency.
+     *
+     * @param  siteModel   the SiteModel for the LemmaModel
+     * @param  lemma       the lemma for the LemmaModel
+     * @param  frequency   the frequency for the LemmaModel
+     * @return             the newly created LemmaModel object
+     */
     private LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency){
         return LemmaModel.builder()
                 .site(siteModel)
@@ -159,6 +200,14 @@ public class EntityHandler {
                 .frequency(frequency)
                 .build();
     }
+    /**
+     * Creates an IndexModel object with the given PageModel, LemmaModel, and ranking.
+     *
+     * @param  pageModel   the PageModel to associate with the IndexModel
+     * @param  lemmaModel   the LemmaModel to associate with the IndexModel
+     * @param  ranking     the ranking value to associate with the IndexModel
+     * @return             the newly created IndexModel object
+     */
     private IndexModel createIndexModel(PageModel pageModel, LemmaModel lemmaModel, Float ranking){
         return IndexModel.builder()
                 .page(pageModel)

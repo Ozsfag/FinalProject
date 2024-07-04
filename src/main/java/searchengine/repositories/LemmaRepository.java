@@ -27,18 +27,4 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
     @Modifying
     @Query("UPDATE LemmaModel l SET l.frequency = l.frequency + :frequency WHERE l.lemma = :lemma AND l.site.id = :siteId")
     void mergeLemmaModel(@Param("lemma") String lemma, @Param("siteId") Integer siteId, @Param("frequency") Integer frequency);
-
-    default Set<LemmaModel> findByLemmaInAndSite_IdWithMerge(Collection<String> lemma, Integer siteId) {
-        Set<LemmaModel> lemmaModels = findByLemmaInAndSite_Id(lemma, siteId);
-        Map<String, LemmaModel> lemmaMap = new HashMap<>();
-        for (LemmaModel lemmaModel : lemmaModels) {
-            String lemmaKey = lemmaModel.getLemma() + "_" + lemmaModel.getSite().getId();
-            if (lemmaMap.containsKey(lemmaKey)) {
-                mergeLemmaModel(lemmaModel.getLemma(), lemmaModel.getSite().getId(), lemmaModel.getFrequency());
-            } else {
-                lemmaMap.put(lemmaKey, lemmaModel);
-            }
-        }
-        return new HashSet<>(lemmaMap.values());
-    }
 }
