@@ -7,8 +7,10 @@ import java.io.Serializable;
 import java.util.Set;
 
 @Entity
-@Table(name = "lemmas", schema = "search_engine", indexes = {
-        @Index(name = "idx_lemma_lemma_site_id", columnList = "lemma, site_id")})
+@Table(name = "lemmas", schema = "search_engine",
+        indexes = {
+        @Index(name = "idx_lemma_lemma_site_id", columnList = "lemma, site_id")
+        })
 @RequiredArgsConstructor
 @Getter
 @Setter
@@ -23,7 +25,6 @@ public class LemmaModel implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
-    @ToString.Exclude
     private SiteModel site;
 
     @Column(name = "lemma", nullable = false, columnDefinition = "VARCHAR(255)")

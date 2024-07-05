@@ -22,12 +22,10 @@ public class IndexModel  {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "page_id", nullable = false)
-    @ToString.Exclude
     private PageModel page;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lemma_id", nullable = false)
-    @ToString.Exclude
     private LemmaModel lemma;
 
     @Column(name = "`rank`", nullable = false, columnDefinition = "FLOAT")

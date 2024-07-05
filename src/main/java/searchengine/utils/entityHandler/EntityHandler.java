@@ -126,35 +126,28 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return the list of IndexModels generated from the content
      */
-    public List<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
-        return wordCountMap.entrySet().stream().parallel()
-                .map(word2Count -> {
-                    try {
-                        LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
-                        return getIndexModel(lemmaModel, pageModel, (float) word2Count.getValue());
-                    } catch (StoppedExecutionException e) {
-                        throw new RuntimeException(e.getLocalizedMessage());
-                    }
-                })
-                .toList();
+    public Set<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
+        Set<IndexModel> indexes = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
+                .parallelStream()
+                .peek(indexModel -> indexModel.setRank(indexModel.getRank() + wordCountMap.get(indexModel.getLemma())))
+                .collect(Collectors.toSet());
+
+        wordCountMap.keySet().removeIf(indexes::contains);
+
+        indexes.addAll(wordCountMap.entrySet().stream().parallel()
+                    .map(word2Count -> {
+                        try {
+                           LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
+                           return createIndexModel(pageModel,lemmaModel, (float) word2Count.getValue());
+                        } catch (StoppedExecutionException e) {
+                            throw new RuntimeException(e.getLocalizedMessage());
+                        }
+                    })
+                    .collect(Collectors.toSet())
+        );
+        return indexes;
     }
-    /**
-     * Retrieves the IndexModel based on the provided LemmaModel, PageModel, and frequency.
-     *
-     * @param  lemmaModel  the LemmaModel for indexing
-     * @param  pageModel   the PageModel containing the content
-     * @param  frequency   the frequency of the index
-     * @return             the retrieved or newly created IndexModel
-     * @throws StoppedExecutionException if indexing is stopped
-     */
-    private IndexModel getIndexModel(LemmaModel lemmaModel, PageModel pageModel, Float frequency) throws StoppedExecutionException {
-        if (!isIndexing)throw new StoppedExecutionException("Stop indexing signal received");
-        return Optional.ofNullable(indexRepository.findByLemmaAndPage(pageModel.getId(), lemmaModel.getId()))
-                .map(indexModel -> {
-                    indexModel.setRank(indexModel.getRank() + frequency);
-                    return indexModel;})
-                .orElseGet(() -> createIndexModel(pageModel, lemmaModel, frequency));
-    }
+
     /**
      * Creates a new SiteModel object with the provided site information.
      *

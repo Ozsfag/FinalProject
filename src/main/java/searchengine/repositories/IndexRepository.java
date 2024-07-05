@@ -15,12 +15,15 @@ import java.util.Set;
 
 @Repository
 public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
-    @Query("select i from IndexModel i where i.page.id = :pageId and i.lemma.id = :lemmaId")
-    IndexModel findByLemmaAndPage(@Param("pageId") Integer pageId, @Param("lemmaId") Integer lemmaId);
+//    @Query("select i from IndexModel i where i.page.id = :pageId and i.lemma.id = :lemmaId")
+//    IndexModel findByLemmaAndPage(@Param("pageId") Integer pageId, @Param("lemmaId") Integer lemmaId);
 
     @Query("select i from IndexModel i where i.lemma.lemma = ?1 and i.lemma.frequency < ?2")
     Set<IndexModel> findIndexBy2Params(String lemma, int frequency);
 
     @Query("select i from IndexModel i where i.lemma.lemma = ?1 and i.lemma.frequency < ?2 and i.lemma.site.id = ?3")
     Set<IndexModel> findIndexBy3Params(String lemma, int frequency, SiteModel site);
+
+    @Query("select i from IndexModel i where i.page.id = ?1 and i.lemma in ?2")
+    Set<IndexModel> findByPage_IdAndLemmaIn(Integer id, Collection<LemmaModel> lemmas);
 }

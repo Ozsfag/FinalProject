@@ -7,7 +7,9 @@ import java.util.Set;
 
 @Entity
 @Table( name = "pages", schema = "search_engine",
-        indexes = @Index(name = "path_index", columnList = "path", unique = true))
+        indexes = {
+        @Index(name = "path_index", columnList = "path", unique = true),
+        @Index(name = "site_id_index", columnList = "site_id")})
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -22,7 +24,6 @@ public class PageModel{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
-    @ToString.Exclude
     private SiteModel site;
 
 

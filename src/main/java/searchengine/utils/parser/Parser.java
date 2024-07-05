@@ -15,7 +15,9 @@ import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.RecursiveTask;
+import java.util.stream.Collectors;
 
 /**
  * Recursively index page and it`s subpage.
@@ -41,11 +43,13 @@ public class Parser extends RecursiveTask<Void> {
      */
     @Override
     protected Void compute() {
-        List<String> urlsToParse = getUrlsToParse();
+        CopyOnWriteArraySet<String> urlsToParse = getUrlsToParse();
         if (!urlsToParse.isEmpty()) {
-                List<PageModel> pages = pageRepository.saveAllAndFlush(getPages(urlsToParse));
-                indexingLemmaAndIndex(pages);
-                siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
+            CopyOnWriteArraySet<PageModel> pages = getPages(urlsToParse);
+            pages.removeIf(Objects::isNull);
+            pageRepository.saveAllAndFlush(pages);
+            indexingLemmaAndIndex(pages);
+            siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
             List<Parser> subtasks = urlsToParse.parallelStream()
                     .map(url -> new Parser(
                             entityHandler,
@@ -70,14 +74,13 @@ public class Parser extends RecursiveTask<Void> {
      *
      * @return                 list of URLs to parse
      */
-    private List<String> getUrlsToParse() {
-        Set <String> allUrlsBySite = pageRepository.findAllPathsBySite(siteModel.getId());
-        Set <String> urls = connection.getConnectionResponse(href).getUrls();
-        urls.removeAll(allUrlsBySite);
+    private CopyOnWriteArraySet<String> getUrlsToParse() {
+        CopyOnWriteArraySet <String> urls = connection.getConnectionResponse(href).getUrls();
+        urls.removeIf(pageRepository.findAllPathsBySite(siteModel.getId())::contains);
         return urls.parallelStream()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
-                .toList();
+                .collect(Collectors.toCollection(CopyOnWriteArraySet::new));
     }
     /**
      * Retrieves a list of PageModel objects from the provided list of URLs to parse.
@@ -85,8 +88,8 @@ public class Parser extends RecursiveTask<Void> {
      * @param  urlsToParse  the list of URLs to parse
      * @return              a list of PageModel objects representing the pages parsed from the URLs
      */
-    private List<PageModel> getPages(List<String> urlsToParse) {
-        return urlsToParse.stream()
+    private CopyOnWriteArraySet<PageModel> getPages(Set<String> urlsToParse) {
+        return urlsToParse.stream().parallel()
                 .map(url -> {
                     try {
                         return entityHandler.getPageModel(siteModel, url);
@@ -94,19 +97,19 @@ public class Parser extends RecursiveTask<Void> {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
                 })
-                .toList();
+                .collect(Collectors.toCollection(CopyOnWriteArraySet::new));
     }
     /**
      * Indexes the lemmas and indexes for a list of pages.
      *
      * @param  pages   the list of pages to index
      */
-    private void indexingLemmaAndIndex(List<PageModel> pages) {
+    private void indexingLemmaAndIndex(Set<PageModel> pages) {
         pages.forEach(page -> {
             Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
             Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
             lemmaRepository.saveAllAndFlush(lemmas);
-            List<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
+            Set<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
             indexRepository.saveAllAndFlush(indexes);
         });
     }

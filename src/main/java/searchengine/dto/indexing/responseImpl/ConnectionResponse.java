@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Data
 @AllArgsConstructor
@@ -14,6 +14,6 @@ public class ConnectionResponse {
     private String path;
     private int responseCode;
     private String content;
-    private Set<String> urls;
+    private CopyOnWriteArraySet<String> urls;
     private String errorMessage;
 }

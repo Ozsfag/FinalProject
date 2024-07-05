@@ -9,9 +9,8 @@ import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 /**
@@ -39,13 +38,13 @@ public class Connection {
 
             Document document = connection.get();
             String content = Optional.of(document.body().text()).orElseThrow();
-            Set<String> urls = document.select("a[href]").stream()
+            CopyOnWriteArraySet<String> urls = document.select("a[href]").stream()
                     .map(element -> element.absUrl("href"))
-                    .collect(Collectors.toCollection(HashSet::new));
+                    .collect(Collectors.toCollection(CopyOnWriteArraySet::new));
 
             return new ConnectionResponse(url, HttpStatus.OK.value(), content, urls, "");
         } catch (IOException e) {
-            return new ConnectionResponse(url, HttpStatus.NOT_FOUND.value(),"", new HashSet<>(), HttpStatus.NOT_FOUND.getReasonPhrase());
+            return new ConnectionResponse(url, HttpStatus.NOT_FOUND.value(),"", new CopyOnWriteArraySet<>(), HttpStatus.NOT_FOUND.getReasonPhrase());
         }
     }
 
