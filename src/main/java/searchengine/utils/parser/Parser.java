@@ -46,11 +46,10 @@ public class Parser extends RecursiveTask<Void> {
         CopyOnWriteArraySet<String> urlsToParse = getUrlsToParse();
         if (!urlsToParse.isEmpty()) {
             CopyOnWriteArraySet<PageModel> pages = getPages(urlsToParse);
-            pages.removeIf(Objects::isNull);
-            pageRepository.saveAllAndFlush(pages);
+            savePage(pages);
             indexingLemmaAndIndex(pages);
             siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
-            List<Parser> subtasks = urlsToParse.parallelStream()
+            List<Parser> subtasks = urlsToParse.stream()
                     .map(url -> new Parser(
                             entityHandler,
                             connection,
@@ -67,6 +66,10 @@ public class Parser extends RecursiveTask<Void> {
             invokeAll(subtasks);
         }
         return null;
+    }
+    private synchronized void savePage(CopyOnWriteArraySet<PageModel> pages){
+        pageRepository.saveAll(pages);
+        pageRepository.flush();
     }
 
     /**
@@ -88,7 +91,7 @@ public class Parser extends RecursiveTask<Void> {
      * @param  urlsToParse  the list of URLs to parse
      * @return              a list of PageModel objects representing the pages parsed from the URLs
      */
-    private CopyOnWriteArraySet<PageModel> getPages(Set<String> urlsToParse) {
+    private CopyOnWriteArraySet<PageModel> getPages(CopyOnWriteArraySet<String> urlsToParse) {
         return urlsToParse.stream().parallel()
                 .map(url -> {
                     try {

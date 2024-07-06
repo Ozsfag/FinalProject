@@ -30,4 +30,9 @@ public class IndexModel  {
 
     @Column(name = "`rank`", nullable = false, columnDefinition = "FLOAT")
     private Float rank;
+
+    @Version
+    @Column(name = "version")
+    private Integer version;
+
 }
