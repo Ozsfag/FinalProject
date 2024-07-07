@@ -1,8 +1,13 @@
 package searchengine.model;
 
 import lombok.*;
+import org.hibernate.annotations.SQLInsert;
+import org.hibernate.annotations.SQLUpdate;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.repository.config.BootstrapMode;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Set;
 
 @Entity
@@ -12,11 +17,12 @@ import java.util.Set;
         @Index(name = "site_id_index", columnList = "site_id")})
 @Getter
 @Setter
-@RequiredArgsConstructor
 @Builder
 @AllArgsConstructor
 @ToString
-public class PageModel{
+@NoArgsConstructor
+@EqualsAndHashCode
+public class PageModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "page_id", columnDefinition = "INT")
@@ -24,10 +30,11 @@ public class PageModel{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
+    @ToString.Exclude
     private SiteModel site;
 
 
-    @Column(name = "path", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "path", nullable = false, columnDefinition = "TEXT", unique = true)
     private String path;
 
 

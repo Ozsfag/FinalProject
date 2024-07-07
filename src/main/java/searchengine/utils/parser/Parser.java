@@ -43,10 +43,10 @@ public class Parser extends RecursiveTask<Void> {
      */
     @Override
     protected Void compute() {
-        CopyOnWriteArraySet<String> urlsToParse = getUrlsToParse();
+        Set<String> urlsToParse = getUrlsToParse();
         if (!urlsToParse.isEmpty()) {
             CopyOnWriteArraySet<PageModel> pages = getPages(urlsToParse);
-            savePage(pages);
+            pageRepository.saveAllAndFlush(pages);
             indexingLemmaAndIndex(pages);
             siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
             List<Parser> subtasks = urlsToParse.stream()
@@ -67,23 +67,20 @@ public class Parser extends RecursiveTask<Void> {
         }
         return null;
     }
-    private synchronized void savePage(CopyOnWriteArraySet<PageModel> pages){
-        pageRepository.saveAll(pages);
-        pageRepository.flush();
-    }
 
     /**
      * Retrieves a list of URLs to parse based on the provided list of all URLs by site.
      *
      * @return                 list of URLs to parse
      */
-    private CopyOnWriteArraySet<String> getUrlsToParse() {
-        CopyOnWriteArraySet <String> urls = connection.getConnectionResponse(href).getUrls();
-        urls.removeIf(pageRepository.findAllPathsBySite(siteModel.getId())::contains);
+    private Set<String> getUrlsToParse() {
+        List <String> urls = connection.getConnectionResponse(href).getUrls();
+        List<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
+        urls.removeAll(alreadyParsed);
         return urls.parallelStream()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
-                .collect(Collectors.toCollection(CopyOnWriteArraySet::new));
+                .collect(Collectors.toSet());
     }
     /**
      * Retrieves a list of PageModel objects from the provided list of URLs to parse.
@@ -91,7 +88,7 @@ public class Parser extends RecursiveTask<Void> {
      * @param  urlsToParse  the list of URLs to parse
      * @return              a list of PageModel objects representing the pages parsed from the URLs
      */
-    private CopyOnWriteArraySet<PageModel> getPages(CopyOnWriteArraySet<String> urlsToParse) {
+    private CopyOnWriteArraySet<PageModel> getPages(Set<String> urlsToParse) {
         return urlsToParse.stream().parallel()
                 .map(url -> {
                     try {
