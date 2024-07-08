@@ -15,7 +15,6 @@ import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 
@@ -45,8 +44,8 @@ public class Parser extends RecursiveTask<Void> {
     protected Void compute() {
         Set<String> urlsToParse = getUrlsToParse();
         if (!urlsToParse.isEmpty()) {
-            CopyOnWriteArraySet<PageModel> pages = getPages(urlsToParse);
-            pageRepository.saveAllAndFlush(pages);
+            Set<PageModel> pages = getPages(urlsToParse);
+//            pageRepository.saveAllAndFlush(pages);
             indexingLemmaAndIndex(pages);
             siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
             List<Parser> subtasks = urlsToParse.stream()
@@ -75,8 +74,8 @@ public class Parser extends RecursiveTask<Void> {
      */
     private Set<String> getUrlsToParse() {
         List <String> urls = connection.getConnectionResponse(href).getUrls();
-        List<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
-        urls.removeAll(alreadyParsed);
+//        List<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
+//        urls.removeAll(alreadyParsed);
         return urls.parallelStream()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
@@ -88,7 +87,7 @@ public class Parser extends RecursiveTask<Void> {
      * @param  urlsToParse  the list of URLs to parse
      * @return              a list of PageModel objects representing the pages parsed from the URLs
      */
-    private CopyOnWriteArraySet<PageModel> getPages(Set<String> urlsToParse) {
+    private Set<PageModel> getPages(Set<String> urlsToParse) {
         return urlsToParse.stream().parallel()
                 .map(url -> {
                     try {
@@ -97,7 +96,7 @@ public class Parser extends RecursiveTask<Void> {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
                 })
-                .collect(Collectors.toCollection(CopyOnWriteArraySet::new));
+                .collect(Collectors.toSet());
     }
     /**
      * Indexes the lemmas and indexes for a list of pages.

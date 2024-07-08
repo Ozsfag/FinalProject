@@ -67,16 +67,18 @@ public class EntityHandler {
      * @return indexed pageModel
      */
     public PageModel getPageModel(SiteModel siteModel, String href) {
-        PageModel pageModel = null;
-        try {
-            pageModel = createPageModel(siteModel, href);
-            if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
-            return pageModel;
-
-        } catch (StoppedExecutionException e) {
-            pageRepository.saveAndFlush(Objects.requireNonNull(pageModel));
-            throw new StoppedExecutionException(e.getLocalizedMessage());
-        }
+        return Optional.ofNullable(pageRepository.findByPath(href))
+                .map(page -> {
+                    if (!isIndexing) {
+                        throw new StoppedExecutionException("Индексация остановлена пользователем");
+                    }
+                    return page;
+                })
+                .orElseGet(() -> {
+                    PageModel newPage = createPageModel(siteModel, href);
+                    pageRepository.saveAndFlush(newPage);
+                    return newPage;
+                });
     }
 
 
@@ -99,17 +101,6 @@ public class EntityHandler {
                             lemmaRepository.mergeLemmaModel(newOne.getLemma(), newOne.getSite().getId(), newOne.getFrequency());
                             return existing;
                         }));
-
-//        Set<LemmaModel> lemmaModels = lemmaRepository.findByLemmaInAndSite_Id(new ArrayList<>(wordCountMap.keySet()), siteModel.getId());
-//        Map<String, LemmaModel> existingLemmaModels = new HashMap<>();
-//        for (LemmaModel lemmaModel : lemmaModels) {
-//            String lemmaKey = lemmaModel.getLemma() + "_" + lemmaModel.getSite().getId();
-//            if (existingLemmaModels.containsKey(lemmaKey)) {
-//               lemmaRepository.mergeLemmaModel(lemmaModel.getLemma(), lemmaModel.getSite().getId(), lemmaModel.getFrequency());
-//            } else {
-//                existingLemmaModels.put(lemmaKey, lemmaModel);
-//            }
-//        }
 
         wordCountMap.entrySet().removeIf(entry -> existingLemmaModels.containsKey(entry.getKey() + "_" + siteModel.getId()));
 
