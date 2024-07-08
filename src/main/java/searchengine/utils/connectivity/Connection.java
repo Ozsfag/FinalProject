@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,7 @@ public class Connection {
             String content = Optional.of(document.body().text()).orElseThrow();
             List<String> urls = document.select("a[href]").stream()
                     .map(element -> element.absUrl("href"))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
             return new ConnectionResponse(url, HttpStatus.OK.value(), content, urls, "");
         } catch (IOException e) {

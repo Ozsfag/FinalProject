@@ -15,6 +15,7 @@ import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 
@@ -44,9 +45,7 @@ public class Parser extends RecursiveTask<Void> {
     protected Void compute() {
         Set<String> urlsToParse = getUrlsToParse();
         if (!urlsToParse.isEmpty()) {
-            Set<PageModel> pages = getPages(urlsToParse);
-//            pageRepository.saveAllAndFlush(pages);
-            indexingLemmaAndIndex(pages);
+            indexingProcess(urlsToParse);
             siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
             List<Parser> subtasks = urlsToParse.stream()
                     .map(url -> new Parser(
@@ -68,20 +67,6 @@ public class Parser extends RecursiveTask<Void> {
     }
 
     /**
-     * Retrieves a list of URLs to parse based on the provided list of all URLs by site.
-     *
-     * @return                 list of URLs to parse
-     */
-    private Set<String> getUrlsToParse() {
-        List <String> urls = connection.getConnectionResponse(href).getUrls();
-//        List<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
-//        urls.removeAll(alreadyParsed);
-        return urls.parallelStream()
-                .filter(url -> url.startsWith(siteModel.getUrl()) &&
-                        Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
-                .collect(Collectors.toSet());
-    }
-    /**
      * Retrieves a list of PageModel objects from the provided list of URLs to parse.
      *
      * @param  urlsToParse  the list of URLs to parse
@@ -99,12 +84,29 @@ public class Parser extends RecursiveTask<Void> {
                 .collect(Collectors.toSet());
     }
     /**
+     * Retrieves a list of URLs to parse based on the provided list of all URLs by site.
+     *
+     * @return                 list of URLs to parse
+     */
+    private Set<String> getUrlsToParse() {
+        CopyOnWriteArrayList<String> urls = (CopyOnWriteArrayList<String>) connection.getConnectionResponse(href).getUrls();
+        CopyOnWriteArrayList<String> alreadyParsed = (CopyOnWriteArrayList<String>) pageRepository.findAllPathsBySite(siteModel.getId());
+        urls.parallelStream().filter(url -> alreadyParsed.parallelStream().noneMatch(url::equals));
+        return urls.parallelStream()
+                .filter(url -> url.startsWith(siteModel.getUrl()) &&
+                        Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
+                .collect(Collectors.toSet());
+    }
+    /**
      * Indexes the lemmas and indexes for a list of pages.
      *
-     * @param  pages   the list of pages to index
+     * @param  urlsToParse   the list of pages to index
      */
-    private void indexingLemmaAndIndex(Set<PageModel> pages) {
+    private void indexingProcess(Set<String> urlsToParse) {
+        Set<PageModel> pages = getPages(urlsToParse);
+        pageRepository.saveAllAndFlush(pages);
         pages.forEach(page -> {
+//            pageRepository.updateOrInsertPage(siteModel.getId(), page.getPath(), page.getCode(), page.getContent());
             Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
             Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
             lemmaRepository.saveAllAndFlush(lemmas);

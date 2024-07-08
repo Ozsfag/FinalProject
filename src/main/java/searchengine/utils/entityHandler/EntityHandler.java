@@ -67,18 +67,16 @@ public class EntityHandler {
      * @return indexed pageModel
      */
     public PageModel getPageModel(SiteModel siteModel, String href) {
-        return Optional.ofNullable(pageRepository.findByPath(href))
-                .map(page -> {
-                    if (!isIndexing) {
-                        throw new StoppedExecutionException("Индексация остановлена пользователем");
-                    }
-                    return page;
-                })
-                .orElseGet(() -> {
-                    PageModel newPage = createPageModel(siteModel, href);
-                    pageRepository.saveAndFlush(newPage);
-                    return newPage;
-                });
+        PageModel pageModel = null;
+        try {
+            pageModel = createPageModel(siteModel, href);
+            if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
+            return pageModel;
+
+        } catch (StoppedExecutionException e) {
+            pageRepository.saveAndFlush(Objects.requireNonNull(pageModel));
+            throw new StoppedExecutionException(e.getLocalizedMessage());
+        }
     }
 
 
