@@ -20,6 +20,7 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
+import searchengine.utils.Adder;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
@@ -55,6 +56,7 @@ public class IndexingImpl implements IndexingService {
     private final IndexRepository indexRepository;
     @Lazy
     public static volatile boolean isIndexing = true;
+    private final Adder adder;
     /**
      * Starts the indexing process.
      *
@@ -112,7 +114,8 @@ public class IndexingImpl implements IndexingService {
                 morphologySettings,
                 lemmaRepository,
                 indexRepository,
-                siteRepository);
+                siteRepository,
+                adder);
     }
     /**
      * Stops the indexing process if it is currently running.

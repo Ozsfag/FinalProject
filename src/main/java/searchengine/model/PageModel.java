@@ -45,13 +45,8 @@ public class PageModel implements Serializable {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<IndexModel> indexModels;
-
-    @Version
-    @Column(name = "version")
-    private Integer version;
-
 }
