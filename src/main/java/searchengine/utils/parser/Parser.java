@@ -1,6 +1,7 @@
 package searchengine.utils.parser;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
 import searchengine.config.MorphologySettings;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -71,7 +72,7 @@ public class Parser extends RecursiveTask<Void> {
      * @param  urlsToParse  the list of URLs to parse
      * @return              a list of PageModel objects representing the pages parsed from the URLs
      */
-    private Set<PageModel> getPages(Set<String> urlsToParse) {
+    private List<PageModel> getPages(Set<String> urlsToParse) {
         return urlsToParse.stream().parallel()
                 .map(url -> {
                     try {
@@ -80,7 +81,7 @@ public class Parser extends RecursiveTask<Void> {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
                 })
-                .collect(Collectors.toSet());
+                .toList();
     }
     /**
      * Retrieves a list of URLs to parse based on the provided list of all URLs by site.
@@ -101,8 +102,17 @@ public class Parser extends RecursiveTask<Void> {
      *
      * @param  urlsToParse   the list of pages to index
      */
-    private synchronized void indexingProcess(Set<String> urlsToParse) {
-        List<PageModel> pages = pageRepository.saveAllAndFlush(getPages(urlsToParse));
+    private void indexingProcess(Set<String> urlsToParse) {
+        List<PageModel> pages = getPages(urlsToParse);
+        try {
+             pages = pageRepository.saveAllAndFlush(pages);
+        }
+        catch (Exception e){
+            pages.stream()
+                    .filter(page -> !pageRepository.existsByPath(page.getPath()))
+                    .forEach(pageRepository::saveAndFlush);
+        }
+
         pages.forEach(page -> {
                     Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
                     Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);

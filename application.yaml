@@ -44,12 +44,12 @@ indexing-settings:
 #      name: PlayBack.Ru
 #    - url: https://volochek.life/
 #      name: Волочек.Лайф
-    - url: https://ipfran.ru/
-      name: Ипфрэн
+#    - url: https://ipfran.ru/
+#      name: Ипфрэн
     - url: https://dimonvideo.ru/
       name: Димонвидео
-#    - url: https://www.svetlovka.ru/
-#      name: Светловка
+    - url: https://www.svetlovka.ru/
+      name: Светловка
 
 
 connection-settings:

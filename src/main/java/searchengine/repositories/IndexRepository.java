@@ -24,8 +24,4 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
 
     @Query("select i from IndexModel i where i.page.id = ?1 and i.lemma in ?2")
     Set<IndexModel> findByPage_IdAndLemmaIn(Integer id, Collection<LemmaModel> lemmas);
-
-    @Override
-//    @Transactional(isolation = Isolation.SERIALIZABLE)
-    <S extends IndexModel> List<S> saveAllAndFlush(Iterable<S> entities);
 }

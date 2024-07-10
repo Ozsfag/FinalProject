@@ -9,7 +9,7 @@ import java.util.Set;
 @Entity
 @Table( name = "pages", schema = "search_engine",
         indexes = {
-        @Index(name = "path_index", columnList = "path", unique = true),
+        @Index(name = "path_index", columnList = "path"),
         @Index(name = "site_id_index", columnList = "site_id")})
 @Getter
 @Setter

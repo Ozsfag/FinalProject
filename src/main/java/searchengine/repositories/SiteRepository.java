@@ -14,8 +14,6 @@ import java.util.Date;
 
 @Repository
 public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
-
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     SiteModel findByUrl(String path);
 
     @Transactional
