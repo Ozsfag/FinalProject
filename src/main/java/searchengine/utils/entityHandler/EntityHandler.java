@@ -74,7 +74,7 @@ public class EntityHandler {
             return pageModel;
 
         } catch (StoppedExecutionException e) {
-            pageRepository.saveAndFlush(Objects.requireNonNull(pageModel));
+            pageRepository.saveAndFlush(pageModel);
             throw new StoppedExecutionException(e.getLocalizedMessage());
         }
     }
@@ -87,24 +87,29 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return              the set of indexed LemmaModels
      */
-    public Set<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
+    public synchronized Set<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
 
-        Map<String, LemmaModel> existingLemmaModels =
-                lemmaRepository.findByLemmaInAndSite_Id(new ArrayList<>(wordCountMap.keySet()), siteModel.getId())
-                .stream()
-                .collect(Collectors.toMap(
-                        lemmaModel -> lemmaModel.getLemma() + "_" + lemmaModel.getSite().getId(),
-                        Function.identity(),
-                        (existing, newOne) -> {
-                            lemmaRepository.mergeLemmaModel(newOne.getLemma(), newOne.getSite().getId(), newOne.getFrequency());
-                            return existing;
-                        }));
+//        Map<String, LemmaModel> existingLemmaModels =
+        Set<LemmaModel> existingLemmaModels =
+                lemmaRepository.findByLemmaInAndSite_Id(wordCountMap.keySet(), siteModel.getId())
+                        .parallelStream()
+                        .peek(lemmaModel -> lemmaModel.setFrequency(lemmaModel.getFrequency() + wordCountMap.get(lemmaModel.getLemma())))
+                        .collect(Collectors.toSet());
+//                        lemmaModel -> lemmaModel.getLemma() + "_" + lemmaModel.getSite().getId(),
+//                        Function.identity(),
+//                        (existing, newOne) -> {
+//                            lemmaRepository.mergeLemmaModel(newOne.getLemma(), newOne.getSite().getId(), newOne.getFrequency());
+//                            return existing;
+//                        }));
 
-        wordCountMap.entrySet().removeIf(entry -> existingLemmaModels.containsKey(entry.getKey() + "_" + siteModel.getId()));
+//        wordCountMap.entrySet().removeIf(entry -> existingLemmaModels.containsKey(entry.getKey() + "_" + siteModel.getId()));
+        wordCountMap.keySet().removeAll(existingLemmaModels.stream().map(LemmaModel::getLemma).collect(Collectors.toSet()));
 
-        return wordCountMap.entrySet().parallelStream()
+        existingLemmaModels.addAll(wordCountMap.entrySet()
+                .parallelStream()
                 .map(entry -> createLemmaModel(siteModel, entry.getKey(), entry.getValue()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet()));
+        return existingLemmaModels;
     }
 
     /**
@@ -115,26 +120,26 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return the list of IndexModels generated from the content
      */
-    public Set<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
-        Set<IndexModel> indexes = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
+    public synchronized Set<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
+        Set<IndexModel> existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
                 .parallelStream()
                 .peek(indexModel -> indexModel.setRank(indexModel.getRank() + wordCountMap.get(indexModel.getLemma())))
                 .collect(Collectors.toSet());
 
-        wordCountMap.keySet().removeIf(indexes::contains);
+        wordCountMap.keySet().removeAll(existingIndexModels.stream().map(IndexModel::getLemma).collect(Collectors.toSet()));
 
-        indexes.addAll(wordCountMap.entrySet().stream().parallel()
+        existingIndexModels.addAll(wordCountMap.entrySet().stream().parallel()
                     .map(word2Count -> {
                         try {
                            LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
-                           return createIndexModel(pageModel,lemmaModel, (float) word2Count.getValue());
+                           return createIndexModel(pageModel, lemmaModel, (float) word2Count.getValue());
                         } catch (StoppedExecutionException e) {
                             throw new RuntimeException(e.getLocalizedMessage());
                         }
                     })
                     .collect(Collectors.toSet())
         );
-        return indexes;
+        return existingIndexModels;
     }
 
     /**
@@ -162,7 +167,8 @@ public class EntityHandler {
     private PageModel createPageModel(SiteModel siteModel, String path){
         ConnectionResponse connectionResponse = connection.getConnectionResponse(path);
         return PageModel.builder()
-                .site(siteModel).path(path)
+                .site(siteModel)
+                .path(path)
                 .code(connectionResponse.getResponseCode())
                 .content(connectionResponse.getContent())
                 .build();

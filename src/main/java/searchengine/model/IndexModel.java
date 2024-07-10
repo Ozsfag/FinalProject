@@ -1,7 +1,6 @@
 package searchengine.model;
 
 import lombok.*;
-import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 
@@ -23,11 +22,12 @@ public class IndexModel  {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "page_id", nullable = false)
-    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+    @ToString.Exclude
     private PageModel page;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lemma_id", nullable = false)
+    @ToString.Exclude
     private LemmaModel lemma;
 
     @Column(name = "`rank`", nullable = false, columnDefinition = "FLOAT")
@@ -36,5 +36,4 @@ public class IndexModel  {
     @Version
     @Column(name = "version")
     private Integer version;
-
 }

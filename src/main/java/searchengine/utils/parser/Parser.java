@@ -10,13 +10,11 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.Adder;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 
@@ -36,7 +34,6 @@ public class Parser extends RecursiveTask<Void> {
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
     private final SiteRepository siteRepository;
-    private final Adder adder;
 
     /**
      * Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed.
@@ -60,8 +57,7 @@ public class Parser extends RecursiveTask<Void> {
                             morphologySettings,
                             lemmaRepository,
                             indexRepository,
-                            siteRepository,
-                            adder)
+                            siteRepository)
                     )
                     .toList();
             invokeAll(subtasks);
@@ -92,8 +88,8 @@ public class Parser extends RecursiveTask<Void> {
      * @return                 list of URLs to parse
      */
     private Set<String> getUrlsToParse() {
-        CopyOnWriteArrayList<String> urls = (CopyOnWriteArrayList<String>) connection.getConnectionResponse(href).getUrls();
-        CopyOnWriteArrayList<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
+        Set<String> urls = connection.getConnectionResponse(href).getUrls();
+        Set<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
         urls.removeAll(alreadyParsed);
         return urls.parallelStream()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
@@ -105,14 +101,9 @@ public class Parser extends RecursiveTask<Void> {
      *
      * @param  urlsToParse   the list of pages to index
      */
-    private void indexingProcess(Set<String> urlsToParse) {
-        Set<PageModel> pages = getPages(urlsToParse);
-
-//        pageRepository.saveAllAndFlush(pages);
-        pages.stream()
-                .map(adder::updateOrInsertUsingBuiltInFeature)
-                .forEach(page -> {
-//                    pageRepository.saveAndFlush(page);
+    private synchronized void indexingProcess(Set<String> urlsToParse) {
+        List<PageModel> pages = pageRepository.saveAllAndFlush(getPages(urlsToParse));
+        pages.forEach(page -> {
                     Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
                     Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
                     lemmaRepository.saveAllAndFlush(lemmas);

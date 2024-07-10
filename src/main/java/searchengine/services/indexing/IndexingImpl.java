@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import searchengine.config.MorphologySettings;
 import searchengine.config.SitesList;
@@ -20,7 +19,6 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.Adder;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
@@ -29,7 +27,6 @@ import searchengine.utils.parser.Parser;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +53,6 @@ public class IndexingImpl implements IndexingService {
     private final IndexRepository indexRepository;
     @Lazy
     public static volatile boolean isIndexing = true;
-    private final Adder adder;
     /**
      * Starts the indexing process.
      *
@@ -114,8 +110,7 @@ public class IndexingImpl implements IndexingService {
                 morphologySettings,
                 lemmaRepository,
                 indexRepository,
-                siteRepository,
-                adder);
+                siteRepository);
     }
     /**
      * Stops the indexing process if it is currently running.

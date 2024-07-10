@@ -25,6 +25,7 @@ public class LemmaModel implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
+    @ToString.Exclude
     private SiteModel site;
 
     @Column(name = "lemma", nullable = false, columnDefinition = "VARCHAR(255)")

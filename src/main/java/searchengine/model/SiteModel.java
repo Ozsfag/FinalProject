@@ -53,5 +53,4 @@ public class SiteModel {
     @Version
     @Column(name = "version")
     private Integer version;
-
 }

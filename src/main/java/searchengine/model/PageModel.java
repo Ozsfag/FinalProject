@@ -1,10 +1,6 @@
 package searchengine.model;
 
 import lombok.*;
-import org.hibernate.annotations.SQLInsert;
-import org.hibernate.annotations.SQLUpdate;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.repository.config.BootstrapMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -21,7 +17,6 @@ import java.util.Set;
 @AllArgsConstructor
 @ToString
 @NoArgsConstructor
-@EqualsAndHashCode
 public class PageModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,8 +40,12 @@ public class PageModel implements Serializable {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<IndexModel> indexModels;
+
+    @Version
+    @Column(name = "version")
+    private Integer version;
 }
