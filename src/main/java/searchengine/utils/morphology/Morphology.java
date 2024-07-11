@@ -74,7 +74,6 @@ public class Morphology {
      * split transmitted link into scheme and host, and path
      *
      * @param url@return valid url components
-     * @throws URISyntaxException
      */
     public String[] getValidUrlComponents(String url) throws URISyntaxException {
         final URI uri = new URI(url);

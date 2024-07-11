@@ -17,7 +17,6 @@ import searchengine.utils.morphology.Morphology;
 
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static searchengine.services.indexing.IndexingImpl.isIndexing;
@@ -87,28 +86,21 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return              the set of indexed LemmaModels
      */
-    public synchronized Set<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
+    public Set<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
 
-//        Map<String, LemmaModel> existingLemmaModels =
         Set<LemmaModel> existingLemmaModels =
                 lemmaRepository.findByLemmaInAndSite_Id(wordCountMap.keySet(), siteModel.getId())
                         .parallelStream()
                         .peek(lemmaModel -> lemmaModel.setFrequency(lemmaModel.getFrequency() + wordCountMap.get(lemmaModel.getLemma())))
                         .collect(Collectors.toSet());
-//                        lemmaModel -> lemmaModel.getLemma() + "_" + lemmaModel.getSite().getId(),
-//                        Function.identity(),
-//                        (existing, newOne) -> {
-//                            lemmaRepository.mergeLemmaModel(newOne.getLemma(), newOne.getSite().getId(), newOne.getFrequency());
-//                            return existing;
-//                        }));
 
-//        wordCountMap.entrySet().removeIf(entry -> existingLemmaModels.containsKey(entry.getKey() + "_" + siteModel.getId()));
-        wordCountMap.keySet().removeAll(existingLemmaModels.stream().map(LemmaModel::getLemma).collect(Collectors.toSet()));
+        wordCountMap.entrySet().removeIf(entry -> existingLemmaModels.parallelStream().map(LemmaModel::getLemma).toList().contains(entry.getKey()));
 
-        existingLemmaModels.addAll(wordCountMap.entrySet()
-                .parallelStream()
+        existingLemmaModels.addAll(wordCountMap.entrySet().stream()
                 .map(entry -> createLemmaModel(siteModel, entry.getKey(), entry.getValue()))
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toCollection(ArrayList::new))
+        );
+
         return existingLemmaModels;
     }
 
@@ -120,16 +112,16 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return the list of IndexModels generated from the content
      */
-    public synchronized Set<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
+    public Set<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
         Set<IndexModel> existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
                 .parallelStream()
                 .peek(indexModel -> indexModel.setRank(indexModel.getRank() + wordCountMap.get(indexModel.getLemma())))
                 .collect(Collectors.toSet());
 
-        wordCountMap.keySet().removeAll(existingIndexModels.stream().map(IndexModel::getLemma).collect(Collectors.toSet()));
+        wordCountMap.entrySet().removeIf(entry-> existingIndexModels.parallelStream().map(IndexModel::getLemma).toList().contains(entry.getKey()));
 
-        existingIndexModels.addAll(wordCountMap.entrySet().stream().parallel()
-                    .map(word2Count -> {
+        existingIndexModels.addAll(wordCountMap.entrySet().parallelStream()
+                .map(word2Count -> {
                         try {
                            LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
                            return createIndexModel(pageModel, lemmaModel, (float) word2Count.getValue());

@@ -14,6 +14,6 @@ import java.util.*;
 public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
     int countBySite_Url(String url);
 
-    @Query("SELECT l FROM LemmaModel l WHERE l.id = :siteId AND l.lemma IN :lemma")
+    @Query("SELECT l FROM LemmaModel l JOIN FETCH l.site s WHERE s.id = :siteId AND l.lemma IN :lemma")
     Set<LemmaModel> findByLemmaInAndSite_Id(@Param("lemma") @Nullable Collection<String> lemma, @Param("siteId") Integer siteId);
 }

@@ -1,7 +1,6 @@
 package searchengine.utils.parser;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.exception.ConstraintViolationException;
 import searchengine.config.MorphologySettings;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -106,8 +105,7 @@ public class Parser extends RecursiveTask<Void> {
         List<PageModel> pages = getPages(urlsToParse);
         try {
              pages = pageRepository.saveAllAndFlush(pages);
-        }
-        catch (Exception e){
+        } catch (Exception e){
             pages.stream()
                     .filter(page -> !pageRepository.existsByPath(page.getPath()))
                     .forEach(pageRepository::saveAndFlush);
