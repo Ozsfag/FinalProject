@@ -1,6 +1,8 @@
 package searchengine.utils.parser;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
+import org.springframework.data.jpa.repository.JpaRepository;
 import searchengine.config.MorphologySettings;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -103,20 +105,14 @@ public class Parser extends RecursiveTask<Void> {
      */
     private void indexingProcess(Set<String> urlsToParse) {
         List<PageModel> pages = getPages(urlsToParse);
-        try {
-             pages = pageRepository.saveAllAndFlush(pages);
-        } catch (Exception e){
-            pages.stream()
-                    .filter(page -> !pageRepository.existsByPath(page.getPath()))
-                    .forEach(pageRepository::saveAndFlush);
-        }
+        entityHandler.saveEntities(Collections.unmodifiableCollection(pages), pageRepository);
 
         pages.forEach(page -> {
-                    Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
-                    Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
-                    lemmaRepository.saveAllAndFlush(lemmas);
-                    Set<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
-                    indexRepository.saveAllAndFlush(indexes);
+            Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
+            Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
+            entityHandler.saveEntities(Collections.unmodifiableCollection(lemmas), lemmaRepository);
+            Set<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
+            entityHandler.saveEntities(Collections.unmodifiableCollection(indexes), indexRepository);
         });
     }
 }

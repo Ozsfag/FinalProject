@@ -26,7 +26,9 @@ import searchengine.utils.parser.Parser;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor
@@ -61,12 +63,25 @@ public class IndexingImpl implements IndexingService {
     @Override
     public ResponseInterface startIndexing() {
         if (!isIndexing) return new Bad(false, "Индексация уже запущена");
-        CompletableFuture.runAsync(() ->
-                sitesList.getSites()
-                        .parallelStream()
-                        .forEach(siteUrl -> processSite(siteUrl.getUrl())), forkJoinPool)
-                .thenAccept(item -> forkJoinPool.shutdown());
-        return new Successful(true);
+        AtomicBoolean result = new AtomicBoolean(false);
+        List<CompletableFuture<Object>> futures = sitesList.getSites()
+                .parallelStream()
+                .map(siteUrl -> CompletableFuture.supplyAsync(() -> processSite(siteUrl.getUrl())))
+                .toList();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenAccept(item -> {
+                    futures.forEach(future -> {
+
+                        try {
+                            future.get();
+                        } catch (InterruptedException | ExecutionException e) {
+                            throw new RuntimeException(e);
+                        }
+                        result.set(true);
+                    });
+                    forkJoinPool.shutdown();
+                });
+        return new Successful(result.get());
     }
     /**
      * Processes a given site by submitting a task to a ForkJoinPool executor.

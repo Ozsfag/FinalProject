@@ -1,6 +1,8 @@
 package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
@@ -15,6 +17,7 @@ import searchengine.repositories.SiteRepository;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.morphology.Morphology;
 
+import javax.persistence.Entity;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -73,7 +76,7 @@ public class EntityHandler {
             return pageModel;
 
         } catch (StoppedExecutionException e) {
-            pageRepository.saveAndFlush(pageModel);
+            pageRepository.saveAndFlush(Objects.requireNonNull(pageModel));
             throw new StoppedExecutionException(e.getLocalizedMessage());
         }
     }
@@ -133,7 +136,23 @@ public class EntityHandler {
         );
         return existingIndexModels;
     }
-
+    /**
+     * A description of the entire Java function.
+     *
+     * @param  entities	     description of parameter
+     * @param  jpaRepository  description of parameter
+     * @return               description of return value
+     */
+    public synchronized Collection<Object> saveEntities(Collection<Object> entities, JpaRepository jpaRepository) {
+        try {
+            entities = jpaRepository.saveAllAndFlush(entities);
+        } catch (Exception e){
+            entities.stream()
+                    .filter(entity -> ! jpaRepository.exists((Example) entity))
+                    .forEach(jpaRepository::saveAndFlush);
+        }
+        return entities;
+    }
     /**
      * Creates a new SiteModel object with the provided site information.
      *
