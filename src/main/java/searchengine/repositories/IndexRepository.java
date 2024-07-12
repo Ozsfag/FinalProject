@@ -1,13 +1,10 @@
 package searchengine.repositories;
 
-import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -32,5 +29,5 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
     @Transactional()
     @Modifying
     @Query("UPDATE IndexModel i SET i.rank = i.rank + i.rank - :rank  WHERE i.lemma = :lemma AND i.page.id = :pageId")
-    void merge(@Param("lemma") String lemma,@Param("pageId") Integer id, @Param("rank") Integer frequency);
+    void merge(@Param("lemma") String lemma,@Param("pageId") Integer id, @Param("rank") Float frequency);
 }

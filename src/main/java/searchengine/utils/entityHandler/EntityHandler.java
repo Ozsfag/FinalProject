@@ -1,7 +1,6 @@
 package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Synchronized;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
@@ -147,9 +146,11 @@ public class EntityHandler {
         } catch (Exception e) {
 
             entities.forEach(entity -> {
-                if (entity.getClass().equals(LemmaModel.class)) {
-                    lemmaRepository.merge(((LemmaModel) entity).getLemma(), ((LemmaModel) entity).getSite().getId(), (((LemmaModel) entity).getFrequency()));
-                } else repository.saveAndFlush(entity);
+                Class aClass = entity.getClass();
+                if (aClass.equals(PageModel.class))  repository.saveAndFlush(entity);
+                else if (aClass.equals(LemmaModel.class)) lemmaRepository.merge(((LemmaModel) entity).getLemma(), ((LemmaModel) entity).getSite().getId(), (((LemmaModel) entity).getFrequency()));
+                else if (aClass.equals(IndexModel.class)) indexRepository.merge(((IndexModel) entity).getLemma().getLemma(), ((IndexModel) entity).getPage().getId(), (((IndexModel) entity).getRank()));
+
             });
         }
     }
