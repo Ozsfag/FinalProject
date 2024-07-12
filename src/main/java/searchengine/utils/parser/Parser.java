@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * @author Ozsfag
  */
 @RequiredArgsConstructor
-public class Parser extends RecursiveTask<Void> {
+public class Parser extends RecursiveTask<Boolean> {
     private final EntityHandler entityHandler;
     private final Connection connection;
     private final Morphology morphology;
@@ -41,7 +41,7 @@ public class Parser extends RecursiveTask<Void> {
      * @return         	null
      */
     @Override
-    protected Void compute() {
+    protected Boolean compute() {
         Set<String> urlsToParse = getUrlsToParse();
         if (!urlsToParse.isEmpty()) {
             indexingProcess(urlsToParse);
@@ -62,7 +62,7 @@ public class Parser extends RecursiveTask<Void> {
                     .toList();
             invokeAll(subtasks);
         }
-        return null;
+        return true;
     }
 
     /**
@@ -87,23 +87,22 @@ public class Parser extends RecursiveTask<Void> {
      *
      * @return                 list of URLs to parse
      */
-//    private Set<String> getUrlsToParse() {
-//        Set<String> urls = connection.getConnectionResponse(href).getUrls();
-//        Set<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
-//        urls.removeAll(alreadyParsed);
-//        return urls.parallelStream()
-//                .filter(url -> url.startsWith(siteModel.getUrl()) &&
-//                        Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
-//                .collect(Collectors.toSet());
-//    }
     private Set<String> getUrlsToParse() {
         Set<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
         return connection.getConnectionResponse(href).getUrls().stream().parallel()
                 .distinct()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
-                        Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
+                        Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains) &&
+                        notRepeatedUrl(url))
                 .filter(url -> !alreadyParsed.contains(url))
                 .collect(Collectors.toSet());
+    }
+    private boolean notRepeatedUrl(String url) {
+        String[] urlSplit = url.split("/");
+        return Arrays.stream(urlSplit)
+                .distinct()
+                .count() == urlSplit.length;
+
     }
     /**
      * Indexes the lemmas and indexes for a list of pages.

@@ -119,7 +119,13 @@ public class EntityHandler {
                 .peek(indexModel -> indexModel.setRank(indexModel.getRank() + wordCountMap.get(indexModel.getLemma())))
                 .collect(Collectors.toSet());
 
-        wordCountMap.entrySet().removeIf(entry-> existingIndexModels.parallelStream().map(IndexModel::getLemma).toList().contains(entry.getKey()));
+        wordCountMap.entrySet().removeIf(entry-> existingIndexModels.parallelStream()
+                .map(IndexModel::getLemma)
+                .toList()
+                .contains(lemmas.stream()
+                        .filter(lemma -> lemma.getLemma().equals(entry.getKey()))
+                        .findFirst()
+                        .orElse(null)));
 
         existingIndexModels.addAll(wordCountMap.entrySet().parallelStream()
                 .map(word2Count -> {
@@ -147,9 +153,9 @@ public class EntityHandler {
 
             entities.forEach(entity -> {
                 Class aClass = entity.getClass();
-                if (aClass.equals(PageModel.class))  repository.saveAndFlush(entity);
+                if (aClass.equals(PageModel.class))  pageRepository.merge( ((PageModel) entity).getId(), ((PageModel) entity).getCode(),((PageModel) entity).getSite().getId(),  ((PageModel) entity).getContent(), ((PageModel) entity).getPath(), ((PageModel) entity).getVersion());
                 else if (aClass.equals(LemmaModel.class)) lemmaRepository.merge(((LemmaModel) entity).getLemma(), ((LemmaModel) entity).getSite().getId(), (((LemmaModel) entity).getFrequency()));
-                else if (aClass.equals(IndexModel.class)) indexRepository.merge(((IndexModel) entity).getLemma().getLemma(), ((IndexModel) entity).getPage().getId(), (((IndexModel) entity).getRank()));
+                else indexRepository.merge(((IndexModel) entity).getLemma().getLemma(), ((IndexModel) entity).getPage().getId(), (((IndexModel) entity).getRank()));
 
             });
         }

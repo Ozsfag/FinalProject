@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import searchengine.config.MorphologySettings;
 import searchengine.config.SitesList;
 import searchengine.dto.ResponseInterface;
+import searchengine.dto.indexing.Site;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
@@ -61,35 +62,25 @@ public class IndexingImpl implements IndexingService {
     @Override
     public ResponseInterface startIndexing() {
         if (!isIndexing) return new Bad(false, "Индексация уже запущена");
-        CompletableFuture.runAsync(() ->
-                        sitesList.getSites()
-                                .parallelStream()
-                                .forEach(siteUrl -> processSite(siteUrl.getUrl())), forkJoinPool);
+        CompletableFuture.runAsync(() -> {
+                    List<CompletableFuture<Void>> futures = new ArrayList<>();
+                    for (Site siteUrl : sitesList.getSites()) {
+                        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                            try {
+                                SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl.getUrl());
+                                Parser parser = getParser(siteModel, siteUrl.getUrl());
+                                forkJoinPool.invoke(parser);
+                                siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl.getUrl());
+                            } catch (Error re) {
+                                siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl.getUrl());
+                            }
+                        });
+                        futures.add(future);
+                    }
+            CompletableFuture.allOf((CompletableFuture<?>) futures.stream().map(CompletableFuture::join).toList());
+
+                }, forkJoinPool);
         return new Successful(true);
-    }
-    /**
-     * Processes a given site by submitting a task to a ForkJoinPool executor.
-     * The task attempts to get the indexed site model for the given site URL,
-     * creates a parser for the site model, invokes the parser using the ForkJoinPool,
-     * and updates the status and status time of the site in the site repository.
-     * If an exception occurs during the process, the status and status time of the site
-     * are updated with the failed status and the localized error message.
-     *
-     * @param  siteUrl  the URL of the site to be processed
-     * @return           an Object representing the result of the process
-     */
-    @SneakyThrows
-    private Object processSite(String siteUrl) {
-        return forkJoinPool.submit(() -> {
-            try {
-                SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl);
-                Parser parser = getParser(siteModel, siteUrl);
-                forkJoinPool.invoke(parser);
-                siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl);
-            } catch (Error re) {
-                siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl);
-            }
-        }).get();
     }
     /**
      * Creates and returns a Parser object based on the provided parameters.

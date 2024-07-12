@@ -9,7 +9,7 @@ import java.util.Set;
 @Entity
 @Table( name = "pages", schema = "search_engine",
         indexes = {
-        @Index(name = "path_index", columnList = "path", unique = true),
+        @Index(name = "path_index", columnList = "path"),
         @Index(name = "site_id_index", columnList = "site_id")})
 @Getter
 @Setter
@@ -29,7 +29,7 @@ public class PageModel implements Serializable {
     private SiteModel site;
 
 
-    @Column(name = "path", nullable = false, columnDefinition = "TEXT", unique = true, length = 60)
+    @Column(name = "path", nullable = false, columnDefinition = "TEXT")
     private String path;
 
 
