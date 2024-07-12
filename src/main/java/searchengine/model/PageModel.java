@@ -29,7 +29,7 @@ public class PageModel implements Serializable {
     private SiteModel site;
 
 
-    @Column(name = "path", nullable = false, columnDefinition = "TEXT", unique = true)
+    @Column(name = "path", nullable = false, columnDefinition = "TEXT", unique = true, length = 60)
     private String path;
 
 

@@ -1,8 +1,6 @@
 package searchengine.utils.parser;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Example;
-import org.springframework.data.jpa.repository.JpaRepository;
 import searchengine.config.MorphologySettings;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -73,7 +71,7 @@ public class Parser extends RecursiveTask<Void> {
      * @param  urlsToParse  the list of URLs to parse
      * @return              a list of PageModel objects representing the pages parsed from the URLs
      */
-    private List<PageModel> getPages(Set<String> urlsToParse) {
+    private Set<PageModel> getPages(Set<String> urlsToParse) {
         return urlsToParse.stream().parallel()
                 .map(url -> {
                     try {
@@ -82,20 +80,29 @@ public class Parser extends RecursiveTask<Void> {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
                 })
-                .toList();
+                .collect(Collectors.toSet());
     }
     /**
      * Retrieves a list of URLs to parse based on the provided list of all URLs by site.
      *
      * @return                 list of URLs to parse
      */
+//    private Set<String> getUrlsToParse() {
+//        Set<String> urls = connection.getConnectionResponse(href).getUrls();
+//        Set<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
+//        urls.removeAll(alreadyParsed);
+//        return urls.parallelStream()
+//                .filter(url -> url.startsWith(siteModel.getUrl()) &&
+//                        Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
+//                .collect(Collectors.toSet());
+//    }
     private Set<String> getUrlsToParse() {
-        Set<String> urls = connection.getConnectionResponse(href).getUrls();
         Set<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
-        urls.removeAll(alreadyParsed);
-        return urls.parallelStream()
+        return connection.getConnectionResponse(href).getUrls().stream().parallel()
+                .distinct()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains))
+                .filter(url -> !alreadyParsed.contains(url))
                 .collect(Collectors.toSet());
     }
     /**
@@ -104,15 +111,15 @@ public class Parser extends RecursiveTask<Void> {
      * @param  urlsToParse   the list of pages to index
      */
     private void indexingProcess(Set<String> urlsToParse) {
-        List<PageModel> pages = getPages(urlsToParse);
-        entityHandler.saveEntities(Collections.unmodifiableCollection(pages), pageRepository);
+        Set<PageModel> pages = getPages(urlsToParse);
+        entityHandler.saveEntities(pages, pageRepository);
 
         pages.forEach(page -> {
             Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
             Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
-            entityHandler.saveEntities(Collections.unmodifiableCollection(lemmas), lemmaRepository);
+            entityHandler.saveEntities(lemmas, lemmaRepository);
             Set<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
-            entityHandler.saveEntities(Collections.unmodifiableCollection(indexes), indexRepository);
+            entityHandler.saveEntities(indexes, indexRepository);
         });
     }
 }

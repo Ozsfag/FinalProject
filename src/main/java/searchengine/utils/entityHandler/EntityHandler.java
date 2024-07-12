@@ -1,7 +1,7 @@
 package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Example;
+import lombok.Synchronized;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
@@ -17,7 +17,6 @@ import searchengine.repositories.SiteRepository;
 import searchengine.utils.connectivity.Connection;
 import searchengine.utils.morphology.Morphology;
 
-import javax.persistence.Entity;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -101,7 +100,7 @@ public class EntityHandler {
 
         existingLemmaModels.addAll(wordCountMap.entrySet().stream()
                 .map(entry -> createLemmaModel(siteModel, entry.getKey(), entry.getValue()))
-                .collect(Collectors.toCollection(ArrayList::new))
+                .collect(Collectors.toSet())
         );
 
         return existingLemmaModels;
@@ -140,18 +139,19 @@ public class EntityHandler {
      * A description of the entire Java function.
      *
      * @param  entities	     description of parameter
-     * @param  jpaRepository  description of parameter
-     * @return               description of return value
      */
-    public synchronized Collection<Object> saveEntities(Collection<Object> entities, JpaRepository jpaRepository) {
+
+    public synchronized void saveEntities(Set<?> entities, JpaRepository repository) {
         try {
-            entities = jpaRepository.saveAllAndFlush(entities);
-        } catch (Exception e){
-            entities.stream()
-                    .filter(entity -> ! jpaRepository.exists((Example) entity))
-                    .forEach(jpaRepository::saveAndFlush);
+            repository.saveAllAndFlush(entities);
+        } catch (Exception e) {
+
+            entities.forEach(entity -> {
+                if (entity.getClass().equals(LemmaModel.class)) {
+                    lemmaRepository.merge(((LemmaModel) entity).getLemma(), ((LemmaModel) entity).getSite().getId(), (((LemmaModel) entity).getFrequency()));
+                } else repository.saveAndFlush(entity);
+            });
         }
-        return entities;
     }
     /**
      * Creates a new SiteModel object with the provided site information.
