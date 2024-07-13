@@ -156,7 +156,6 @@ public class EntityHandler {
                 if (aClass.equals(PageModel.class))  pageRepository.merge( ((PageModel) entity).getId(), ((PageModel) entity).getCode(),((PageModel) entity).getSite().getId(),  ((PageModel) entity).getContent(), ((PageModel) entity).getPath(), ((PageModel) entity).getVersion());
                 else if (aClass.equals(LemmaModel.class)) lemmaRepository.merge(((LemmaModel) entity).getLemma(), ((LemmaModel) entity).getSite().getId(), (((LemmaModel) entity).getFrequency()));
                 else indexRepository.merge(((IndexModel) entity).getLemma().getLemma(), ((IndexModel) entity).getPage().getId(), (((IndexModel) entity).getRank()));
-
             });
         }
     }

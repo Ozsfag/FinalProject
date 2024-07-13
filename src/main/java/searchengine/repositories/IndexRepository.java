@@ -29,5 +29,5 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
     @Transactional()
     @Modifying
     @Query("UPDATE IndexModel i SET i.rank = i.rank + i.rank - :rank  WHERE i.lemma = :lemma AND i.page.id = :pageId")
-    void merge(@Param("lemma") String lemma,@Param("pageId") Integer id, @Param("rank") Float frequency);
+    void merge(@Param("lemma") String lemma,@Param("pageId") Integer id, @Param("rank") Float rank);
 }

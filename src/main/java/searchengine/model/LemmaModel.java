@@ -9,7 +9,8 @@ import java.util.Set;
 @Entity
 @Table(name = "lemmas", schema = "search_engine",
         indexes = {
-            @Index(name = "idx_lemma_lemma_site_id", columnList = "lemma, site_id")
+            @Index(name = "idx_lemma_lemma_site_id", columnList = "lemma, site_id"),
+            @Index(name = "idx_lemma_lemma_site_id_frequency", columnList = "lemma, site_id, frequency")
         })
 @RequiredArgsConstructor
 @Getter
