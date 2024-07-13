@@ -55,9 +55,9 @@ public class IndexingImpl implements IndexingService {
     @Lazy
     public static volatile boolean isIndexing = true;
     /**
-     * Starts the indexing process.
+     * Starts the indexing process for all sites in the sitesList asynchronously.
      *
-     * @return A ResponseInterface indicating the success or failure of the indexing process.
+     * @return          a ResponseInterface indicating the success of the indexing process
      */
     @Override
     public ResponseInterface startIndexing() {

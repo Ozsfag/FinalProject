@@ -31,6 +31,16 @@ public class SearchingImpl implements SearchingService {
     private final IndexRepository indexRepository;
     private final Connection connection;
     private static final int MAX_FREQUENCY = 5000;
+
+    /**
+     * A description of the entire Java function.
+     *
+     * @param  query  description of parameter
+     * @param  site   description of parameter
+     * @param  offset description of parameter
+     * @param  limit  description of parameter
+     * @return        description of return value
+     */
     @Override
     public ResponseInterface search(String query, String site, int offset, int limit) {
         SiteModel siteModel = site == null ? null : entityHandler.getIndexedSiteModel(site);
@@ -44,6 +54,16 @@ public class SearchingImpl implements SearchingService {
 
         return new TotalSearchResponse(true, detailedSearchResponse.size(), detailedSearchResponse);
     }
+
+    /**
+     * Generates a list of detailed search responses based on the given parameters.
+     *
+     * @param  rel         a map containing the page ID and relevance
+     * @param  offset       the number of responses to skip
+     * @param  limit        the maximum number of responses to return
+     * @param  uniqueSet    a set of unique IndexModel objects
+     * @return              a list of DetailedSearchResponse objects
+     */
     private List<DetailedSearchResponse> getDetailedSearchResponses(Map<Integer, Float> rel, int offset, int limit, Set<IndexModel> uniqueSet){
         return rel.entrySet().stream()
                 .skip(offset)
@@ -67,6 +87,14 @@ public class SearchingImpl implements SearchingService {
                 .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
+
+    /**
+     * Transforms a query string into a set of IndexModel objects.
+     *
+     * @param  query      the query string to transform
+     * @param  siteModel  the SiteModel object to filter the query by, or null to search all sites
+     * @return             a set of IndexModel objects representing the query
+     */
     private Set<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
         return morphology.getLemmaSet(query).stream()
                 .flatMap(queryWord -> siteModel == null ?
@@ -76,6 +104,12 @@ public class SearchingImpl implements SearchingService {
 
     }
 
+    /**
+     * Transforms a set of IndexModel objects into a map of page IDs to their normalized absolute ranks.
+     *
+     * @param  uniqueSet  the set of unique IndexModel objects
+     * @return            a map of page IDs to their normalized absolute ranks
+     */
     private Map<Integer, Float> getPageId2AbsRank(Set<IndexModel> uniqueSet){
 
         Map<Integer, Float> pageId2AbsRank = uniqueSet.stream()
@@ -91,6 +125,14 @@ public class SearchingImpl implements SearchingService {
         return pageId2AbsRank.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, id2AbsRank -> id2AbsRank.getValue() / maxValues));
     }
+
+    /**
+     * Retrieves matching snippets from the content of a page based on the given IndexModel set and PageModel.
+     *
+     * @param  uniqueSet   the set of unique IndexModel objects
+     * @param  pageModel   the PageModel to retrieve snippets from
+     * @return             a concatenated string of matching snippets with highlighted words
+     */
     public String getSnippet(Set<IndexModel> uniqueSet, PageModel pageModel) {
         List<String> matchingSentences = new ArrayList<>();
         uniqueSet.stream()

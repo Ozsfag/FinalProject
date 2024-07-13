@@ -27,6 +27,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final SiteRepository siteRepository;
     private final SitesList sites;
 
+    /**
+     * Retrieves statistics for sites, pages, and lemmas.
+     *
+     * @return         	Statistics response containing total and detailed statistics
+     */
     @Override
     public StatisticsResponse getStatistics() {
 

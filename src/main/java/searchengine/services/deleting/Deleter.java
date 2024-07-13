@@ -13,6 +13,9 @@ public class Deleter implements DeletingService{
         @Autowired
         private EntityManager em;
 
+    /**
+     * Deletes all data from the tables: lemmas, pages, sites, and indexes in the search_engine database.
+     */
         @Override
         @Transactional
         public void deleteData() {

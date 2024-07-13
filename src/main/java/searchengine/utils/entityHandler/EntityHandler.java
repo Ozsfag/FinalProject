@@ -141,11 +141,13 @@ public class EntityHandler {
         return existingIndexModels;
     }
     /**
-     * A description of the entire Java function.
+     * Saves a set of entities to the database using the provided JpaRepository.
+     * If an exception occurs during the save operation, the entities are saved individually
+     * using the respective repository merge methods.
      *
-     * @param  entities	     description of parameter
+     * @param entities the set of entities to save
+     * @param repository the JpaRepository used to save the entities
      */
-
     public synchronized void saveEntities(Set<?> entities, JpaRepository repository) {
         try {
             repository.saveAllAndFlush(entities);

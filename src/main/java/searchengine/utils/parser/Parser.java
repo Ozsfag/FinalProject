@@ -66,10 +66,10 @@ public class Parser extends RecursiveTask<Boolean> {
     }
 
     /**
-     * Retrieves a list of PageModel objects from the provided list of URLs to parse.
+     * Retrieves a set of PageModel objects from a set of URLs to parse.
      *
-     * @param  urlsToParse  the list of URLs to parse
-     * @return              a list of PageModel objects representing the pages parsed from the URLs
+     * @param  urlsToParse  a set of URLs to parse
+     * @return              a set of PageModel objects obtained from the URLs
      */
     private Set<PageModel> getPages(Set<String> urlsToParse) {
         return urlsToParse.stream().parallel()
@@ -82,10 +82,11 @@ public class Parser extends RecursiveTask<Boolean> {
                 })
                 .collect(Collectors.toSet());
     }
+
     /**
-     * Retrieves a list of URLs to parse based on the provided list of all URLs by site.
+     * Retrieves a set of URLs to parse based on the provided list of all URLs by site.
      *
-     * @return                 list of URLs to parse
+     * @return                 a set of URLs to parse
      */
     private Set<String> getUrlsToParse() {
         Set<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
@@ -97,6 +98,12 @@ public class Parser extends RecursiveTask<Boolean> {
                 .filter(url -> !alreadyParsed.contains(url))
                 .collect(Collectors.toSet());
     }
+    /**
+     * Checks if the given URL is not repeated by splitting it into its components and checking if each component is unique.
+     *
+     * @param  url  the URL to check for repetition
+     * @return      true if the URL is not repeated, false otherwise
+     */
     private boolean notRepeatedUrl(String url) {
         String[] urlSplit = url.split("/");
         return Arrays.stream(urlSplit)
