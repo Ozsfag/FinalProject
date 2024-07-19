@@ -148,16 +148,26 @@ public class EntityHandler {
      * @param entities the set of entities to save
      * @param repository the JpaRepository used to save the entities
      */
-    public synchronized void saveEntities(Set<?> entities, JpaRepository repository) {
+    public void saveEntities(Set<?> entities, JpaRepository repository) {
         try {
             repository.saveAllAndFlush(entities);
         } catch (Exception e) {
-
             entities.forEach(entity -> {
-                Class aClass = entity.getClass();
-                if (aClass.equals(PageModel.class))  pageRepository.merge( ((PageModel) entity).getId(), ((PageModel) entity).getCode(),((PageModel) entity).getSite().getId(),  ((PageModel) entity).getContent(), ((PageModel) entity).getPath(), ((PageModel) entity).getVersion());
-                else if (aClass.equals(LemmaModel.class)) lemmaRepository.merge(((LemmaModel) entity).getLemma(), ((LemmaModel) entity).getSite().getId(), (((LemmaModel) entity).getFrequency()));
-                else indexRepository.merge(((IndexModel) entity).getLemma().getLemma(), ((IndexModel) entity).getPage().getId(), (((IndexModel) entity).getRank()));
+                Class<?> aClass = entity.getClass();
+                switch (aClass.getSimpleName()) {
+                    case "PageModel":
+                        PageModel pageModel = (PageModel) entity;
+                        pageRepository.merge(pageModel.getId(), pageModel.getCode(), pageModel.getSite().getId(), pageModel.getContent(), pageModel.getPath(), pageModel.getVersion());
+                        break;
+                    case "LemmaModel":
+                        LemmaModel lemmaModel = (LemmaModel) entity;
+                        lemmaRepository.merge(lemmaModel.getLemma(), lemmaModel.getSite().getId(), lemmaModel.getFrequency());
+                        break;
+                    case "IndexModel":
+                        IndexModel indexModel = (IndexModel) entity;
+                        indexRepository.merge(indexModel.getLemma().getLemma(), indexModel.getPage().getId(), indexModel.getRank());
+                        break;
+                }
             });
         }
     }

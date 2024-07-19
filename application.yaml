@@ -36,16 +36,18 @@ spring:
 
 indexing-settings:
   sites:
-    - url: https://lenta.ru/
-      name: Лента.ру
-    - url: https://skillbox.ru/
-      name: Skillbox
-    - url: http://www.playback.ru/
-      name: PlayBack.Ru
+#    - url: https://lenta.ru/
+#      name: Лента.ру
+#    - url: https://skillbox.ru/
+#      name: Skillbox
+#    - url: http://www.playback.ru/
+#      name: PlayBack.Ru
 #    - url: https://domrebenka.belzdrav.ru/
 #      name: Дом Ребенка
 #    - url: https://amurkino.ru/
 #      name: Амуркино
+    - url: https://sendel.ru/
+      name: sendel
 
 
 connection-settings:
@@ -85,3 +87,6 @@ morphology-settings:
     - .rtf
     - .mp4
     - .rar
+    - .sql
+    - .yaml
+    - .yml
