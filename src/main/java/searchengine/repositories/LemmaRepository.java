@@ -40,6 +40,6 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
      */
     @Transactional()
     @Modifying
-    @Query("UPDATE LemmaModel l SET l.frequency = CASE WHEN ((l.frequency > :frequency)  THEN (l.frequency + l.frequency - :frequency) ELSE :frequency END  WHERE l.lemma = :lemma AND l.site.id = :siteId")
+    @Query("UPDATE LemmaModel l SET l.frequency = CASE WHEN (l.frequency > :frequency) THEN (l.frequency) ELSE (:frequency) END  WHERE l.lemma = :lemma AND l.site.id = :siteId")
     void merge(@Param("lemma") String lemma, @Param("siteId") Integer siteId, @Param("frequency") Integer frequency);
 }
