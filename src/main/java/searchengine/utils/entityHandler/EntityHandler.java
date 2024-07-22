@@ -148,7 +148,7 @@ public class EntityHandler {
      * @param entities the set of entities to save
      * @param repository the JpaRepository used to save the entities
      */
-    public synchronized void saveEntities(Set<?> entities, JpaRepository repository) {
+    public void saveEntities(Set<?> entities, JpaRepository repository) {
         try {
             repository.saveAllAndFlush(entities);
         } catch (Exception e) {
