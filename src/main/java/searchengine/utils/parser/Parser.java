@@ -122,12 +122,9 @@ public class Parser extends RecursiveTask<Boolean> {
 
         pages.forEach(page -> {
             Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
-            Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
-            Set<IndexModel> indexes;
-            synchronized (this) {
-                entityHandler.saveEntities(lemmas, lemmaRepository);
-                indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
-            }
+            Collection<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
+            entityHandler.saveEntities(lemmas, lemmaRepository);
+            Collection<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
             entityHandler.saveEntities(indexes, indexRepository);
         });
     }

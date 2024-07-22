@@ -15,8 +15,7 @@ public class IndexingConfiguration {
      * @return the common ForkJoinPool instance
      */
     @Bean
-    public ForkJoinPool forkJoinPool(){
-        return ForkJoinPool.commonPool();
+    public ForkJoinPool forkJoinPool(){return ForkJoinPool.commonPool();
     }
 
     /**

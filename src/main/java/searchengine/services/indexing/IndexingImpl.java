@@ -129,7 +129,7 @@ public class IndexingImpl implements IndexingService {
         PageModel pageModel = entityHandler.getPageModel(siteModel, url);
         pageRepository.saveAndFlush(pageModel);
         Map<String, Integer> wordCountMap = morphology.wordCounter(pageModel.getContent());
-        Set<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
+        Collection<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
         entityHandler.getIndexModelFromContent(pageModel, lemmas, wordCountMap);
         return new Successful(true);
     }

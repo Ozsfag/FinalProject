@@ -87,7 +87,7 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return              the set of indexed LemmaModels
      */
-    public Set<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
+    public Collection<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
 
         Set<LemmaModel> existingLemmaModels =
                 lemmaRepository.findByLemmaInAndSite_Id(wordCountMap.keySet(), siteModel.getId())
@@ -113,7 +113,7 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return the list of IndexModels generated from the content
      */
-    public Set<IndexModel> getIndexModelFromContent(PageModel pageModel, Set<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
+    public Collection<IndexModel> getIndexModelFromContent(PageModel pageModel, Collection<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
         Set<IndexModel> existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
                 .parallelStream()
                 .peek(indexModel -> indexModel.setRank(indexModel.getRank() + wordCountMap.get(indexModel.getLemma())))
@@ -148,7 +148,7 @@ public class EntityHandler {
      * @param entities the set of entities to save
      * @param repository the JpaRepository used to save the entities
      */
-    public void saveEntities(Set<?> entities, JpaRepository repository) {
+    public void saveEntities(Collection<?> entities, JpaRepository repository) {
         try {
             repository.saveAllAndFlush(entities);
         } catch (Exception e) {

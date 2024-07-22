@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.PageModel;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Repository

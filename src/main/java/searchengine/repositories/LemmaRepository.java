@@ -30,7 +30,7 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
      * @return        a set of LemmaModel objects that match the criteria
      */
     @Query("SELECT l FROM LemmaModel l JOIN FETCH l.site s WHERE s.id = :siteId AND l.lemma IN :lemma")
-    Set<LemmaModel> findByLemmaInAndSite_Id(@Param("lemma") @Nullable Collection<String> lemma, @Param("siteId") Integer siteId);
+    Set<LemmaModel> findByLemmaInAndSite_Id(@Param("lemma") Collection<String> lemma, @Param("siteId") Integer siteId);
 
     /**
      * Retrieves a set of LemmaModel objects that have a matching lemma and site ID.
