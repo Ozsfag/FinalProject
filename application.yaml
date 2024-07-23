@@ -19,8 +19,8 @@ spring:
       maximum-pool-size: 10
       auto-commit: true
       pool-name: HikariCorePool
-      max-lifetime: 3600000
-      connection-timeout: 3000000
+      max-lifetime: 0
+      connection-timeout: 30000
 
   jpa:
     properties:
@@ -36,12 +36,12 @@ spring:
 
 indexing-settings:
   sites:
-    - url: https://lenta.ru/
-      name: Лента.ру
-    - url: https://skillbox.ru/
-      name: Skillbox
-    - url: http://www.playback.ru/
-      name: PlayBack.Ru
+#    - url: https://lenta.ru/
+#      name: Лента.ру
+#    - url: https://skillbox.ru/
+#      name: Skillbox
+#    - url: http://www.playback.ru/
+#      name: PlayBack.Ru
 #    - url: https://domrebenka.belzdrav.ru/
 #      name: Дом Ребенка
 #    - url: https://amurkino.ru/

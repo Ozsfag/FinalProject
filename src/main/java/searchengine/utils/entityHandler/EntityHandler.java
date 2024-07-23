@@ -136,8 +136,9 @@ public class EntityHandler {
                             throw new RuntimeException(e.getLocalizedMessage());
                         }
                     })
-                    .collect(Collectors.toSet())
+                .collect(Collectors.toSet())
         );
+
         return existingIndexModels;
     }
     /**

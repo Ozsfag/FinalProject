@@ -28,6 +28,8 @@ import searchengine.utils.parser.Parser;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +79,7 @@ public class IndexingImpl implements IndexingService {
                         });
                         futures.add(future);
                     }
-                    CompletableFuture.allOf((CompletableFuture<?>) futures.parallelStream().map(CompletableFuture::join).toList());
+                    CompletableFuture.allOf((CompletableFuture<?>) futures).join();
         });
         return new Successful(true);
     }

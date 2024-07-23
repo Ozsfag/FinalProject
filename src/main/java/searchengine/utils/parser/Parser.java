@@ -72,7 +72,7 @@ public class Parser extends RecursiveTask<Boolean> {
      * @return              a set of PageModel objects obtained from the URLs
      */
     private Collection<PageModel> getPages(Collection<String> urlsToParse) {
-        return urlsToParse.stream().parallel()
+        return urlsToParse.parallelStream()
                 .map(url -> {
                     try {
                         return entityHandler.getPageModel(siteModel, url);
@@ -80,6 +80,7 @@ public class Parser extends RecursiveTask<Boolean> {
                         throw new RuntimeException(e.getLocalizedMessage());
                     }
                 })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
@@ -89,7 +90,11 @@ public class Parser extends RecursiveTask<Boolean> {
      * @return                 a set of URLs to parse
      */
     private Collection<String> getUrlsToParse() {
-        Set<String> alreadyParsed = pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), connection.getConnectionResponse(href).getUrls());
+        ArrayList<String> alreadyParsed = pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), connection.getConnectionResponse(href).getUrls())
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new));
+
         return connection.getConnectionResponse(href).getUrls().stream().parallel()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains) &&
