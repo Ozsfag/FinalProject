@@ -77,9 +77,8 @@ public class IndexingImpl implements IndexingService {
                         });
                         futures.add(future);
                     }
-            CompletableFuture.allOf((CompletableFuture<?>) futures.stream().map(CompletableFuture::join).toList());
-
-                }, forkJoinPool);
+                    CompletableFuture.allOf((CompletableFuture<?>) futures.parallelStream().map(CompletableFuture::join).toList());
+        });
         return new Successful(true);
     }
     /**

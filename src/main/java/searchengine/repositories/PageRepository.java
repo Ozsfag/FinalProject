@@ -9,19 +9,20 @@ import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.PageModel;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 @Repository
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
     /**
-     * Returns a set of paths for all pages associated with a given site ID.
+     * Retrieves a set of page paths from the database based on the given site ID and collection of paths.
      *
-     * @param  siteId  the ID of the site to search for pages
-     * @return         a set of paths for all pages associated with the given site ID
+     * @param  siteId   the ID of the site to filter the pages by
+     * @param  paths    the collection of paths to filter the pages by
+     * @return          a set of page paths that match the given site ID and collection of paths
      */
-    @Query("SELECT p.path FROM PageModel p JOIN SiteModel s ON p.site = s.id WHERE s.id = :siteId")
-    Set<String> findAllPathsBySite(@Param("siteId") int siteId);
+
+    @Query("SELECT p.path FROM PageModel p JOIN SiteModel s ON p.site = s.id WHERE s.id = :siteId AND p.path IN :paths")
+    Set<String> findAllPathsBySiteAndPathIn(@Param("siteId") int siteId, @Param("paths") Collection<String> paths);
     /**
      * A description of the entire Java function.
      *

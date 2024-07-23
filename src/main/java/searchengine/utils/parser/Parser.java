@@ -42,7 +42,7 @@ public class Parser extends RecursiveTask<Boolean> {
      */
     @Override
     protected Boolean compute() {
-        Set<String> urlsToParse = getUrlsToParse();
+        Collection<String> urlsToParse = getUrlsToParse();
         if (!urlsToParse.isEmpty()) {
             indexingProcess(urlsToParse);
             siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
@@ -71,7 +71,7 @@ public class Parser extends RecursiveTask<Boolean> {
      * @param  urlsToParse  a set of URLs to parse
      * @return              a set of PageModel objects obtained from the URLs
      */
-    private Set<PageModel> getPages(Set<String> urlsToParse) {
+    private Collection<PageModel> getPages(Collection<String> urlsToParse) {
         return urlsToParse.stream().parallel()
                 .map(url -> {
                     try {
@@ -88,10 +88,9 @@ public class Parser extends RecursiveTask<Boolean> {
      *
      * @return                 a set of URLs to parse
      */
-    private Set<String> getUrlsToParse() {
-        Set<String> alreadyParsed = pageRepository.findAllPathsBySite(siteModel.getId());
+    private Collection<String> getUrlsToParse() {
+        Set<String> alreadyParsed = pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), connection.getConnectionResponse(href).getUrls());
         return connection.getConnectionResponse(href).getUrls().stream().parallel()
-                .distinct()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains) &&
                         notRepeatedUrl(url))
@@ -116,8 +115,8 @@ public class Parser extends RecursiveTask<Boolean> {
      *
      * @param  urlsToParse   the list of pages to index
      */
-    private void indexingProcess(Set<String> urlsToParse) {
-        Set<PageModel> pages = getPages(urlsToParse);
+    private void indexingProcess(Collection<String> urlsToParse) {
+        Collection<PageModel> pages = getPages(urlsToParse);
         entityHandler.saveEntities(pages, pageRepository);
 
         pages.forEach(page -> {

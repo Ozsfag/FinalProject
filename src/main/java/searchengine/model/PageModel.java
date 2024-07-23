@@ -10,7 +10,8 @@ import java.util.Set;
 @Table( name = "pages", schema = "search_engine",
         indexes = {
         @Index(name = "path_index", columnList = "path"),
-        @Index(name = "site_id_index", columnList = "site_id")})
+        @Index(name = "site_id_index", columnList = "site_id"),
+        @Index(name = "idx_site_id_path", columnList = "site_id, path")})
 @Getter
 @Setter
 @Builder
