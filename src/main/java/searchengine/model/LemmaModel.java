@@ -1,10 +1,11 @@
 package searchengine.model;
 
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "lemmas", schema = "search_engine",
@@ -23,8 +24,9 @@ public class LemmaModel implements Serializable {
     @Column(name = "lemma_id", columnDefinition = "INT")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "site_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "site_id", referencedColumnName = "site_id", nullable = false)
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @ToString.Exclude
     private SiteModel site;
 
@@ -37,7 +39,7 @@ public class LemmaModel implements Serializable {
     @OneToMany(mappedBy = "lemma", cascade = CascadeType.ALL)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Set<IndexModel> indexModels;
+    private List<IndexModel> indexModels;
 
     @Version
     @Column(name = "version")
