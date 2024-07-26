@@ -50,7 +50,7 @@ public class EntityHandler {
                     .findFirst()
                     .orElseThrow(() -> new OutOfSitesConfigurationException("Out of sites"));
 
-            SiteModel siteModel = Optional.ofNullable(siteRepository.findByUrl(validatedUrl))
+            SiteModel siteModel = Optional.ofNullable(siteRepository.findSiteByPath(validatedUrl))
                     .orElseGet(()-> createSiteModel(site));
 
             return siteRepository.saveAndFlush(siteModel);

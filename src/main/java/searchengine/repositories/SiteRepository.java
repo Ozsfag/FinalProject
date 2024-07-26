@@ -20,7 +20,7 @@ public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
      * @param  path  the URL of the site to find
      * @return       the SiteModel corresponding to the given URL, or null if not found
      */
-    SiteModel findByUrl(String path);
+    SiteModel findSiteByPath(String path);
 
     /**
      * Updates the status time of a SiteModel with the given URL to the specified status time.

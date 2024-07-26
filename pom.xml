@@ -148,6 +148,19 @@
             <artifactId>byte-buddy</artifactId>
             <version>1.14.18</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>3.3.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.rnorth.test-containers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>0.9.5</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 

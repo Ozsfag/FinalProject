@@ -1,13 +1,11 @@
 package searchengine.utils.connectivity;
 
-
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
@@ -15,66 +13,60 @@ import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class ConnectionTest {
 
     private Connection connection;
-    org.jsoup.Connection connect;
-
+    private ConnectionSettings connectionSettings;
+    private Document document;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        ConnectionSettings connectionSettings = new ConnectionSettings();
-        connection = new Connection();
-        connectionSettings.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
-        connectionSettings.setReferrer("https://www.google.com");
-        connection.connectionSettings = connectionSettings;
-        String url = "https://sendel.ru/";
-        connect = Jsoup.connect(url)
-                .userAgent(connectionSettings.getUserAgent())
-                .referrer(connectionSettings.getReferrer())
-                .ignoreHttpErrors(true);
+    public void setup() {
+        connectionSettings = mock(ConnectionSettings.class);
+        connection = new Connection(connectionSettings);
+        document = mock(Document.class);
     }
 
     @Test
-    @DisplayName("testGetTitle")
-    public void testGetConnectionResponse() {
-        String content = "";
-        Set<String> expectedUrls = new HashSet<>();
-        String url = "https://sendel.ru/";
+    public void testGetConnectionResponse_Success() {
+        String url = "http://example.com";
+        String content = "This is the content";
+        Set<String> urls = Set.of("http://example.com/page1", "http://example.com/page2");
+
+//        when(Jsoup.connect(url)).thenReturn(mock(org.jsoup.Connection.class));
+        when(connectionSettings.getUserAgent()).thenReturn("User Agent");
+        when(connectionSettings.getReferrer()).thenReturn("Referrer");
+        when(connection.getDocument(url)).thenReturn(document);
+        when(document.body().text()).thenReturn(content);
+        when(document.select("a[href]")).thenReturn(mock(Elements.class));
+        when(document.select("a[href]").stream()).thenReturn((Stream<Element>) urls);
+        when(document.select("a[href]").stream().map(element -> element.absUrl("href"))).thenReturn(urls.stream());
 
         ConnectionResponse response = connection.getConnectionResponse(url);
 
         assertEquals(url, response.getPath());
         assertEquals(HttpStatus.OK.value(), response.getResponseCode());
-        assertNotEquals(content, response.getContent());
-        assertNotEquals(expectedUrls, response.getUrls());
+        assertEquals(content, response.getContent());
+        assertEquals(urls, response.getUrls());
         assertEquals("", response.getErrorMessage());
     }
 
     @Test
-    @DisplayName("testGetTitle")
-    public void testGetTitle() {
-        // Arrange
-        String url = "https://sendel.ru/";
-        String title = "Konstantin Shibkov";
-        String result = connection.getTitle(url);
-        assertEquals(title, result);
-    }
+    public void testGetConnectionResponse_IOException() {
+        String url = "http://example.com";
 
-    @Test
-    @DisplayName("testGetTitleIOException")
-    public void testGetTitleIOException() {
-        String url = "https://sendel.ru/";
-        String result = "";
-        when(connection.getTitle(url)).thenThrow(new IOException());
-        result = connection.getTitle(url);
-        assertTrue(result.isEmpty());
-        verify(connection, times(1)).getTitle(url);
+//        when(Jsoup.connect(url)).thenThrow(new IOException());
+
+        ConnectionResponse response = connection.getConnectionResponse(url);
+
+        assertEquals(url, response.getPath());
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getResponseCode());
+        assertEquals("", response.getContent());
+        assertEquals(new HashSet<>(), response.getUrls());
+        assertEquals(HttpStatus.NOT_FOUND.getReasonPhrase(), response.getErrorMessage());
     }
 }

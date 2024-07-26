@@ -3,7 +3,6 @@ package searchengine.utils.connectivity;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.ConnectionSettings;
@@ -18,10 +17,21 @@ import java.util.stream.Collectors;
  * @author Ozsfag
  */
 @Component
+@RequiredArgsConstructor
 public class Connection {
-    @Autowired
-    ConnectionSettings connectionSettings;
+    final ConnectionSettings connectionSettings;
 
+    public Document getDocument(String url) {
+        try {
+            return Jsoup.connect(url)
+                    .userAgent(connectionSettings.getUserAgent())
+                    .referrer(connectionSettings.getReferrer())
+                    .ignoreHttpErrors(true)
+                    .get();
+        } catch (IOException e) {
+            return null;
+        }
+    }
     /**
      * Retrieves the connection response for the specified URL.
      *
@@ -30,20 +40,14 @@ public class Connection {
      */
     public ConnectionResponse getConnectionResponse(String url) {
         try {
-
-            org.jsoup.Connection connection = Jsoup.connect(url)
-                    .userAgent(connectionSettings.getUserAgent())
-                    .referrer(connectionSettings.getReferrer())
-                    .ignoreHttpErrors(true);
-
-            Document document = connection.get();
+            Document document = getDocument(url);
             String content = Optional.of(document.body().text()).orElseThrow();
             Set<String> urls = document.select("a[href]").stream()
                     .map(element -> element.absUrl("href"))
                     .collect(Collectors.toSet());
 
             return new ConnectionResponse(url, HttpStatus.OK.value(), content, urls, "");
-        } catch (IOException e) {
+        } catch (Exception e) {
             return new ConnectionResponse(url, HttpStatus.NOT_FOUND.value(),"", new HashSet<>(), HttpStatus.NOT_FOUND.getReasonPhrase());
         }
     }

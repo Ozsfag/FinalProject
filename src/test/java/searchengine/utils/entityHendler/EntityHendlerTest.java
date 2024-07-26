@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
-import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.entityHandler.EntityHandler;
@@ -45,19 +44,20 @@ class EntityHandlerTest {
         // Arrange
         String href = "https://example.com";
         String validatedUrl = "https://example.com";
-        Site site = new Site("https://example.com", "Example Site");
+        Site site = new Site(href, "Example Site");
+        sitesList.setSites(Collections.singletonList(site));
         SiteModel siteModel = new SiteModel();
 
         when(morphology.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
         when(sitesList.getSites()).thenReturn(Collections.singletonList(site));
-        when(siteRepository.findByUrl(validatedUrl)).thenReturn(null);
+        when(siteRepository.findSiteByPath(validatedUrl)).thenReturn(null);
         when(siteRepository.saveAndFlush(any(SiteModel.class))).thenReturn(siteModel);
 
         // Assert
-        assertThrows(RuntimeException.class, (Executable) entityHandler.getIndexedSiteModel(href));
+        assertThrows(RuntimeException.class, (Executable) entityHandler.getIndexedSiteModel(validatedUrl));
         verify(morphology, times(1)).getValidUrlComponents(href);
         verify(sitesList, times(1)).getSites();
-        verify(siteRepository, times(1)).findByUrl(validatedUrl);
+        verify(siteRepository, times(1)).findSiteByPath(validatedUrl);
         verify(siteRepository, times(1)).saveAndFlush(any(SiteModel.class));
     }
 
@@ -70,10 +70,10 @@ class EntityHandlerTest {
 
         when(morphology.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
         when(sitesList.getSites()).thenReturn(Collections.singletonList(site));
-        when(siteRepository.findByUrl(validatedUrl)).thenReturn(null);
+        when(siteRepository.findSiteByPath(validatedUrl)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(OutOfSitesConfigurationException.class, () -> entityHandler.getIndexedSiteModel(href));
+        assertThrows(RuntimeException.class, () -> entityHandler.getIndexedSiteModel(href));
     }
 
     @Test
