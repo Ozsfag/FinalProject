@@ -22,13 +22,14 @@ public class IndexModel  {
     @Column(name = "index_id",columnDefinition = "INT")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "page_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "page_id", referencedColumnName = "page_id" ,nullable = false)
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @ToString.Exclude
     private PageModel page;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lemma_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "lemma_id", referencedColumnName = "lemma_id",nullable = false)
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @ToString.Exclude
     private LemmaModel lemma;

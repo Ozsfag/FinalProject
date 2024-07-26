@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import searchengine.config.MorphologySettings;
 import searchengine.config.SitesList;
 import searchengine.dto.ResponseInterface;
-import searchengine.dto.indexing.Site;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
@@ -62,23 +61,7 @@ public class IndexingImpl implements IndexingService {
     @Override
     public ResponseInterface startIndexing() {
         if (!isIndexing) return new Bad(false, "Индексация уже запущена");
-        CompletableFuture.runAsync(() -> {
-                    List<CompletableFuture<Void>> futures = new ArrayList<>();
-                    for (Site siteUrl : sitesList.getSites()) {
-                        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                            try {
-                                SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl.getUrl());
-                                Parser parser = getParser(siteModel, siteUrl.getUrl());
-                                forkJoinPool.invoke(parser);
-                                siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl.getUrl());
-                            } catch (Error re) {
-                                siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl.getUrl());
-                            }
-                        });
-                        futures.add(future);
-                    }
-                    CompletableFuture.allOf((CompletableFuture<?>) futures).join();
-        });
+        CompletableFuture.runAsync(this::run);
         return new Successful(true);
     }
     /**
@@ -133,4 +116,19 @@ public class IndexingImpl implements IndexingService {
         return new Successful(true);
     }
 
+    private void run() {
+        List<CompletableFuture<Void>> futures = sitesList.getSites().stream()
+                .map(site -> CompletableFuture.runAsync(() -> {
+                    try {
+                        SiteModel siteModel = entityHandler.getIndexedSiteModel(site.getUrl());
+                        Parser parser = getParser(siteModel, site.getUrl());
+                        forkJoinPool.invoke(parser);
+                        siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), site.getUrl());
+                    } catch (Error re) {
+                        siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), site.getUrl());
+                    }
+                }))
+                .toList();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+    }
 }

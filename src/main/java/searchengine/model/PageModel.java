@@ -1,6 +1,7 @@
 package searchengine.model;
 
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -24,8 +25,9 @@ public class PageModel implements Serializable {
     @Column(name = "page_id", columnDefinition = "INT")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "site_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "site_id", referencedColumnName = "site_id", nullable = false)
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @ToString.Exclude
     private SiteModel site;
 
