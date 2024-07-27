@@ -45,7 +45,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         sites.getSites().forEach(site -> {
             DetailedStatisticsItem item = new DetailedStatisticsItem();
-            SiteModel siteModel = siteRepository.findSiteByPath(site.getUrl());
+            SiteModel siteModel = siteRepository.findSiteByUrl(site.getUrl());
             if (siteModel == null){
                 item.setName("");
                 item.setUrl("");

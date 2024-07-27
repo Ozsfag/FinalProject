@@ -6,6 +6,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
@@ -26,7 +30,7 @@ public class ConnectionTest {
 
     @BeforeEach
     public void setup() {
-        connectionSettings = mock(ConnectionSettings.class);
+        connectionSettings = Mockito.mock(ConnectionSettings.class);
         connection = new Connection(connectionSettings);
         document = mock(Document.class);
     }
@@ -37,10 +41,11 @@ public class ConnectionTest {
         String content = "This is the content";
         Set<String> urls = Set.of("http://example.com/page1", "http://example.com/page2");
 
-//        when(Jsoup.connect(url)).thenReturn(mock(org.jsoup.Connection.class));
+
         when(connectionSettings.getUserAgent()).thenReturn("User Agent");
         when(connectionSettings.getReferrer()).thenReturn("Referrer");
-        when(connection.getDocument(url)).thenReturn(document);
+
+
         when(document.body().text()).thenReturn(content);
         when(document.select("a[href]")).thenReturn(mock(Elements.class));
         when(document.select("a[href]").stream()).thenReturn((Stream<Element>) urls);

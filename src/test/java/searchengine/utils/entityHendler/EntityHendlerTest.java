@@ -50,14 +50,14 @@ class EntityHandlerTest {
 
         when(morphology.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
         when(sitesList.getSites()).thenReturn(Collections.singletonList(site));
-        when(siteRepository.findSiteByPath(validatedUrl)).thenReturn(null);
+        when(siteRepository.findSiteByUrl(validatedUrl)).thenReturn(null);
         when(siteRepository.saveAndFlush(any(SiteModel.class))).thenReturn(siteModel);
 
         // Assert
         assertThrows(RuntimeException.class, (Executable) entityHandler.getIndexedSiteModel(validatedUrl));
         verify(morphology, times(1)).getValidUrlComponents(href);
         verify(sitesList, times(1)).getSites();
-        verify(siteRepository, times(1)).findSiteByPath(validatedUrl);
+        verify(siteRepository, times(1)).findSiteByUrl(validatedUrl);
         verify(siteRepository, times(1)).saveAndFlush(any(SiteModel.class));
     }
 
@@ -70,7 +70,7 @@ class EntityHandlerTest {
 
         when(morphology.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
         when(sitesList.getSites()).thenReturn(Collections.singletonList(site));
-        when(siteRepository.findSiteByPath(validatedUrl)).thenReturn(null);
+        when(siteRepository.findSiteByUrl(validatedUrl)).thenReturn(null);
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> entityHandler.getIndexedSiteModel(href));

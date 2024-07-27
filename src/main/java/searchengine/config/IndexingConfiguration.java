@@ -17,6 +17,7 @@ public class IndexingConfiguration {
     @Bean
     public ForkJoinPool forkJoinPool(){return ForkJoinPool.commonPool();
     }
+//    java.util.concurrent.ForkJoinPool@372f7bc[Running, parallelism = 3, size = 2, active = 2, running = 2, steals = 0, tasks = 0, submissions = 0]
 
     /**
      * Returns a new instance of the ConnectionResponse class.
