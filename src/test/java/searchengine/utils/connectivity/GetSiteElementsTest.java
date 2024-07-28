@@ -1,20 +1,15 @@
 package searchengine.utils.connectivity;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -22,16 +17,16 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class ConnectionTest {
+public class GetSiteElementsTest {
 
-    private Connection connection;
+    private GetSiteElements getSiteElements;
     private ConnectionSettings connectionSettings;
     private Document document;
 
     @BeforeEach
     public void setup() {
         connectionSettings = Mockito.mock(ConnectionSettings.class);
-        connection = new Connection(connectionSettings);
+        getSiteElements = new GetSiteElements(connectionSettings);
         document = mock(Document.class);
     }
 
@@ -51,7 +46,7 @@ public class ConnectionTest {
         when(document.select("a[href]").stream()).thenReturn((Stream<Element>) urls);
         when(document.select("a[href]").stream().map(element -> element.absUrl("href"))).thenReturn(urls.stream());
 
-        ConnectionResponse response = connection.getConnectionResponse(url);
+        ConnectionResponse response = getSiteElements.getConnectionResponse(url);
 
         assertEquals(url, response.getPath());
         assertEquals(HttpStatus.OK.value(), response.getResponseCode());
@@ -66,7 +61,7 @@ public class ConnectionTest {
 
 //        when(Jsoup.connect(url)).thenThrow(new IOException());
 
-        ConnectionResponse response = connection.getConnectionResponse(url);
+        ConnectionResponse response = getSiteElements.getConnectionResponse(url);
 
         assertEquals(url, response.getPath());
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getResponseCode());

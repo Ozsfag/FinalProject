@@ -12,7 +12,7 @@ import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.connectivity.Connection;
+import searchengine.utils.connectivity.GetSiteElements;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
@@ -29,7 +29,7 @@ public class SearchingImpl implements SearchingService {
     private final Morphology morphology;
     private final PageRepository pageRepository;
     private final IndexRepository indexRepository;
-    private final Connection connection;
+    private final GetSiteElements getSiteElements;
     private static final int MAX_FREQUENCY = 5000;
 
     /**
@@ -77,7 +77,7 @@ public class SearchingImpl implements SearchingService {
                         response.setSite(urlComponents[0]);
                         response.setSiteName(pageModel.getSite().getName());
                         response.setRelevance(entry.getValue());
-                        response.setTitle(connection.getTitle(pageModel.getPath()));
+                        response.setTitle(getSiteElements.getTitle(pageModel.getPath()));
                         response.setSnippet(getSnippet(uniqueSet, pageModel));
                     } catch (URISyntaxException e) {
                         throw new RuntimeException(e.getLocalizedMessage());

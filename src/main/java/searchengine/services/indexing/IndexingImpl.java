@@ -20,7 +20,7 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.connectivity.Connection;
+import searchengine.utils.connectivity.GetSiteElements;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.parser.Parser;
@@ -45,7 +45,7 @@ public class IndexingImpl implements IndexingService {
     @Lazy
     private final EntityHandler entityHandler;
     @Lazy
-    private final Connection connection;
+    private final GetSiteElements getSiteElements;
     @Lazy
     private final MorphologySettings morphologySettings;
     @Lazy
@@ -91,7 +91,7 @@ public class IndexingImpl implements IndexingService {
     private Parser getParser(SiteModel siteModel, String siteUrl){
         return new Parser(
                 entityHandler,
-                connection,
+                getSiteElements,
                 morphology,
                 siteModel,
                 siteUrl,

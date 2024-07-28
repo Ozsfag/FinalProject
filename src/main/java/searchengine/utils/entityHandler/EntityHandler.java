@@ -1,11 +1,9 @@
 package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
-import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.*;
@@ -13,7 +11,7 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.connectivity.Connection;
+import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.morphology.Morphology;
 
 import java.net.URISyntaxException;
@@ -29,13 +27,13 @@ import static searchengine.services.indexing.IndexingImpl.isIndexing;
 @Component
 @RequiredArgsConstructor
 public class EntityHandler {
-    private final Connection connection;
     private final SitesList sitesList;
     private final SiteRepository siteRepository;
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
     public final Morphology morphology;
     private final PageRepository pageRepository;
+    private final EntityFactory entityFactory;
 
     /**
      * @param href from application.yaml
@@ -51,7 +49,7 @@ public class EntityHandler {
                     .orElseThrow(() -> new OutOfSitesConfigurationException("Out of sites"));
 
             SiteModel siteModel = Optional.ofNullable(siteRepository.findSiteByUrl(validatedUrl))
-                    .orElseGet(()-> createSiteModel(site));
+                    .orElseGet(()-> entityFactory.createSiteModel(site));
 
             return siteRepository.saveAndFlush(siteModel);
 
@@ -69,7 +67,7 @@ public class EntityHandler {
     public PageModel getPageModel(SiteModel siteModel, String href) {
         PageModel pageModel = null;
         try {
-            pageModel = createPageModel(siteModel, href);
+            pageModel = entityFactory.createPageModel(siteModel, href);
             if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
             return pageModel;
 
@@ -101,7 +99,7 @@ public class EntityHandler {
                 .contains(entry.getKey()));
 
         existingLemmaModels.addAll(wordCountMap.entrySet().stream()
-                .map(entry -> createLemmaModel(siteModel, entry.getKey(), entry.getValue()))
+                .map(entry -> entityFactory.createLemmaModel(siteModel, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toSet())
         );
 
@@ -134,7 +132,7 @@ public class EntityHandler {
                 .map(word2Count -> {
                         try {
                            LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
-                           return createIndexModel(pageModel, lemmaModel, (float) word2Count.getValue());
+                           return entityFactory.createIndexModel(pageModel, lemmaModel, (float) word2Count.getValue());
                         } catch (StoppedExecutionException e) {
                             throw new RuntimeException(e.getLocalizedMessage());
                         }
@@ -150,11 +148,24 @@ public class EntityHandler {
      * using the respective repository merge methods.
      *
      * @param entities the set of entities to save
-     * @param repository the JpaRepository used to save the entities
      */
-    public void saveEntities(Collection<?> entities, JpaRepository repository) {
+    public void saveEntities(Collection<?> entities) {
         try {
-            repository.saveAllAndFlush(entities);
+            Class<?> repositoryClass = entities.iterator().next().getClass();
+            switch (repositoryClass.getSimpleName()) {
+                case "PageModel":
+                    Collection<PageModel> pages = (Collection<PageModel>) entities;
+                    pageRepository.saveAll(pages);
+                    break;
+                case "LemmaModel":
+                    Collection<LemmaModel> lemmas = (Collection<LemmaModel>) entities;
+                    lemmaRepository.saveAll(lemmas);
+                    break;
+                case "IndexModel":
+                    Collection<IndexModel> indexes = (Collection<IndexModel>) entities;
+                    indexRepository.saveAll(indexes);
+                    break;
+            }
         } catch (Exception e) {
             entities.forEach(entity -> {
                 Class<?> aClass = entity.getClass();
@@ -174,66 +185,5 @@ public class EntityHandler {
                 }
             });
         }
-    }
-    /**
-     * Creates a new SiteModel object with the provided site information.
-     *
-     * @param  site  the Site object to create the SiteModel from
-     * @return       the newly created SiteModel object
-     */
-    private SiteModel createSiteModel(Site site) {
-        return SiteModel.builder()
-                .status(Status.INDEXING)
-                .url(site.getUrl())
-                .statusTime(new Date())
-                .lastError("")
-                .name(site.getName())
-                .build();
-    }
-    /**
-     * Creates a new PageModel object with the provided siteModel and path.
-     *
-     * @param  siteModel  the SiteModel for the PageModel
-     * @param  path       the path of the page
-     * @return             the newly created PageModel object
-     */
-    private PageModel createPageModel(SiteModel siteModel, String path){
-        ConnectionResponse connectionResponse = connection.getConnectionResponse(path);
-        return PageModel.builder()
-                .site(siteModel)
-                .path(path)
-                .code(connectionResponse.getResponseCode())
-                .content(connectionResponse.getContent())
-                .build();
-    }
-    /**
-     * Creates a new LemmaModel object with the provided siteModel, lemma, and frequency.
-     *
-     * @param  siteModel   the SiteModel for the LemmaModel
-     * @param  lemma       the lemma for the LemmaModel
-     * @param  frequency   the frequency for the LemmaModel
-     * @return             the newly created LemmaModel object
-     */
-    private LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency){
-        return LemmaModel.builder()
-                .site(siteModel)
-                .lemma(lemma)
-                .frequency(frequency)
-                .build();
-    }
-    /**
-     * Creates an IndexModel object with the given PageModel, LemmaModel, and ranking.
-     *
-     * @param  pageModel   the PageModel to associate with the IndexModel
-     * @param  lemmaModel   the LemmaModel to associate with the IndexModel
-     * @param  ranking     the ranking value to associate with the IndexModel
-     * @return             the newly created IndexModel object
-     */
-    private IndexModel createIndexModel(PageModel pageModel, LemmaModel lemmaModel, Float ranking){
-        return IndexModel.builder()
-                .page(pageModel)
-                .lemma(lemmaModel)
-                .rank(ranking)
-                .build();
     }
 }

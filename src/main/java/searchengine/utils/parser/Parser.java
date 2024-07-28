@@ -10,7 +10,7 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.connectivity.Connection;
+import searchengine.utils.connectivity.GetSiteElements;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class Parser extends RecursiveTask<Boolean> {
     private final EntityHandler entityHandler;
-    private final Connection connection;
+    private final GetSiteElements getSiteElements;
     private final Morphology morphology;
     private final SiteModel siteModel;
     private final String href;
@@ -42,14 +42,14 @@ public class Parser extends RecursiveTask<Boolean> {
      */
     @Override
     protected Boolean compute() {
-        Collection<String> urlsToParse = getUrlsToParse();
+        Collection<String> urlsToParse = getSiteElements.getUrlsToParse(siteModel, href);
         if (!urlsToParse.isEmpty()) {
             indexingProcess(urlsToParse);
             siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
             List<Parser> subtasks = urlsToParse.stream()
                     .map(url -> new Parser(
                             entityHandler,
-                            connection,
+                            getSiteElements,
                             morphology,
                             siteModel,
                             url,
@@ -84,49 +84,20 @@ public class Parser extends RecursiveTask<Boolean> {
     }
 
     /**
-     * Retrieves a set of URLs to parse based on the provided list of all URLs by site.
-     *
-     * @return                 a set of URLs to parse
-     */
-    private Set<String> getUrlsToParse() {
-        Collection<String> urls = connection.getConnectionResponse(href).getUrls();
-        Set<String> alreadyParsed = pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
-
-        return urls.parallelStream()
-                .filter(url -> url.startsWith(siteModel.getUrl()) &&
-                        Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains) &&
-                        notRepeatedUrl(url))
-                .filter(url -> !alreadyParsed.contains(url))
-                .collect(Collectors.toSet());
-    }
-    /**
-     * Checks if the given URL is not repeated by splitting it into its components and checking if each component is unique.
-     *
-     * @param  url  the URL to check for repetition
-     * @return      true if the URL is not repeated, false otherwise
-     */
-    private boolean notRepeatedUrl(String url) {
-        String[] urlSplit = url.split("/");
-        return Arrays.stream(urlSplit)
-                .distinct()
-                .count() == urlSplit.length;
-
-    }
-    /**
      * Indexes the lemmas and indexes for a list of pages.
      *
      * @param  urlsToParse   the list of pages to index
      */
     private void indexingProcess(Collection<String> urlsToParse) {
         Collection<PageModel> pages = getPages(urlsToParse);
-        entityHandler.saveEntities(pages, pageRepository);
+        entityHandler.saveEntities(pages);
 
         pages.forEach(page -> {
             Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
             Collection<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
-            entityHandler.saveEntities(lemmas, lemmaRepository);
+            entityHandler.saveEntities(lemmas);
             Collection<IndexModel> indexes = entityHandler.getIndexModelFromContent(page, lemmas, wordCountMap);
-            entityHandler.saveEntities(indexes, indexRepository);
+            entityHandler.saveEntities(indexes);
         });
     }
 }
