@@ -107,6 +107,5 @@ public class GetSiteElements {
         return Arrays.stream(urlSplit)
                 .distinct()
                 .count() == urlSplit.length;
-
     }
 }

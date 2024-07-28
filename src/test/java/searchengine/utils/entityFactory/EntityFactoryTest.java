@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class EntityFactoryTest {
     @InjectMocks
     private GetSiteElements getSiteElements;
-    @InjectMocks
     private EntityFactory factory ;
 
     @BeforeEach
@@ -47,6 +46,7 @@ public class EntityFactoryTest {
 
     @Test
     public void testCreatePageModel() {
+        // Arrange
         SiteModel siteModel = new SiteModel();
         String path = "/index.html";
         PageModel expected = PageModel.builder()
@@ -55,8 +55,19 @@ public class EntityFactoryTest {
                 .code(200)
                 .content("Hello, world!")
                 .build();
+
+        // Act
         PageModel actual = factory.createPageModel(siteModel, path);
-        assertEquals(expected, actual);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(expected.getSite(), actual.getSite()),
+                () -> assertEquals(expected.getPath(), actual.getPath()),
+                () -> assertEquals(expected.getCode(), actual.getCode()),
+                () -> assertEquals(expected.getVersion(), actual.getVersion()),
+                () -> assertEquals(expected.getId(), actual.getId()),
+                () -> assertEquals(expected.getContent(), actual.getContent())
+        );
     }
 
     @Test
