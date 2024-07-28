@@ -26,7 +26,7 @@ public class PageModel implements Serializable {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "site_id", referencedColumnName = "site_id", nullable = false)
+    @JoinColumn(name = "site_id", referencedColumnName = "site_id", nullable = false, unique = true)
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @ToString.Exclude
     private SiteModel site;

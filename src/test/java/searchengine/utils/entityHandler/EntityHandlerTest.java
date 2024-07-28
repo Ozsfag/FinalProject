@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
+import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.entityHandler.EntityHandler;
@@ -30,6 +31,9 @@ class EntityHandlerTest {
     private SiteRepository siteRepository;
     @InjectMocks
     private EntityHandler entityHandler;
+    private Site site;
+    private String href;
+    String validatedUrl;
 
     @BeforeEach
     public  void setUp() {
@@ -37,15 +41,14 @@ class EntityHandlerTest {
         sitesList = Mockito.mock(SitesList.class);
         siteRepository = Mockito.mock(SiteRepository.class);
         entityHandler = Mockito.mock(EntityHandler.class);
+        site = Site.builder().url("https://example.com").name("Example Site").build();
+        href = "https://example.com/";;
+        validatedUrl = "https://example.com";
     }
 
     @Test
     void getIndexedSiteModel_validUrl_returnsSiteModel() throws URISyntaxException {
         // Arrange
-        String href = "https://example.com";
-        String validatedUrl = "https://example.com";
-        Site site = new Site(href, "Example Site");
-        sitesList.setSites(Collections.singletonList(site));
         SiteModel siteModel = new SiteModel();
 
         when(morphology.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
@@ -54,7 +57,7 @@ class EntityHandlerTest {
         when(siteRepository.saveAndFlush(any(SiteModel.class))).thenReturn(siteModel);
 
         // Assert
-        assertThrows(RuntimeException.class, (Executable) entityHandler.getIndexedSiteModel(validatedUrl));
+        assertThrows(RuntimeException.class, (Executable) entityHandler.getIndexedSiteModel(href));
         verify(morphology, times(1)).getValidUrlComponents(href);
         verify(sitesList, times(1)).getSites();
         verify(siteRepository, times(1)).findSiteByUrl(validatedUrl);
@@ -64,16 +67,12 @@ class EntityHandlerTest {
     @Test
     void getIndexedSiteModel_invalidUrl_throwsOutOfSitesConfigurationException() throws URISyntaxException {
         // Arrange
-        String href = "https://examples.com";
-        String validatedUrl = "https://example.com";
-        Site site = new Site("https://example.com", "Example Site");
-
         when(morphology.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
         when(sitesList.getSites()).thenReturn(Collections.singletonList(site));
         when(siteRepository.findSiteByUrl(validatedUrl)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> entityHandler.getIndexedSiteModel(href));
+        assertThrows(OutOfSitesConfigurationException.class, () -> entityHandler.getIndexedSiteModel(href));
     }
 
     @Test

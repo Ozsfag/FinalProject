@@ -95,7 +95,10 @@ public class EntityHandler {
                         .peek(lemmaModel -> lemmaModel.setFrequency(lemmaModel.getFrequency() + wordCountMap.get(lemmaModel.getLemma())))
                         .collect(Collectors.toSet());
 
-        wordCountMap.entrySet().removeIf(entry -> existingLemmaModels.parallelStream().map(LemmaModel::getLemma).toList().contains(entry.getKey()));
+        wordCountMap.entrySet().removeIf(entry -> existingLemmaModels.parallelStream()
+                .map(LemmaModel::getLemma)
+                .toList()
+                .contains(entry.getKey()));
 
         existingLemmaModels.addAll(wordCountMap.entrySet().stream()
                 .map(entry -> createLemmaModel(siteModel, entry.getKey(), entry.getValue()))

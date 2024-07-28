@@ -1,11 +1,15 @@
 package searchengine.dto.indexing;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class Site {
-    private final String url;
-    private final String name;
+    public String url;
+    public String name;
 }
