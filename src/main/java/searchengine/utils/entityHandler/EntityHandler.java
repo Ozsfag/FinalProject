@@ -70,11 +70,7 @@ public class EntityHandler {
                     }
                     return pageModel;
                 })
-                .peek(pageModel -> {
-                    if (pageModel != null) {
-                        pageRepository.saveAndFlush(pageModel);
-                    }
-                })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
@@ -87,10 +83,9 @@ public class EntityHandler {
      */
     public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(SiteModel siteModel, Map<String, Integer> wordCountMap) {
 
-        Set<LemmaModel> existingLemmaModels =
+        Collection<LemmaModel> existingLemmaModels =
                 lemmaRepository.findByLemmaInAndSite_Id(wordCountMap.keySet(), siteModel.getId())
                         .parallelStream()
-                        .peek(lemmaModel -> lemmaModel.setFrequency(lemmaModel.getFrequency() + wordCountMap.get(lemmaModel.getLemma())))
                         .collect(Collectors.toSet());
 
         wordCountMap.entrySet().removeIf(entry -> existingLemmaModels.parallelStream()
@@ -115,9 +110,8 @@ public class EntityHandler {
      * @return the list of IndexModels generated from the content
      */
     public Collection<IndexModel> getIndexedIndexModelFromCountedWords(PageModel pageModel, Collection<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
-        Set<IndexModel> existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
+        Collection<IndexModel> existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
                 .parallelStream()
-                .peek(indexModel -> indexModel.setRank(indexModel.getRank() + wordCountMap.get(indexModel.getLemma())))
                 .collect(Collectors.toSet());
 
         wordCountMap.entrySet().removeIf(entry-> existingIndexModels.parallelStream()

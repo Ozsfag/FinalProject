@@ -29,7 +29,12 @@ public class WebScraper {
     private final PageRepository pageRepository;
     private final MorphologySettings morphologySettings;
     private final Validator validator;
-
+    /**
+     * Retrieves a Jsoup Document object for the given URL by establishing a connection with it.
+     *
+     * @param  url   the URL to connect to
+     * @return       a Jsoup Document object representing the HTML content of the URL, or null if an IOException occurs
+     */
     public Document getDocument(String url) {
         try {
             return Jsoup.connect(url)
@@ -38,7 +43,7 @@ public class WebScraper {
                     .ignoreHttpErrors(true)
                     .get();
         } catch (IOException e) {
-            return null;
+            throw new RuntimeException(e.getCause());
         }
     }
     /**
@@ -87,7 +92,7 @@ public class WebScraper {
      */
     public Collection<String> getUrlsToParse(SiteModel siteModel, String href) {
         Collection<String> urls = getConnectionResponse(href).getUrls();
-        Set<String> alreadyParsed = pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
+        Collection<String> alreadyParsed = pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
         urls.removeAll(alreadyParsed);
 
         return urls.parallelStream()
