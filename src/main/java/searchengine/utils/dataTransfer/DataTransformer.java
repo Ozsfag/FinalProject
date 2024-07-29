@@ -19,15 +19,22 @@ public class DataTransformer {
     public Collection<String> transformUrlToUrls(String url){
         return Collections.singletonList(url);
     }
+
     public Site transformUrlToSite(String url) throws OutOfSitesConfigurationException {
         return sitesList.getSites().stream()
                 .filter(siteUrl -> siteUrl.getUrl().equals(url))
                 .findFirst()
-                .orElseThrow(() -> new OutOfSitesConfigurationException("Site not found"));
+                .orElseThrow(() -> new OutOfSitesConfigurationException("Site is not in configuration"));
     }
 
     @SneakyThrows
-    public Collection<Site> transformUrlToSites(String url) throws OutOfSitesConfigurationException {
-        return transformUrlToUrls(url).stream().map(this::transformUrlToSite).toList();
+    public Collection<Site> transformUrlToSites(String url) {
+        return transformUrlToUrls(url).stream().map(href -> {
+            try {
+                return transformUrlToSite(href);
+            } catch (OutOfSitesConfigurationException e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
     }
 }

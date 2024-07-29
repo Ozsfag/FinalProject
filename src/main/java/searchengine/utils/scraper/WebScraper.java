@@ -1,9 +1,9 @@
 package searchengine.utils.scraper;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.ConnectionSettings;
@@ -11,6 +11,7 @@ import searchengine.config.MorphologySettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
+import searchengine.utils.validator.Validator;
 
 import java.io.IOException;
 import java.util.*;
@@ -21,13 +22,13 @@ import java.util.stream.Collectors;
  * @author Ozsfag
  */
 @Component
+@Data
 @RequiredArgsConstructor
 public class WebScraper {
     private final ConnectionSettings connectionSettings;
-    @Autowired
-    private PageRepository pageRepository;
-    @Autowired
-    private MorphologySettings morphologySettings;
+    private final PageRepository pageRepository;
+    private final MorphologySettings morphologySettings;
+    private final Validator validator;
 
     public Document getDocument(String url) {
         try {
@@ -84,28 +85,14 @@ public class WebScraper {
      *
      * @return a set of URLs to parse
      */
-    public Set<String> getUrlsToParse(SiteModel siteModel, String href) {
+    public Collection<String> getUrlsToParse(SiteModel siteModel, String href) {
         Collection<String> urls = getConnectionResponse(href).getUrls();
         Set<String> alreadyParsed = pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
         urls.removeAll(alreadyParsed);
 
         return urls.parallelStream()
-                .filter(url -> url.startsWith(siteModel.getUrl()) &&
-                        Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains) &&
-                        notRepeatedUrlByFragments(url))
+                .filter(url -> validator.urlHasCorrectForm(url, siteModel))
                 .collect(Collectors.toSet());
     }
 
-    /**
-     * Checks if the given URL is not repeated by splitting it into its components and checking if each component is unique.
-     *
-     * @param url the URL to check for repetition
-     * @return true if the URL is not repeated, false otherwise
-     */
-    private boolean notRepeatedUrlByFragments(String url) {
-        String[] urlSplit = url.split("/");
-        return Arrays.stream(urlSplit)
-                .distinct()
-                .count() == urlSplit.length;
-    }
 }

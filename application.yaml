@@ -44,10 +44,10 @@ indexing-settings:
 #      name: PlayBack.Ru
 #    - url: https://domrebenka.belzdrav.ru/
 #      name: Дом Ребенка
-#    - url: https://amurkino.ru/
-#      name: Амуркино
-    - url: https://sendel.ru/
-      name: sendel
+    - url: https://amurkino.ru/
+      name: Амуркино
+#    - url: https://sendel.ru/
+#      name: sendel
 
 
 connection-settings:

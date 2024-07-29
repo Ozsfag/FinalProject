@@ -47,9 +47,9 @@ public class EntityHandler {
 
         pages.forEach(page -> {
             Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
-            Collection<LemmaModel> lemmas = getIndexedLemmaModelsFromContent(siteModel, wordCountMap);
+            Collection<LemmaModel> lemmas = getIndexedLemmaModelsFromCountedWords(siteModel, wordCountMap);
             saveEntities(lemmas);
-            Collection<IndexModel> indexes = getIndexedIndexModelFromContent(page, lemmas, wordCountMap);
+            Collection<IndexModel> indexes = getIndexedIndexModelFromCountedWords(page, lemmas, wordCountMap);
             saveEntities(indexes);
             siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
         });
@@ -85,7 +85,7 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return              the set of indexed LemmaModels
      */
-    public Collection<LemmaModel> getIndexedLemmaModelsFromContent(SiteModel siteModel, Map<String, Integer> wordCountMap) {
+    public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(SiteModel siteModel, Map<String, Integer> wordCountMap) {
 
         Set<LemmaModel> existingLemmaModels =
                 lemmaRepository.findByLemmaInAndSite_Id(wordCountMap.keySet(), siteModel.getId())
@@ -114,7 +114,7 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return the list of IndexModels generated from the content
      */
-    public Collection<IndexModel> getIndexedIndexModelFromContent(PageModel pageModel, Collection<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
+    public Collection<IndexModel> getIndexedIndexModelFromCountedWords(PageModel pageModel, Collection<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
         Set<IndexModel> existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
                 .parallelStream()
                 .peek(indexModel -> indexModel.setRank(indexModel.getRank() + wordCountMap.get(indexModel.getLemma())))
@@ -126,7 +126,7 @@ public class EntityHandler {
                 .contains(lemmas.stream()
                         .filter(lemma -> lemma.getLemma().equals(entry.getKey()))
                         .findFirst()
-                        ));
+                ));
 
         existingIndexModels.addAll(wordCountMap.entrySet().parallelStream()
                 .map(word2Count -> {

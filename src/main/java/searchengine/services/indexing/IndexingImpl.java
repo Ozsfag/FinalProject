@@ -11,8 +11,6 @@ import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
-import searchengine.model.LemmaModel;
-import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
 import searchengine.repositories.IndexRepository;
@@ -108,10 +106,8 @@ public class IndexingImpl implements IndexingService {
     @SneakyThrows
     @Override
     public ResponseInterface indexPage(String url) {
-        if (isIndexing) {
-            return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
-        }
-        SiteModel siteModel = entityHandler.getIndexedSiteModelFromSites(dataTransformer.).iterator().next();
+        if (isIndexing) return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
+        SiteModel siteModel = entityHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url)).iterator().next();
         entityHandler.processIndexing(dataTransformer.transformUrlToUrls(url), siteModel);
         return new Successful(true);
     }

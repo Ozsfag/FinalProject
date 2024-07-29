@@ -5,11 +5,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.config.MorphologySettings;
 import searchengine.dto.ResponseInterface;
-import searchengine.dto.indexing.Site;
 import searchengine.dto.searching.responseImpl.DetailedSearchResponse;
 import searchengine.dto.searching.responseImpl.TotalEmptyResponse;
 import searchengine.dto.searching.responseImpl.TotalSearchResponse;
-import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.model.IndexModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
@@ -19,6 +17,7 @@ import searchengine.utils.dataTransfer.DataTransformer;
 import searchengine.utils.scraper.WebScraper;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
+import searchengine.utils.validator.Validator;
 
 import java.net.URISyntaxException;
 import java.util.*;
@@ -36,6 +35,7 @@ public class SearchingImpl implements SearchingService {
     private final WebScraper webScraper;
     private final MorphologySettings morphologySettings;
     private final DataTransformer dataTransformer;
+    private final Validator validator;
 
     /**
      * A description of the entire Java function.
@@ -48,13 +48,12 @@ public class SearchingImpl implements SearchingService {
      */
     @Override
     public ResponseInterface search(String query, String url, int offset, int limit) {
-        Site site = null;
-        try {
-            site = dataTransformer.transformUrlToSite(url);
-        } catch (OutOfSitesConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-        SiteModel siteModel = url == null ? null : entityHandler.getIndexedSiteModelFromSites(Collections.singleton(site)).stream().findFirst().get();
+        SiteModel siteModel = url == null ?
+                null :
+                entityHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
+                        .stream()
+                        .findFirst()
+                        .get();
 
         Collection<IndexModel> uniqueSet = transformQueryToIndexModelSet(query, siteModel);
         if (uniqueSet.isEmpty()){return new TotalEmptyResponse(false, "Not found");}
@@ -83,7 +82,7 @@ public class SearchingImpl implements SearchingService {
                     DetailedSearchResponse response = new DetailedSearchResponse();
                     try {
                         PageModel pageModel = pageRepository.findById(entry.getKey()).orElseThrow();
-                        String[] urlComponents = morphology.getValidUrlComponents(pageModel.getPath());
+                        String[] urlComponents = validator.getValidUrlComponents(pageModel.getPath());
                         response.setUri(urlComponents[1]);
                         response.setSite(urlComponents[0]);
                         response.setSiteName(pageModel.getSite().getName());

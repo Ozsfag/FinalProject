@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-public class LemmaModel implements Serializable {
+public class LemmaModel implements Serializable, EntityInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lemma_id", columnDefinition = "INT")

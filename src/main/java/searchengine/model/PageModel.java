@@ -19,7 +19,7 @@ import java.util.Set;
 @AllArgsConstructor
 @ToString
 @NoArgsConstructor
-public class PageModel implements Serializable {
+public class PageModel implements Serializable, EntityInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "page_id", columnDefinition = "INT")

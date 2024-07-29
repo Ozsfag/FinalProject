@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "`indexes`", schema = "search_engine",
@@ -16,7 +17,7 @@ import javax.persistence.*;
 @ToString
 @RequiredArgsConstructor
 @Builder
-public class IndexModel  {
+public class IndexModel implements Serializable, EntityInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "index_id",columnDefinition = "INT")
