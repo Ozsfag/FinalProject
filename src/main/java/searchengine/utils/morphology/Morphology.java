@@ -81,6 +81,10 @@ public class Morphology {
         final String path = uri.getPath();
         return new String[]{schemeAndHost, path};
     }
+    public boolean isInSiteConfiguration(String url, String validationBySiteInConfiguration){
+        return url.startsWith(validationBySiteInConfiguration);
+    }
+
 }
 
 

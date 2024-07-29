@@ -1,4 +1,4 @@
-package searchengine.utils.connectivity;
+package searchengine.utils.scraper;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,16 +17,16 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class GetSiteElementsTest {
+public class WebScraperTest {
 
-    private GetSiteElements getSiteElements;
+    private WebScraper webScraper;
     private ConnectionSettings connectionSettings;
     private Document document;
 
     @BeforeEach
     public void setup() {
         connectionSettings = Mockito.mock(ConnectionSettings.class);
-        getSiteElements = new GetSiteElements(connectionSettings);
+        webScraper = new WebScraper(connectionSettings);
         document = mock(Document.class);
     }
 
@@ -46,7 +46,7 @@ public class GetSiteElementsTest {
         when(document.select("a[href]").stream()).thenReturn((Stream<Element>) urls);
         when(document.select("a[href]").stream().map(element -> element.absUrl("href"))).thenReturn(urls.stream());
 
-        ConnectionResponse response = getSiteElements.getConnectionResponse(url);
+        ConnectionResponse response = webScraper.getConnectionResponse(url);
 
         assertEquals(url, response.getPath());
         assertEquals(HttpStatus.OK.value(), response.getResponseCode());
@@ -61,7 +61,7 @@ public class GetSiteElementsTest {
 
 //        when(Jsoup.connect(url)).thenThrow(new IOException());
 
-        ConnectionResponse response = getSiteElements.getConnectionResponse(url);
+        ConnectionResponse response = webScraper.getConnectionResponse(url);
 
         assertEquals(url, response.getPath());
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getResponseCode());

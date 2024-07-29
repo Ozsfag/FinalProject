@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import searchengine.dto.ResponseInterface;
 
-import java.util.List;
+import java.util.Collection;
 
 @Data
 @AllArgsConstructor
@@ -13,5 +13,5 @@ import java.util.List;
 public class TotalSearchResponse implements ResponseInterface {
     boolean result;
     int count;
-    List<DetailedSearchResponse> data;
+    Collection<DetailedSearchResponse> data;
 }

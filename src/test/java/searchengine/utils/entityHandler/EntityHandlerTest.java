@@ -1,4 +1,4 @@
-package searchengine.utils.entityHendler;
+package searchengine.utils.entityHandler;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,6 @@ import searchengine.dto.indexing.Site;
 import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
 import java.net.URISyntaxException;
@@ -47,7 +46,7 @@ class EntityHandlerTest {
     }
 
     @Test
-    void getIndexedSiteModel_validUrl_returnsSiteModel() throws URISyntaxException {
+    void getIndexedSiteModel_validUrl_returnsSiteModelFromUrls() throws URISyntaxException {
         // Arrange
         SiteModel siteModel = new SiteModel();
 
@@ -57,7 +56,7 @@ class EntityHandlerTest {
         when(siteRepository.saveAndFlush(any(SiteModel.class))).thenReturn(siteModel);
 
         // Assert
-        assertThrows(RuntimeException.class, (Executable) entityHandler.getIndexedSiteModel(href));
+        assertThrows(RuntimeException.class, (Executable) entityHandler.getIndexedSiteModelFromSites(href));
         verify(morphology, times(1)).getValidUrlComponents(href);
         verify(sitesList, times(1)).getSites();
         verify(siteRepository, times(1)).findSiteByUrl(validatedUrl);
@@ -65,24 +64,24 @@ class EntityHandlerTest {
     }
 
     @Test
-    void getIndexedSiteModel_invalidUrl_throwsOutOfSitesConfigurationException() throws URISyntaxException {
+    void getIndexedSiteModel_FromUrls_invalidUrl_throwsOutOfSitesConfigurationException() throws URISyntaxException {
         // Arrange
         when(morphology.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
         when(sitesList.getSites()).thenReturn(Collections.singletonList(site));
         when(siteRepository.findSiteByUrl(validatedUrl)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(OutOfSitesConfigurationException.class, () -> entityHandler.getIndexedSiteModel(href));
+        assertThrows(OutOfSitesConfigurationException.class, () -> entityHandler.getIndexedSiteModelFromSites(href));
     }
 
     @Test
-    void getIndexedSiteModel_URISyntaxException_throwsRuntimeException() throws URISyntaxException {
+    void getIndexedSiteModel_FromUrls_URISyntaxException_throwsRuntimeException() throws URISyntaxException {
         // Arrange
         String href = "https://example.com";
 
         when(morphology.getValidUrlComponents(href)).thenThrow(new URISyntaxException("Invalid URL", href));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> entityHandler.getIndexedSiteModel(href));
+        assertThrows(RuntimeException.class, () -> entityHandler.getIndexedSiteModelFromSites(href));
     }
 }

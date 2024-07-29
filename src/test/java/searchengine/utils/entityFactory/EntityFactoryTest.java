@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import searchengine.dto.indexing.Site;
 import searchengine.model.*;
-import searchengine.utils.connectivity.GetSiteElements;
+import searchengine.utils.scraper.WebScraper;
 
 import java.util.Date;
 
@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EntityFactoryTest {
     @InjectMocks
-    private GetSiteElements getSiteElements;
+    private WebScraper webScraper;
     private EntityFactory factory ;
 
     @BeforeEach
     public void setup() {
-        getSiteElements = Mockito.mock(GetSiteElements.class);
-        factory = new EntityFactory(getSiteElements);
+        webScraper = Mockito.mock(WebScraper.class);
+        factory = new EntityFactory(webScraper);
     }
 
     @Test

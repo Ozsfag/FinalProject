@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import searchengine.config.MorphologySettings;
 import searchengine.config.SitesList;
 import searchengine.dto.ResponseInterface;
-import searchengine.dto.indexing.Site;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
@@ -20,7 +19,9 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.connectivity.GetSiteElements;
+import searchengine.utils.dataTransfer.DataTransformer;
+import searchengine.utils.entityFactory.EntityFactory;
+import searchengine.utils.scraper.WebScraper;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.parser.Parser;
@@ -45,13 +46,17 @@ public class IndexingImpl implements IndexingService {
     @Lazy
     private final EntityHandler entityHandler;
     @Lazy
-    private final GetSiteElements getSiteElements;
+    private final EntityFactory entityFactory;
+    @Lazy
+    private final WebScraper webScraper;
     @Lazy
     private final MorphologySettings morphologySettings;
     @Lazy
     private final LemmaRepository lemmaRepository;
     @Lazy
     private final IndexRepository indexRepository;
+    @Lazy
+    private final DataTransformer dataTransformer;
     @Lazy
     public static volatile boolean isIndexing = true;
     /**
@@ -63,43 +68,25 @@ public class IndexingImpl implements IndexingService {
     public ResponseInterface startIndexing() {
         if (!isIndexing) return new Bad(false, "Индексация уже запущена");
         CompletableFuture.runAsync(() -> {
-            List<CompletableFuture<Void>> futures = new ArrayList<>();
-            for (Site siteUrl : sitesList.getSites()) {
+            Collection<CompletableFuture<Void>> futures = new ArrayList<>();
+
+            Collection<SiteModel> siteModels = entityHandler.getIndexedSiteModelFromSites(sitesList.getSites());
+            entityHandler.saveEntities(siteModels);
+
+            siteModels.forEach(siteModel -> {
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     try {
-                        SiteModel siteModel = entityHandler.getIndexedSiteModel(siteUrl.getUrl());
-                        Parser parser = getParser(siteModel, siteUrl.getUrl());
-                        forkJoinPool.invoke(parser);
-                        siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteUrl.getUrl());
+                        forkJoinPool.invoke(new Parser(entityHandler, webScraper, siteModel, siteModel.getUrl()));
+                        siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteModel.getUrl());
                     } catch (Error re) {
-                        siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteUrl.getUrl());
+                        siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(Status.FAILED, new Date(), re.getLocalizedMessage(), siteModel.getUrl());
                     }
                 });
                 futures.add(future);
-            }
+            });
             CompletableFuture.allOf((CompletableFuture<?>) futures).join();
         });
         return new Successful(true);
-    }
-    /**
-     * Creates and returns a Parser object based on the provided parameters.
-     *
-     * @param  siteModel    the SiteModel object for the parser
-     * @param  siteUrl      the URL of the site for the parser
-     * @return              a new Parser object initialized with the given parameters
-     */
-    private Parser getParser(SiteModel siteModel, String siteUrl){
-        return new Parser(
-                entityHandler,
-                getSiteElements,
-                morphology,
-                siteModel,
-                siteUrl,
-                pageRepository,
-                morphologySettings,
-                lemmaRepository,
-                indexRepository,
-                siteRepository);
     }
     /**
      * Stops the indexing process if it is currently running.
@@ -124,12 +111,8 @@ public class IndexingImpl implements IndexingService {
         if (isIndexing) {
             return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
         }
-        SiteModel siteModel = entityHandler.getIndexedSiteModel(url);
-        PageModel pageModel = entityHandler.getPageModel(siteModel, url);
-        pageRepository.saveAndFlush(pageModel);
-        Map<String, Integer> wordCountMap = morphology.wordCounter(pageModel.getContent());
-        Collection<LemmaModel> lemmas = entityHandler.getIndexedLemmaModelListFromContent(siteModel, wordCountMap);
-        entityHandler.getIndexModelFromContent(pageModel, lemmas, wordCountMap);
+        SiteModel siteModel = entityHandler.getIndexedSiteModelFromSites(dataTransformer.).iterator().next();
+        entityHandler.processIndexing(dataTransformer.transformUrlToUrls(url), siteModel);
         return new Successful(true);
     }
 }

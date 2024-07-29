@@ -17,4 +17,5 @@ public class MorphologySettings {
     private String splitter;
     private String emptyString;
     private String[] formats;
+    private int maxFrequency;
 }

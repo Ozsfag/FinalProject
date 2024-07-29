@@ -2,9 +2,7 @@ package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
-import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.*;
 import searchengine.repositories.IndexRepository;
@@ -14,7 +12,6 @@ import searchengine.repositories.SiteRepository;
 import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.morphology.Morphology;
 
-import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,7 +24,6 @@ import static searchengine.services.indexing.IndexingImpl.isIndexing;
 @Component
 @RequiredArgsConstructor
 public class EntityHandler {
-    private final SitesList sitesList;
     private final SiteRepository siteRepository;
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
@@ -35,48 +31,52 @@ public class EntityHandler {
     private final PageRepository pageRepository;
     private final EntityFactory entityFactory;
 
-    /**
-     * @param href from application.yaml
-     * @return indexed siteModel
-     */
-    public SiteModel getIndexedSiteModel(String href) {
-        try {
-            String validatedUrl = morphology.getValidUrlComponents(href)[0];
-
-            Site site = sitesList.getSites().stream()
-                    .filter(s -> validatedUrl.startsWith(s.getUrl()))
-                    .findFirst()
-                    .orElseThrow(() -> new OutOfSitesConfigurationException("Out of sites"));
-
-            SiteModel siteModel = Optional.ofNullable(siteRepository.findSiteByUrl(validatedUrl))
-                    .orElseGet(()-> entityFactory.createSiteModel(site));
-
-            return siteRepository.saveAndFlush(siteModel);
-
-        } catch (URISyntaxException | OutOfSitesConfigurationException e) {
-            throw new RuntimeException(e.getLocalizedMessage());
-        }
+    public Collection<SiteModel> getIndexedSiteModelFromSites(Collection<Site> sitesToParse) {
+        return sitesToParse.stream().map(entityFactory::createSiteModel).toList();
     }
 
     /**
-     * get indexed PageModel from Site content
-     * @param siteModel, from database
-     * @param href of page from site
-     * @return indexed pageModel
+     * Indexes the lemmas and indexes for a list of pages.
+     *
+     * @param urlsToParse the list of pages to index
+     * @param siteModel
      */
-    public PageModel getPageModel(SiteModel siteModel, String href) {
-        PageModel pageModel = null;
-        try {
-            pageModel = entityFactory.createPageModel(siteModel, href);
-            if (!isIndexing)throw new StoppedExecutionException("Индексация остановлена пользователем");
-            return pageModel;
+    public void processIndexing(Collection<String> urlsToParse, SiteModel siteModel) {
+        Collection<PageModel> pages = getIndexedPageModelsFromUrls(urlsToParse, siteModel);
+        saveEntities(pages);
 
-        } catch (StoppedExecutionException e) {
-            pageRepository.saveAndFlush(Objects.requireNonNull(pageModel));
-            throw new StoppedExecutionException(e.getLocalizedMessage());
-        }
+        pages.forEach(page -> {
+            Map<String, Integer> wordCountMap = morphology.wordCounter(page.getContent());
+            Collection<LemmaModel> lemmas = getIndexedLemmaModelsFromContent(siteModel, wordCountMap);
+            saveEntities(lemmas);
+            Collection<IndexModel> indexes = getIndexedIndexModelFromContent(page, lemmas, wordCountMap);
+            saveEntities(indexes);
+            siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
+        });
     }
-
+    /**
+     * Retrieves the indexed PageModel list from the list of URLs.
+     *
+     * @param urlsToParse  the list of URLs to parse
+     * @param siteModel    the SiteModel containing the content
+     * @return              the set of indexed PageModels
+     */
+    public Set<PageModel> getIndexedPageModelsFromUrls(Collection<String> urlsToParse, SiteModel siteModel) {
+        return urlsToParse.parallelStream()
+                .map(url -> {
+                    PageModel pageModel = entityFactory.createPageModel(siteModel, url);
+                    if (!isIndexing) {
+                        throw new StoppedExecutionException("Индексация остановлена пользователем");
+                    }
+                    return pageModel;
+                })
+                .peek(pageModel -> {
+                    if (pageModel != null) {
+                        pageRepository.saveAndFlush(pageModel);
+                    }
+                })
+                .collect(Collectors.toSet());
+    }
 
     /**
      * Retrieves the indexed LemmaModel list from the content of a SiteModel.
@@ -85,7 +85,7 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return              the set of indexed LemmaModels
      */
-    public Collection<LemmaModel> getIndexedLemmaModelListFromContent( SiteModel siteModel, Map<String, Integer> wordCountMap) {
+    public Collection<LemmaModel> getIndexedLemmaModelsFromContent(SiteModel siteModel, Map<String, Integer> wordCountMap) {
 
         Set<LemmaModel> existingLemmaModels =
                 lemmaRepository.findByLemmaInAndSite_Id(wordCountMap.keySet(), siteModel.getId())
@@ -114,7 +114,7 @@ public class EntityHandler {
      * @param  wordCountMap a map of word frequencies in the content
      * @return the list of IndexModels generated from the content
      */
-    public Collection<IndexModel> getIndexModelFromContent(PageModel pageModel, Collection<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
+    public Collection<IndexModel> getIndexedIndexModelFromContent(PageModel pageModel, Collection<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
         Set<IndexModel> existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
                 .parallelStream()
                 .peek(indexModel -> indexModel.setRank(indexModel.getRank() + wordCountMap.get(indexModel.getLemma())))
@@ -126,7 +126,7 @@ public class EntityHandler {
                 .contains(lemmas.stream()
                         .filter(lemma -> lemma.getLemma().equals(entry.getKey()))
                         .findFirst()
-                        .orElse(null)));
+                        ));
 
         existingIndexModels.addAll(wordCountMap.entrySet().parallelStream()
                 .map(word2Count -> {
@@ -153,6 +153,10 @@ public class EntityHandler {
         try {
             Class<?> repositoryClass = entities.iterator().next().getClass();
             switch (repositoryClass.getSimpleName()) {
+                case "SiteModel":
+                    Collection<SiteModel> sites = (Collection<SiteModel>) entities;
+                    siteRepository.saveAll(sites);
+                    break;
                 case "PageModel":
                     Collection<PageModel> pages = (Collection<PageModel>) entities;
                     pageRepository.saveAll(pages);
@@ -170,6 +174,10 @@ public class EntityHandler {
             entities.forEach(entity -> {
                 Class<?> aClass = entity.getClass();
                 switch (aClass.getSimpleName()) {
+                    case "SiteModel":
+                        SiteModel siteModel = (SiteModel) entity;
+                        siteRepository.saveAndFlush(siteModel);
+                        break;
                     case "PageModel":
                         PageModel pageModel = (PageModel) entity;
                         pageRepository.merge(pageModel.getId(), pageModel.getCode(), pageModel.getSite().getId(), pageModel.getContent(), pageModel.getPath(), pageModel.getVersion());

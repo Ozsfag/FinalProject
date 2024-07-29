@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.Site;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 import searchengine.model.*;
-import searchengine.utils.connectivity.GetSiteElements;
+import searchengine.utils.scraper.WebScraper;
 
 import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class EntityFactory {
-    private final GetSiteElements getSiteElements;
+    private final WebScraper webScraper;
     /**
      * Creates a new SiteModel object with the provided site information.
      *
@@ -35,7 +35,7 @@ public class EntityFactory {
      * @return             the newly created PageModel object
      */
     public PageModel createPageModel(SiteModel siteModel, String path){
-        ConnectionResponse connectionResponse = getSiteElements.getConnectionResponse(path);
+        ConnectionResponse connectionResponse = webScraper.getConnectionResponse(path);
         return PageModel.builder()
                 .site(siteModel)
                 .path(path)

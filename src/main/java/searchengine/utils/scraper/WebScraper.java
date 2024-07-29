@@ -1,4 +1,4 @@
-package searchengine.utils.connectivity;
+package searchengine.utils.scraper;
 
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
-public class GetSiteElements {
+public class WebScraper {
     private final ConnectionSettings connectionSettings;
     @Autowired
     private PageRepository pageRepository;
@@ -87,12 +87,12 @@ public class GetSiteElements {
     public Set<String> getUrlsToParse(SiteModel siteModel, String href) {
         Collection<String> urls = getConnectionResponse(href).getUrls();
         Set<String> alreadyParsed = pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
+        urls.removeAll(alreadyParsed);
 
         return urls.parallelStream()
                 .filter(url -> url.startsWith(siteModel.getUrl()) &&
                         Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains) &&
-                        notRepeatedUrl(url))
-                .filter(url -> !alreadyParsed.contains(url))
+                        notRepeatedUrlByFragments(url))
                 .collect(Collectors.toSet());
     }
 
@@ -102,7 +102,7 @@ public class GetSiteElements {
      * @param url the URL to check for repetition
      * @return true if the URL is not repeated, false otherwise
      */
-    private boolean notRepeatedUrl(String url) {
+    private boolean notRepeatedUrlByFragments(String url) {
         String[] urlSplit = url.split("/");
         return Arrays.stream(urlSplit)
                 .distinct()

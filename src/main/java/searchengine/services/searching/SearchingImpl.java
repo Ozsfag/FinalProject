@@ -3,16 +3,20 @@ package searchengine.services.searching;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import searchengine.config.MorphologySettings;
 import searchengine.dto.ResponseInterface;
+import searchengine.dto.indexing.Site;
 import searchengine.dto.searching.responseImpl.DetailedSearchResponse;
 import searchengine.dto.searching.responseImpl.TotalEmptyResponse;
 import searchengine.dto.searching.responseImpl.TotalSearchResponse;
+import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.model.IndexModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.connectivity.GetSiteElements;
+import searchengine.utils.dataTransfer.DataTransformer;
+import searchengine.utils.scraper.WebScraper;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 
@@ -29,28 +33,35 @@ public class SearchingImpl implements SearchingService {
     private final Morphology morphology;
     private final PageRepository pageRepository;
     private final IndexRepository indexRepository;
-    private final GetSiteElements getSiteElements;
-    private static final int MAX_FREQUENCY = 5000;
+    private final WebScraper webScraper;
+    private final MorphologySettings morphologySettings;
+    private final DataTransformer dataTransformer;
 
     /**
      * A description of the entire Java function.
      *
      * @param  query  description of parameter
-     * @param  site   description of parameter
+     * @param  url   description of parameter
      * @param  offset description of parameter
      * @param  limit  description of parameter
      * @return        description of return value
      */
     @Override
-    public ResponseInterface search(String query, String site, int offset, int limit) {
-        SiteModel siteModel = site == null ? null : entityHandler.getIndexedSiteModel(site);
+    public ResponseInterface search(String query, String url, int offset, int limit) {
+        Site site = null;
+        try {
+            site = dataTransformer.transformUrlToSite(url);
+        } catch (OutOfSitesConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+        SiteModel siteModel = url == null ? null : entityHandler.getIndexedSiteModelFromSites(Collections.singleton(site)).stream().findFirst().get();
 
-        Set<IndexModel> uniqueSet = transformQueryToIndexModelSet(query, siteModel);
+        Collection<IndexModel> uniqueSet = transformQueryToIndexModelSet(query, siteModel);
         if (uniqueSet.isEmpty()){return new TotalEmptyResponse(false, "Not found");}
 
         Map<Integer, Float> rel = getPageId2AbsRank(uniqueSet);
 
-        List<DetailedSearchResponse> detailedSearchResponse = getDetailedSearchResponses(rel, offset, limit, uniqueSet);
+        Collection<DetailedSearchResponse> detailedSearchResponse = getDetailedSearchResponses(rel, offset, limit, uniqueSet);
 
         return new TotalSearchResponse(true, detailedSearchResponse.size(), detailedSearchResponse);
     }
@@ -64,7 +75,7 @@ public class SearchingImpl implements SearchingService {
      * @param  uniqueSet    a set of unique IndexModel objects
      * @return              a list of DetailedSearchResponse objects
      */
-    private List<DetailedSearchResponse> getDetailedSearchResponses(Map<Integer, Float> rel, int offset, int limit, Set<IndexModel> uniqueSet){
+    private Collection<DetailedSearchResponse> getDetailedSearchResponses(Map<Integer, Float> rel, int offset, int limit, Collection<IndexModel> uniqueSet){
         return rel.entrySet().stream()
                 .skip(offset)
                 .limit(limit)
@@ -77,7 +88,7 @@ public class SearchingImpl implements SearchingService {
                         response.setSite(urlComponents[0]);
                         response.setSiteName(pageModel.getSite().getName());
                         response.setRelevance(entry.getValue());
-                        response.setTitle(getSiteElements.getTitle(pageModel.getPath()));
+                        response.setTitle(webScraper.getTitle(pageModel.getPath()));
                         response.setSnippet(getSnippet(uniqueSet, pageModel));
                     } catch (URISyntaxException e) {
                         throw new RuntimeException(e.getLocalizedMessage());
@@ -95,11 +106,11 @@ public class SearchingImpl implements SearchingService {
      * @param  siteModel  the SiteModel object to filter the query by, or null to search all sites
      * @return             a set of IndexModel objects representing the query
      */
-    private Set<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
+    private Collection<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
         return morphology.getLemmaSet(query).stream()
                 .flatMap(queryWord -> siteModel == null ?
-                        indexRepository.findIndexBy2Params(queryWord, MAX_FREQUENCY).stream() :
-                        indexRepository.findIndexBy3Params(queryWord, MAX_FREQUENCY, siteModel).stream())
+                        indexRepository.findIndexBy2Params(queryWord, morphologySettings.getMaxFrequency()).stream() :
+                        indexRepository.findIndexBy3Params(queryWord, morphologySettings.getMaxFrequency(), siteModel).stream())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
     }
@@ -110,7 +121,7 @@ public class SearchingImpl implements SearchingService {
      * @param  uniqueSet  the set of unique IndexModel objects
      * @return            a map of page IDs to their normalized absolute ranks
      */
-    private Map<Integer, Float> getPageId2AbsRank(Set<IndexModel> uniqueSet){
+    private Map<Integer, Float> getPageId2AbsRank(Collection<IndexModel> uniqueSet){
 
         Map<Integer, Float> pageId2AbsRank = uniqueSet.stream()
                 .collect(Collectors.toMap(index -> index.getPage().getId(),
@@ -133,7 +144,7 @@ public class SearchingImpl implements SearchingService {
      * @param  pageModel   the PageModel to retrieve snippets from
      * @return             a concatenated string of matching snippets with highlighted words
      */
-    public String getSnippet(Set<IndexModel> uniqueSet, PageModel pageModel) {
+    public String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel) {
         List<String> matchingSentences = new ArrayList<>();
         uniqueSet.stream()
                 .filter(item -> item.getPage().equals(pageModel))

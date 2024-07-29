@@ -69,6 +69,7 @@ morphology-settings:
   notLatinLetters: "[^a-z]"
   splitter: "\\s+"
   emptyString: " "
+  max-frequency: 500
   formats:
     - .pdf
     - .jpg
