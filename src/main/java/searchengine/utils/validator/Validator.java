@@ -15,6 +15,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class Validator {
     private final MorphologySettings morphologySettings;
+
     private boolean urlIsInApplicationConfiguration(String url, String validationBySiteInConfiguration){
         return url.startsWith(validationBySiteInConfiguration);
     }
@@ -54,7 +55,9 @@ public class Validator {
     }
 
     public boolean wordIsNotParticle(String word, LuceneMorphology luceneMorphology, String[] particles) {
-        return word.length() > 2 && !word.isBlank() && Arrays.stream(particles)
-                .noneMatch(part -> luceneMorphology.getMorphInfo(word).contains(part));
+        return word.length() > 2 &&
+                !word.isBlank() &&
+                Arrays.stream(particles)
+                        .noneMatch(part -> luceneMorphology.getMorphInfo(word).contains(part));
     }
 }
