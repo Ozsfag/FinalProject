@@ -4,10 +4,10 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.ConnectionSettings;
-import searchengine.config.MorphologySettings;
 import searchengine.dto.indexing.responseImpl.ConnectionResponse;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
@@ -26,9 +26,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class WebScraper {
     private final ConnectionSettings connectionSettings;
-    private final PageRepository pageRepository;
-    private final MorphologySettings morphologySettings;
-    private final Validator validator;
+    @Autowired
+    private PageRepository pageRepository;
+    @Autowired
+    private Validator validator;
     /**
      * Retrieves a Jsoup Document object for the given URL by establishing a connection with it.
      *
@@ -96,7 +97,7 @@ public class WebScraper {
         urls.removeAll(alreadyParsed);
 
         return urls.parallelStream()
-                .filter(url -> validator.urlHasCorrectForm(url, siteModel))
+                .filter(url -> validator.urlHasCorrectForm(url, siteModel.getUrl()))
                 .collect(Collectors.toSet());
     }
 

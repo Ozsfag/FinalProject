@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
-import searchengine.model.SiteModel;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,11 +20,11 @@ public class Validator {
      * has the correct ending, and does not contain repeated components.
      *
      * @param url the URL to check
-     * @param siteModel the SiteModel object containing the application configuration
+     * @param urlFromConfiguration the SiteModel object containing the application configuration
      * @return true if the URL has the correct form, false otherwise
      */
-    public boolean urlHasCorrectForm(String url, SiteModel siteModel){
-        return urlIsInApplicationConfiguration(url, siteModel.getUrl()) &&
+    public boolean urlHasCorrectForm(String url, String urlFromConfiguration){
+        return urlIsInApplicationConfiguration(url, urlFromConfiguration) &&
                 urlHasCorrectEnding(url) &&
                 urlHasNoRepeatedComponent(url);
     }

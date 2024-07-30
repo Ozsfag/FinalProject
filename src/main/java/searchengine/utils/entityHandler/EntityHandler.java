@@ -19,6 +19,7 @@ import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
 /**
  * Util that handle and process kind of entities
+ *
  * @author Ozsfag
  */
 @Component
@@ -54,12 +55,13 @@ public class EntityHandler {
             siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
         });
     }
+
     /**
      * Retrieves the indexed PageModel list from the list of URLs.
      *
-     * @param urlsToParse  the list of URLs to parse
-     * @param siteModel    the SiteModel containing the content
-     * @return              the set of indexed PageModels
+     * @param urlsToParse the list of URLs to parse
+     * @param siteModel   the SiteModel containing the content
+     * @return the set of indexed PageModels
      */
     public Set<PageModel> getIndexedPageModelsFromUrls(Collection<String> urlsToParse, SiteModel siteModel) {
         return urlsToParse.parallelStream()
@@ -77,9 +79,9 @@ public class EntityHandler {
     /**
      * Retrieves the indexed LemmaModel list from the content of a SiteModel.
      *
-     * @param  siteModel    the SiteModel containing the content
-     * @param  wordCountMap a map of word frequencies in the content
-     * @return              the set of indexed LemmaModels
+     * @param siteModel    the SiteModel containing the content
+     * @param wordCountMap a map of word frequencies in the content
+     * @return the set of indexed LemmaModels
      */
     public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(SiteModel siteModel, Map<String, Integer> wordCountMap) {
 
@@ -104,9 +106,9 @@ public class EntityHandler {
     /**
      * Retrieves the IndexModel list from the content of a PageModel.
      *
-     * @param  pageModel    the PageModel to retrieve indexes from
-     * @param  lemmas       the set of LemmaModels to search for in the content
-     * @param  wordCountMap a map of word frequencies in the content
+     * @param pageModel    the PageModel to retrieve indexes from
+     * @param lemmas       the set of LemmaModels to search for in the content
+     * @param wordCountMap a map of word frequencies in the content
      * @return the list of IndexModels generated from the content
      */
     public Collection<IndexModel> getIndexedIndexModelFromCountedWords(PageModel pageModel, Collection<LemmaModel> lemmas, Map<String, Integer> wordCountMap) {
@@ -114,7 +116,7 @@ public class EntityHandler {
                 .parallelStream()
                 .collect(Collectors.toSet());
 
-        wordCountMap.entrySet().removeIf(entry-> existingIndexModels.parallelStream()
+        wordCountMap.entrySet().removeIf(entry -> existingIndexModels.parallelStream()
                 .map(IndexModel::getLemma)
                 .toList()
                 .contains(lemmas.stream()
@@ -124,18 +126,19 @@ public class EntityHandler {
 
         existingIndexModels.addAll(wordCountMap.entrySet().parallelStream()
                 .map(word2Count -> {
-                        try {
-                           LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
-                           return entityFactory.createIndexModel(pageModel, lemmaModel, (float) word2Count.getValue());
-                        } catch (StoppedExecutionException e) {
-                            throw new RuntimeException(e.getLocalizedMessage());
-                        }
-                    })
+                    try {
+                        LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
+                        return entityFactory.createIndexModel(pageModel, lemmaModel, (float) word2Count.getValue());
+                    } catch (StoppedExecutionException e) {
+                        throw new RuntimeException(e.getLocalizedMessage());
+                    }
+                })
                 .collect(Collectors.toSet())
         );
 
         return existingIndexModels;
     }
+
     /**
      * Saves a set of entities to the database using the provided JpaRepository.
      * If an exception occurs during the save operation, the entities are saved individually

@@ -57,10 +57,11 @@ public class IndexingImpl implements IndexingService {
     private final DataTransformer dataTransformer;
     @Lazy
     public static volatile boolean isIndexing = true;
+
     /**
      * Starts the indexing process for all sites in the sitesList asynchronously.
      *
-     * @return          a ResponseInterface indicating the success of the indexing process
+     * @return a ResponseInterface indicating the success of the indexing process
      */
     @Override
     public ResponseInterface startIndexing() {
@@ -86,10 +87,11 @@ public class IndexingImpl implements IndexingService {
         });
         return new Successful(true);
     }
+
     /**
      * Stops the indexing process if it is currently running.
      *
-     * @return          an object representing the result of stopping the indexing process
+     * @return an object representing the result of stopping the indexing process
      */
     @Override
     public ResponseInterface stopIndexing() {
@@ -97,11 +99,12 @@ public class IndexingImpl implements IndexingService {
         isIndexing = false;
         return new Stop(true, "Индексация остановлена пользователем");
     }
+
     /**
      * Indexes a single page.
      *
-     * @param  url   the URL of the page to be indexed
-     * @return       a ResponseInterface object indicating the success or failure of the indexing process
+     * @param url the URL of the page to be indexed
+     * @return a ResponseInterface object indicating the success or failure of the indexing process
      */
     @SneakyThrows
     @Override

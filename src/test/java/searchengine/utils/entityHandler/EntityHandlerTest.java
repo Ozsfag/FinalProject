@@ -12,21 +12,23 @@ import searchengine.dto.indexing.Site;
 import searchengine.exceptions.OutOfSitesConfigurationException;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.morphology.Morphology;
+import searchengine.utils.dataTransfer.DataTransformer;
+import searchengine.utils.validator.Validator;
 
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EntityHandlerTest {
     @InjectMocks
-    private Morphology morphology;
-    @InjectMocks
+    private Validator validator;
     private SitesList sitesList;
+    @InjectMocks
+    private DataTransformer dataTransformer;
     private SiteRepository siteRepository;
     @InjectMocks
     private EntityHandler entityHandler;
@@ -36,13 +38,15 @@ class EntityHandlerTest {
 
     @BeforeEach
     public  void setUp() {
-        morphology = Mockito.mock(Morphology.class);
-        sitesList = Mockito.mock(SitesList.class);
+        validator = Mockito.mock(Validator.class);
         siteRepository = Mockito.mock(SiteRepository.class);
         entityHandler = Mockito.mock(EntityHandler.class);
         site = Site.builder().url("https://example.com").name("Example Site").build();
-        href = "https://example.com/";;
+        href = "https://example.com/";
         validatedUrl = "https://example.com";
+        sitesList = SitesList.builder()
+                .sites(List.of(site))
+                .build();
     }
 
     @Test
@@ -50,14 +54,14 @@ class EntityHandlerTest {
         // Arrange
         SiteModel siteModel = new SiteModel();
 
-        when(morphology.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
+        when(validator.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
         when(sitesList.getSites()).thenReturn(Collections.singletonList(site));
         when(siteRepository.findSiteByUrl(validatedUrl)).thenReturn(null);
         when(siteRepository.saveAndFlush(any(SiteModel.class))).thenReturn(siteModel);
 
         // Assert
-        assertThrows(RuntimeException.class, (Executable) entityHandler.getIndexedSiteModelFromSites(href));
-        verify(morphology, times(1)).getValidUrlComponents(href);
+        assertThrows(RuntimeException.class, (Executable) entityHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(href)));
+        verify(validator, times(1)).getValidUrlComponents(href);
         verify(sitesList, times(1)).getSites();
         verify(siteRepository, times(1)).findSiteByUrl(validatedUrl);
         verify(siteRepository, times(1)).saveAndFlush(any(SiteModel.class));
@@ -66,12 +70,12 @@ class EntityHandlerTest {
     @Test
     void getIndexedSiteModel_FromUrls_invalidUrl_throwsOutOfSitesConfigurationException() throws URISyntaxException {
         // Arrange
-        when(morphology.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
+        when(validator.getValidUrlComponents(href)).thenReturn(new String[]{validatedUrl});
         when(sitesList.getSites()).thenReturn(Collections.singletonList(site));
         when(siteRepository.findSiteByUrl(validatedUrl)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(OutOfSitesConfigurationException.class, () -> entityHandler.getIndexedSiteModelFromSites(href));
+        assertThrows(OutOfSitesConfigurationException.class, () -> entityHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(href)));
     }
 
     @Test
@@ -79,9 +83,9 @@ class EntityHandlerTest {
         // Arrange
         String href = "https://example.com";
 
-        when(morphology.getValidUrlComponents(href)).thenThrow(new URISyntaxException("Invalid URL", href));
+        when(validator.getValidUrlComponents(href)).thenThrow(new URISyntaxException("Invalid URL", href));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> entityHandler.getIndexedSiteModelFromSites(href));
+        assertThrows(RuntimeException.class, () -> entityHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(href)));
     }
 }

@@ -2,8 +2,7 @@ package searchengine.utils.entityFactory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
+import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.Site;
 import searchengine.model.*;
 import searchengine.utils.scraper.WebScraper;
@@ -14,13 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EntityFactoryTest {
-    @InjectMocks
-    private WebScraper webScraper;
     private EntityFactory factory ;
 
     @BeforeEach
     public void setup() {
-        webScraper = Mockito.mock(WebScraper.class);
+        ConnectionSettings connectionSettings = new ConnectionSettings("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36", "https://www.google.com");
+        WebScraper webScraper = new WebScraper(connectionSettings);
         factory = new EntityFactory(webScraper);
     }
 
@@ -52,8 +50,8 @@ public class EntityFactoryTest {
         PageModel expected = PageModel.builder()
                 .site(siteModel)
                 .path(path)
-                .code(200)
-                .content("Hello, world!")
+                .code(404)
+                .content("")
                 .build();
 
         // Act

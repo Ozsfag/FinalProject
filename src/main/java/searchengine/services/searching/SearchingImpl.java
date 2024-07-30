@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 @Service
 @Lazy
 @RequiredArgsConstructor
@@ -40,11 +41,11 @@ public class SearchingImpl implements SearchingService {
     /**
      * A description of the entire Java function.
      *
-     * @param  query  description of parameter
-     * @param  url   description of parameter
-     * @param  offset description of parameter
-     * @param  limit  description of parameter
-     * @return        description of return value
+     * @param query  description of parameter
+     * @param url    description of parameter
+     * @param offset description of parameter
+     * @param limit  description of parameter
+     * @return description of return value
      */
     @Override
     public ResponseInterface search(String query, String url, int offset, int limit) {
@@ -56,7 +57,9 @@ public class SearchingImpl implements SearchingService {
                         .get();
 
         Collection<IndexModel> uniqueSet = transformQueryToIndexModelSet(query, siteModel);
-        if (uniqueSet.isEmpty()){return new TotalEmptyResponse(false, "Not found");}
+        if (uniqueSet.isEmpty()) {
+            return new TotalEmptyResponse(false, "Not found");
+        }
 
         Map<Integer, Float> rel = getPageId2AbsRank(uniqueSet);
 
@@ -68,13 +71,13 @@ public class SearchingImpl implements SearchingService {
     /**
      * Generates a list of detailed search responses based on the given parameters.
      *
-     * @param  rel         a map containing the page ID and relevance
-     * @param  offset       the number of responses to skip
-     * @param  limit        the maximum number of responses to return
-     * @param  uniqueSet    a set of unique IndexModel objects
-     * @return              a list of DetailedSearchResponse objects
+     * @param rel       a map containing the page ID and relevance
+     * @param offset    the number of responses to skip
+     * @param limit     the maximum number of responses to return
+     * @param uniqueSet a set of unique IndexModel objects
+     * @return a list of DetailedSearchResponse objects
      */
-    private Collection<DetailedSearchResponse> getDetailedSearchResponses(Map<Integer, Float> rel, int offset, int limit, Collection<IndexModel> uniqueSet){
+    private Collection<DetailedSearchResponse> getDetailedSearchResponses(Map<Integer, Float> rel, int offset, int limit, Collection<IndexModel> uniqueSet) {
         return rel.entrySet().stream()
                 .skip(offset)
                 .limit(limit)
@@ -101,9 +104,9 @@ public class SearchingImpl implements SearchingService {
     /**
      * Transforms a query string into a set of IndexModel objects.
      *
-     * @param  query      the query string to transform
-     * @param  siteModel  the SiteModel object to filter the query by, or null to search all sites
-     * @return             a set of IndexModel objects representing the query
+     * @param query     the query string to transform
+     * @param siteModel the SiteModel object to filter the query by, or null to search all sites
+     * @return a set of IndexModel objects representing the query
      */
     private Collection<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
         return morphology.getLemmaSet(query).stream()
@@ -117,10 +120,10 @@ public class SearchingImpl implements SearchingService {
     /**
      * Transforms a set of IndexModel objects into a map of page IDs to their normalized absolute ranks.
      *
-     * @param  uniqueSet  the set of unique IndexModel objects
-     * @return            a map of page IDs to their normalized absolute ranks
+     * @param uniqueSet the set of unique IndexModel objects
+     * @return a map of page IDs to their normalized absolute ranks
      */
-    private Map<Integer, Float> getPageId2AbsRank(Collection<IndexModel> uniqueSet){
+    private Map<Integer, Float> getPageId2AbsRank(Collection<IndexModel> uniqueSet) {
 
         Map<Integer, Float> pageId2AbsRank = uniqueSet.stream()
                 .collect(Collectors.toMap(index -> index.getPage().getId(),
@@ -139,9 +142,9 @@ public class SearchingImpl implements SearchingService {
     /**
      * Retrieves matching snippets from the content of a page based on the given IndexModel set and PageModel.
      *
-     * @param  uniqueSet   the set of unique IndexModel objects
-     * @param  pageModel   the PageModel to retrieve snippets from
-     * @return             a concatenated string of matching snippets with highlighted words
+     * @param uniqueSet the set of unique IndexModel objects
+     * @param pageModel the PageModel to retrieve snippets from
+     * @return a concatenated string of matching snippets with highlighted words
      */
     public String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel) {
         List<String> matchingSentences = new ArrayList<>();
