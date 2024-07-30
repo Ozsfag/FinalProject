@@ -1,63 +1,73 @@
 package searchengine.utils.validator;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 import searchengine.config.MorphologySettings;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
 public class ValidatorTest {
 
-    @Mock
-    private MorphologySettings morphologySettings;
-
-    @InjectMocks
     private Validator validator;
-
     @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() {
+        MorphologySettings morphologySettings = MorphologySettings.builder()
+                .maxFrequency(0)
+                .allowedSchemas(new String[]{"http", "https"})
+                .formats(new String[]{".pdf", ".jpg", ".docx", ".doc", ".JPG", ".jpeg", "#", ".PDF", ".xlsx", ".DOCX", ".xls", ".XLSX", ".png", ".PNG", ".rtf", ".mp4", ".rar", ".sql", ".yaml", ".yml"})
+                .notCyrillicLetters("[^а-я]")
+                .notLatinLetters("[^a-z]")
+                .splitter("\\s+")
+                .emptyString(" ")
+                .build();
+
+        validator = new Validator(morphologySettings);
+    }
+
+
+    @Test
+    void urlIsInApplicationConfiguration_returnsTrue_whenUrlStartsWithValidationString() {
+        String url = "https://example.com/path";
+        assertTrue(validator.urlIsInApplicationConfiguration(url, "https://example.com"));
+        assertFalse(validator.urlIsInApplicationConfiguration(url, "https://another-example.com"));
+
     }
 
     @Test
-    public void testValidateUri_ValidUri_ReturnsTrue() throws URISyntaxException {
-        String uriString = "http://example.com/12313213213";
-        URI uri = new URI(uriString);
+    void testUrlHasCorrectEnding() {
 
-        when(morphologySettings.getAllowedSchemas()).thenReturn(new String[]{"http", "https"});
+        String url1 = "https://example.com/image.jpg";
+        String url2 = "https://example.com/document.pdf";
+        String url3 = "https://example.com/video.mp4";
+        String url4 = "https://example.com/somefile";
 
-        String result = validator.getValidUrlComponents(uriString)[0];
-        String actual = uri.getScheme() + "://" + uri.getHost() + "/";
-
-        assertEquals(actual, result);
+        assertFalse(validator.urlHasCorrectEnding(url1));
+        assertFalse(validator.urlHasCorrectEnding(url2));
+        assertFalse(validator.urlHasCorrectEnding(url3));
+        assertTrue(validator.urlHasCorrectEnding(url4));
     }
 
     @Test
-    public void testValidateUri_InvalidUri_ReturnsFalse() throws URISyntaxException {
-        String uriString = "ftp://example.com/";
-        URI uri = new URI(uriString);
+    public void testUrlHasNoRepeatedComponent() {
+        assertTrue(validator.urlHasNoRepeatedComponent("example.com/path/to/resource"));
+        assertFalse(validator.urlHasNoRepeatedComponent("example.com/path/to/resource/path/to"));
+        assertTrue(validator.urlHasNoRepeatedComponent(""));
+        assertThrows(NullPointerException.class,()->  validator.urlHasNoRepeatedComponent(null));
 
-        assertArrayEquals(morphologySettings.getAllowedSchemas()).thenReturn(new String[]{"http", "https"});
-
-        String result = validator.getValidUrlComponents(uriString)[0];
-        String actual = uri.getScheme() + "://" + uri.getHost() + "/";
-
-        assertEquals(actual, result);
     }
 
     @Test
-    public void testValidateUri_NullUri_ThrowsIllegalArgumentException() {
-        assertThrows(URISyntaxException.class, () ->
-                validator.getValidUrlComponents("ftp://example.com/"));
+    void testGetValidUrlComponents() throws URISyntaxException {
+        String[] expected = {"http://example.com/", "/path/to/file"};
+        String url = "http://example.com/path/to/file";
+        String[] actual = validator.getValidUrlComponents(url);
+        assertArrayEquals(expected, actual);
+        assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents("/path/to/file"));
+        assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(""));
+        assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents("invalid url"));
+        assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents("file:///path/to/file"));
+
     }
 }

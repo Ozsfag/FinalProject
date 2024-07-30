@@ -1,7 +1,6 @@
 package searchengine.utils.validator;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,7 +36,7 @@ public class Validator {
      * @param  validationBySiteInConfiguration the validation string for the site
      * @return             true if the URL starts with the validation string, false otherwise
      */
-    private boolean urlIsInApplicationConfiguration(String url, String validationBySiteInConfiguration){
+    public boolean urlIsInApplicationConfiguration(String url, String validationBySiteInConfiguration){
         return url.startsWith(validationBySiteInConfiguration);
     }
     /**
@@ -47,7 +46,7 @@ public class Validator {
      * @param  url  the URL to check for correct ending
      * @return      true if the URL has a correct ending, false otherwise
      */
-    private boolean urlHasCorrectEnding(String url){
+    public boolean urlHasCorrectEnding(String url){
         return Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains);
     }
     /**
@@ -56,7 +55,7 @@ public class Validator {
      * @param url the URL to check for repetition
      * @return true if the URL is not repeated, false otherwise
      */
-    private boolean urlHasNoRepeatedComponent(String url) {
+    public boolean urlHasNoRepeatedComponent(String url) {
         String[] urlSplit = url.split("/");
         return Arrays.stream(urlSplit)
                 .distinct()
@@ -87,6 +86,9 @@ public class Validator {
      */
     public String[] getValidUrlComponents(String url) throws URISyntaxException {
         final URI uri = new URI(url);
+        if (uri.getScheme() == null || uri.getHost() == null || uri.getPath() == null) {
+            throw new URISyntaxException(url, "Invalid URL");
+        }
         final String schemeAndHost = uri.getScheme() + "://" + uri.getHost() + "/";
         final String path = uri.getPath();
         return new String[]{schemeAndHost, path};
