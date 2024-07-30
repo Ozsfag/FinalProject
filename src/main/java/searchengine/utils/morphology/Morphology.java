@@ -35,8 +35,8 @@ public class Morphology {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<String, Integer> wordFrequency(String content, String regex, LuceneMorphology luceneMorphology, String[] particles){
-        return Arrays.stream(content.toLowerCase().replaceAll(regex, morphologySettings.getEmptyString()).split(morphologySettings.getSplitter()))
+    public Map<String, Integer> wordFrequency(String content, String notLetterRegex, LuceneMorphology luceneMorphology, String[] particles){
+        return Arrays.stream(content.toLowerCase().replaceAll(notLetterRegex, morphologySettings.getEmptyString()).split(morphologySettings.getSplitter()))
                 .parallel()
                 .filter(word -> validator.wordIsNotParticle(word, luceneMorphology, particles))
 //                .map(luceneMorphology::getNormalForms)
