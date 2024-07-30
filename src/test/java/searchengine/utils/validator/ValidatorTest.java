@@ -11,10 +11,8 @@ import searchengine.config.MorphologySettings;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,31 +31,33 @@ public class ValidatorTest {
 
     @Test
     public void testValidateUri_ValidUri_ReturnsTrue() throws URISyntaxException {
-        String uriString = "http://example.com";
+        String uriString = "http://example.com/12313213213";
         URI uri = new URI(uriString);
 
-        when(morphologySettings.getAllowedSchemes()).thenReturn(Arrays.asList("http", "https"));
+        when(morphologySettings.getAllowedSchemas()).thenReturn(new String[]{"http", "https"});
 
-        boolean result = validator.validateUri(uri);
+        String result = validator.getValidUrlComponents(uriString)[0];
+        String actual = uri.getScheme() + "://" + uri.getHost() + "/";
 
-        assertEquals(true, result);
+        assertEquals(actual, result);
     }
 
     @Test
     public void testValidateUri_InvalidUri_ReturnsFalse() throws URISyntaxException {
-        String uriString = "ftp://example.com";
+        String uriString = "ftp://example.com/";
         URI uri = new URI(uriString);
 
-        when(morphologySettings.getAllowedSchemes()).thenReturn(Arrays.asList("http", "https"));
+        assertArrayEquals(morphologySettings.getAllowedSchemas()).thenReturn(new String[]{"http", "https"});
 
-        boolean result = validator.getValidUrlComponents(uri.);
+        String result = validator.getValidUrlComponents(uriString)[0];
+        String actual = uri.getScheme() + "://" + uri.getHost() + "/";
 
-        assertEquals(false, result);
+        assertEquals(actual, result);
     }
 
     @Test
     public void testValidateUri_NullUri_ThrowsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                validator.getValidUrlComponents(null));
+        assertThrows(URISyntaxException.class, () ->
+                validator.getValidUrlComponents("ftp://example.com/"));
     }
 }

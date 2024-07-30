@@ -3,6 +3,7 @@ package searchengine.utils.validator;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
 
@@ -11,8 +12,9 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 @Component
 @Data
-@RequiredArgsConstructor
+
 public class Validator {
+    @Autowired
     private final MorphologySettings morphologySettings;
 
     /**
