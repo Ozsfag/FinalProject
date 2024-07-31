@@ -161,19 +161,19 @@ public class EntityHandler {
             switch (repositoryClass.getSimpleName()) {
                 case "SiteModel":
                     Collection<SiteModel> sites = (Collection<SiteModel>) entities;
-                    siteRepository.saveAll(sites);
+                    siteRepository.saveAllAndFlush(sites);
                     break;
                 case "PageModel":
                     Collection<PageModel> pages = (Collection<PageModel>) entities;
-                    pageRepository.saveAll(pages);
+                    pageRepository.saveAllAndFlush(pages);
                     break;
                 case "LemmaModel":
                     Collection<LemmaModel> lemmas = (Collection<LemmaModel>) entities;
-                    lemmaRepository.saveAll(lemmas);
+                    lemmaRepository.saveAllAndFlush(lemmas);
                     break;
                 case "IndexModel":
                     Collection<IndexModel> indexes = (Collection<IndexModel>) entities;
-                    indexRepository.saveAll(indexes);
+                    indexRepository.saveAllAndFlush(indexes);
                     break;
             }
         } catch (Exception e) {
