@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
-import searchengine.model.SiteModel;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,11 +29,11 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
      *
      * @param  lemma      the lemma of the IndexModel to search for
      * @param  frequency  the frequency of the IndexModel to search for
-     * @param  site       the SiteModel object associated with the IndexModel
+     * @param  siteId       the SiteModel object associated with the IndexModel
      * @return            a set of IndexModel objects that match the given parameters
      */
     @Query("select i from IndexModel i where i.lemma.lemma = ?1 and i.lemma.frequency < ?2 and i.lemma.site.id = ?3")
-    Set<IndexModel> findIndexBy3Params(String lemma, int frequency, SiteModel site);
+    Set<IndexModel> findIndexBy3Params(String lemma, int frequency, Integer siteId);
     /**
      * Retrieves a list of IndexModel objects based on the given page ID and a collection of LemmaModel objects.
      *

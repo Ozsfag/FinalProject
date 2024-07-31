@@ -36,18 +36,18 @@ spring:
 
 indexing-settings:
   sites:
-    - url: https://lenta.ru/
-      name: Лента.ру
-    - url: https://skillbox.ru/
-      name: Skillbox
-    - url: http://www.playback.ru/
-      name: PlayBack.Ru
+#    - url: https://lenta.ru/
+#      name: Лента.ру
+#    - url: https://skillbox.ru/
+#      name: Skillbox
+#    - url: http://www.playback.ru/
+#      name: PlayBack.Ru
 #    - url: https://domrebenka.belzdrav.ru/
 #      name: Дом Ребенка
 #    - url: https://amurkino.ru/
 #      name: Амуркино
-#    - url: https://sendel.ru/
-#      name: sendel
+    - url: https://sendel.ru/
+      name: sendel
 
 
 connection-settings:
@@ -55,6 +55,7 @@ connection-settings:
   referrer: https://www.google.com
 
 morphology-settings:
+  maxFrequency: 500
   russianParticleNames:
     - МЕЖД
     - ПРЕДЛ
@@ -67,9 +68,10 @@ morphology-settings:
     - PART
   notCyrillicLetters: "[^а-я]"
   notLatinLetters: "[^a-z]"
+  onlyLatinLetters: "[a-z]+"
+  onlyCyrillicLetters: "[а-я]+"
   splitter: "\\s+"
   emptyString: " "
-  maxFrequency: 500
   allowedSchemas:
     - http
     - https

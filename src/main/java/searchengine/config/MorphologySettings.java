@@ -20,5 +20,7 @@ public class MorphologySettings {
     private String emptyString;
     private String[] formats;
     private String[] allowedSchemas;
+    private String onlyLatinLetters;
+    private String onlyCyrillicLetters;
     private int maxFrequency;
 }

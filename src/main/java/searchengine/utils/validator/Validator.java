@@ -91,6 +91,7 @@ public class Validator {
         }
         final String schemeAndHost = uri.getScheme() + "://" + uri.getHost() + "/";
         final String path = uri.getPath();
-        return new String[]{schemeAndHost, path};
+        final String host = uri.getHost().substring(0, uri.getHost().indexOf("."));
+        return new String[]{schemeAndHost, path, host};
     }
 }

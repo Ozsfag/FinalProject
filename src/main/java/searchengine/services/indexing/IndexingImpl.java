@@ -109,7 +109,6 @@ public class IndexingImpl implements IndexingService {
     @SneakyThrows
     @Override
     public ResponseInterface indexPage(String url) {
-        if (isIndexing) return new Bad(false, "Индексация не может быть начата во время другого процесса индексации");
         SiteModel siteModel = entityHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url)).iterator().next();
         entityHandler.processIndexing(dataTransformer.transformUrlToUrls(url), siteModel);
         return new Successful(true);

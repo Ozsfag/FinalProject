@@ -6,12 +6,12 @@ import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import searchengine.config.MorphologySettings;
 import searchengine.utils.validator.Validator;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,6 +22,9 @@ public class MorphologyTest {
 
     private RussianLuceneMorphology russianLuceneMorphology;
     private EnglishLuceneMorphology englishLuceneMorphology;
+
+    @Mock
+    private Validator validator;
 
     private Morphology morphology;
 
@@ -41,8 +44,6 @@ public class MorphologyTest {
                 .build();
         russianLuceneMorphology = new RussianLuceneMorphology();
         englishLuceneMorphology = new EnglishLuceneMorphology();
-        Validator validator = new Validator(morphologySettings);
-
         morphology = new Morphology(russianLuceneMorphology, englishLuceneMorphology, morphologySettings, validator);
     }
     @Test
@@ -76,6 +77,22 @@ public class MorphologyTest {
         expectedResult.put("test", 1);
         expectedResult.put("this", 1);
 
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    public void testGetUniqueLemmasFromSearchQuery() {
+        // Set up the test data
+        String query = "test query";
+
+
+        // Create the expected result
+        Collection<String> expectedResult = Arrays.asList("test", "query");
+
+        // Call the method under test
+        Collection<String> result = morphology.getUniqueLemmasFromSearchQuery(query);
+
+        // Verify the result
         assertEquals(expectedResult, result);
     }
 }

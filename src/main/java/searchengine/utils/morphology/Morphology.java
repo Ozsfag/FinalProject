@@ -28,15 +28,22 @@ public class Morphology {
      * @return the amount of words at page
      */
     public Map<String, Integer> wordCounter(String content) {
-        Map<String, Integer> russianCounter = wordFrequency(content, morphologySettings.getNotCyrillicLetters(), russianLuceneMorphology, morphologySettings.getRussianParticleNames());
-        Map<String, Integer> englishCounter = wordFrequency(content, morphologySettings.getNotLatinLetters(), englishLuceneMorphology, morphologySettings.getEnglishParticlesNames());
+        Map<String, Integer> russianCounter = wordFrequency(content,
+                morphologySettings.getNotCyrillicLetters(),
+                russianLuceneMorphology,
+                morphologySettings.getRussianParticleNames());
+        Map<String, Integer> englishCounter = wordFrequency(content,
+                morphologySettings.getNotLatinLetters(),
+                englishLuceneMorphology,
+                morphologySettings.getEnglishParticlesNames());
+
         return Stream.concat(russianCounter.entrySet().parallelStream(), englishCounter.entrySet().parallelStream())
                 .parallel()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public Map<String, Integer> wordFrequency(String content, String notLetterRegex, LuceneMorphology luceneMorphology, String[] particles){
-        return Arrays.stream(content.toLowerCase().replaceAll(notLetterRegex, morphologySettings.getEmptyString()).split(morphologySettings.getSplitter()))
+        return getLoweredReplacedAndSplittedQuery(content, notLetterRegex)
                 .parallel()
                 .filter(word -> validator.wordIsNotParticle(word, luceneMorphology, particles))
 //                .map(luceneMorphology::getNormalForms)
@@ -51,22 +58,57 @@ public class Morphology {
      * @param query, search query
      * @return unique set of lemma
      */
-    public Collection<String> getLemmaSet(String query) {
-        String onlyLatinLetters = "[a-z]+";
-        Stream<String> russianLemmaStream = getLemmaStreamByLanguage(query, morphologySettings.getNotCyrillicLetters(), russianLuceneMorphology,englishLuceneMorphology, morphologySettings.getRussianParticleNames(), onlyLatinLetters);
-        String onlyCyrillicLetters = "[а-я]+";
-        Stream<String> englishLemmaStream = getLemmaStreamByLanguage(query, morphologySettings.getNotLatinLetters(), englishLuceneMorphology, russianLuceneMorphology, morphologySettings.getEnglishParticlesNames(), onlyCyrillicLetters);
-        return Stream.concat(russianLemmaStream.parallel(), englishLemmaStream.parallel()).collect(Collectors.toSet());
+    public Collection<String> getUniqueLemmasFromSearchQuery(String query) {
+        Stream<String> russianLemmaStream = getLemmasFromQueryByLanguage(
+                query,
+                morphologySettings.getNotCyrillicLetters(),
+                russianLuceneMorphology,
+                englishLuceneMorphology,
+                morphologySettings.getRussianParticleNames(),
+                morphologySettings.getOnlyLatinLetters());
+        Stream<String> englishLemmaStream = getLemmasFromQueryByLanguage(
+                query,
+                morphologySettings.getNotLatinLetters(),
+                englishLuceneMorphology,
+                russianLuceneMorphology,
+                morphologySettings.getEnglishParticlesNames(),
+                morphologySettings.getOnlyCyrillicLetters());
 
+        return Stream.concat(russianLemmaStream.parallel(), englishLemmaStream.parallel()).collect(Collectors.toSet());
     }
-    private Stream<String> getLemmaStreamByLanguage(String query, String nonLetters, LuceneMorphology luceneMorphology1, LuceneMorphology luceneMorphology2, String[] particles, String onlyLetters){
-        return Arrays.stream(query.toLowerCase().replaceAll(nonLetters, morphologySettings.getEmptyString()).split(morphologySettings.getSplitter()))
+    /**
+     * Returns a stream of lemmas from the given query, based on the language.
+     *
+     * @param query          the search query
+     * @param nonLetters      a regular expression pattern for non-letter characters
+     * @param luceneMorphology1  the LuceneMorphology object for the first language
+     * @param luceneMorphology2  the LuceneMorphology object for the second language
+     * @param particles      an array of particle strings to check against
+     * @param onlyLetters     a regular expression pattern for only letter characters
+     * @return                a stream of lemmas from the query, based on the language
+     */
+    private Stream<String> getLemmasFromQueryByLanguage(String query, String nonLetters, LuceneMorphology luceneMorphology1, LuceneMorphology luceneMorphology2, String[] particles, String onlyLetters){
+        return getLoweredReplacedAndSplittedQuery(query, nonLetters)
+                .parallel()
                 .filter(word -> validator.wordIsNotParticle(word, luceneMorphology1, particles))
                 .flatMap(queryWord -> queryWord.matches(onlyLetters)?
                         luceneMorphology2.getNormalForms(queryWord).stream():
                         luceneMorphology1.getNormalForms(queryWord).stream());
     }
-
+    /**
+     * Returns a stream of strings obtained by converting the given query to lowercase,
+     * replacing non-letter characters with an empty string, and splitting the resulting
+     * string using the splitter specified in the morphology settings.
+     *
+     * @param  query     the query string to be processed
+     * @param  nonLetters  the regular expression pattern representing non-letter characters
+     * @return           a stream of strings obtained by processing the query
+     */
+    private Stream<String> getLoweredReplacedAndSplittedQuery(String query, String nonLetters){
+        return Arrays.stream(query.toLowerCase()
+                .replaceAll(nonLetters, morphologySettings.getEmptyString())
+                .split(morphologySettings.getSplitter()));
+    }
 }
 
 

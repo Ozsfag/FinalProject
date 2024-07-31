@@ -109,10 +109,10 @@ public class SearchingImpl implements SearchingService {
      * @return a set of IndexModel objects representing the query
      */
     private Collection<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
-        return morphology.getLemmaSet(query).stream()
+        return morphology.getUniqueLemmasFromSearchQuery(query).stream()
                 .flatMap(queryWord -> siteModel == null ?
                         indexRepository.findIndexBy2Params(queryWord, morphologySettings.getMaxFrequency()).stream() :
-                        indexRepository.findIndexBy3Params(queryWord, morphologySettings.getMaxFrequency(), siteModel).stream())
+                        indexRepository.findIndexBy3Params(queryWord, morphologySettings.getMaxFrequency(), siteModel.getId()).stream())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
     }

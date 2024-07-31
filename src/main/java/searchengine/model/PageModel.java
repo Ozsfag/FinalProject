@@ -32,7 +32,7 @@ public class PageModel implements Serializable, EntityInterface {
     private SiteModel site;
 
 
-    @Column(name = "path", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "path", nullable = false, columnDefinition = "TEXT", unique = true)
     private String path;
 
 
