@@ -32,6 +32,13 @@ public class EntityHandler {
     private final PageRepository pageRepository;
     private final EntityFactory entityFactory;
 
+
+    /**
+     * Retrieves a collection of indexed SiteModel objects from a given collection of Site objects.
+     *
+     * @param  sitesToParse  the collection of Site objects to parse
+     * @return                a collection of indexed SiteModel objects
+     */
     public Collection<SiteModel> getIndexedSiteModelFromSites(Collection<Site> sitesToParse) {
         return sitesToParse.stream().map(site -> Optional.ofNullable(siteRepository.findSiteByUrl(site.getUrl()))
                 .orElseGet(()-> entityFactory.createSiteModel(site))).collect(Collectors.toList());

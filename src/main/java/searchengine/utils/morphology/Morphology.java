@@ -42,6 +42,15 @@ public class Morphology {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    /**
+     * Calculates the frequency of each word in the given content.
+     *
+     * @param  content         the content to analyze
+     * @param  notLetterRegex  the regular expression pattern for non-letter characters
+     * @param  luceneMorphology the LuceneMorphology object for the morphology analysis
+     * @param  particles       the array of particle strings to check against
+     * @return                 a map containing each word and its frequency in the content
+     */
     public Map<String, Integer> wordFrequency(String content, String notLetterRegex, LuceneMorphology luceneMorphology, String[] particles){
         return getLoweredReplacedAndSplittedQuery(content, notLetterRegex)
                 .parallel()

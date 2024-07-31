@@ -60,7 +60,7 @@ public class ValidatorTest {
 
     @Test
     void testGetValidUrlComponents() throws URISyntaxException {
-        String[] expected = {"http://example.com/", "/path/to/file"};
+        String[] expected = {"http://example.com/", "/path/to/file", "example"};
         String url = "http://example.com/path/to/file";
         String[] actual = validator.getValidUrlComponents(url);
         assertArrayEquals(expected, actual);
