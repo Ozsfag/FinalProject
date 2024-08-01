@@ -28,11 +28,13 @@ public class Morphology {
      * @return the amount of words at page
      */
     public Map<String, Integer> wordCounter(String content) {
-        Map<String, Integer> russianCounter = wordFrequency(content,
+        Map<String, Integer> russianCounter = wordFrequency(
+                content,
                 morphologySettings.getNotCyrillicLetters(),
                 russianLuceneMorphology,
                 morphologySettings.getRussianParticleNames());
-        Map<String, Integer> englishCounter = wordFrequency(content,
+        Map<String, Integer> englishCounter = wordFrequency(
+                content,
                 morphologySettings.getNotLatinLetters(),
                 englishLuceneMorphology,
                 morphologySettings.getEnglishParticlesNames());
