@@ -2,20 +2,14 @@ package searchengine.utils.entityHandler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import searchengine.dto.indexing.Site;
-import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.*;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.morphology.Morphology;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
 /**
  * Util that handle and process kind of entities
@@ -30,23 +24,9 @@ public class EntityHandler {
     private final IndexRepository indexRepository;
     public final Morphology morphology;
     private final PageRepository pageRepository;
-    private final EntityFactory entityFactory;
     private final LemmaHandler lemmaHandler;
     private final IndexHandler indexHandler;
     private final PageHandler pageHandler;
-
-
-    /**
-     * Retrieves a collection of indexed SiteModel objects from a given collection of Site objects.
-     *
-     * @param  sitesToParse  the collection of Site objects to parse
-     * @return                a collection of indexed SiteModel objects
-     */
-    public Collection<SiteModel> getIndexedSiteModelFromSites(Collection<Site> sitesToParse) {
-        return sitesToParse.stream().map(site -> Optional.ofNullable(siteRepository.findSiteByUrl(site.getUrl()))
-                .orElseGet(()-> entityFactory.createSiteModel(site))).collect(Collectors.toList());
-    }
-
 
     /**
      * Indexes the lemmas and indexes for a list of pages.
@@ -68,10 +48,6 @@ public class EntityHandler {
         });
     }
 
-
-
-
-
     /**
      * Saves a set of entities to the database using the provided JpaRepository.
      * If an exception occurs during the save operation, the entities are saved individually
@@ -85,19 +61,19 @@ public class EntityHandler {
             switch (repositoryClass.getSimpleName()) {
                 case "SiteModel":
                     Collection<SiteModel> sites = (Collection<SiteModel>) entities;
-                    siteRepository.saveAll(sites);
+                    siteRepository.saveAllAndFlush(sites);
                     break;
                 case "PageModel":
                     Collection<PageModel> pages = (Collection<PageModel>) entities;
-                    pageRepository.saveAll(pages);
+                    pageRepository.saveAllAndFlush(pages);
                     break;
                 case "LemmaModel":
                     Collection<LemmaModel> lemmas = (Collection<LemmaModel>) entities;
-                    lemmaRepository.saveAll(lemmas);
+                    lemmaRepository.saveAllAndFlush(lemmas);
                     break;
                 case "IndexModel":
                     Collection<IndexModel> indexes = (Collection<IndexModel>) entities;
-                    indexRepository.saveAll(indexes);
+                    indexRepository.saveAllAndFlush(indexes);
                     break;
             }
         } catch (Exception e) {
@@ -106,18 +82,22 @@ public class EntityHandler {
                 switch (aClass.getSimpleName()) {
                     case "SiteModel":
                         SiteModel siteModel = (SiteModel) entity;
+                        if (siteRepository.existsByUrl(siteModel.getUrl())) break;
                         siteRepository.saveAndFlush(siteModel);
                         break;
                     case "PageModel":
                         PageModel pageModel = (PageModel) entity;
+                        if (pageRepository.existsByPath(pageModel.getPath())) break;
                         pageRepository.merge(pageModel.getId(), pageModel.getCode(), pageModel.getSite().getId(), pageModel.getContent(), pageModel.getPath(), pageModel.getVersion());
                         break;
                     case "LemmaModel":
                         LemmaModel lemmaModel = (LemmaModel) entity;
+                        if (lemmaRepository.existsByLemma(lemmaModel.getLemma())) break;
                         lemmaRepository.merge(lemmaModel.getLemma(), lemmaModel.getSite().getId(), lemmaModel.getFrequency());
                         break;
                     case "IndexModel":
                         IndexModel indexModel = (IndexModel) entity;
+                        if (indexRepository.existsByPage_IdAndLemma_Id(indexModel.getPage().getId(), indexModel.getLemma().getId())) break;
                         indexRepository.merge(indexModel.getLemma().getLemma(), indexModel.getPage().getId(), indexModel.getRank());
                         break;
                 }

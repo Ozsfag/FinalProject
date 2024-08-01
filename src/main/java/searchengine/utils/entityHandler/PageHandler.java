@@ -9,7 +9,6 @@ import searchengine.utils.entityFactory.EntityFactory;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static searchengine.services.indexing.IndexingImpl.isIndexing;
@@ -19,11 +18,9 @@ import static searchengine.services.indexing.IndexingImpl.isIndexing;
 public class PageHandler {
     private final EntityFactory entityFactory;
 
-    private Collection<String> urlsToParse;
     private SiteModel siteModel;
 
     public Collection<PageModel> getIndexedPageModelsFromUrls(Collection<String> urlsToParse, SiteModel siteModel) {
-        this.urlsToParse = urlsToParse;
         this.siteModel = siteModel;
 
         return urlsToParse.parallelStream()

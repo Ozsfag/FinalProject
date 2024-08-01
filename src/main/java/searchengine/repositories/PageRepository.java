@@ -38,4 +38,7 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
     @Transactional
     @Query("UPDATE PageModel p SET p.code = :code, p.site = :siteId, p.content = :content, p.path = :path, p.version = :version WHERE p.id = :id")
     void merge(@Param("id") Integer id, @Param("code") Integer code, @Param("siteId") Integer siteId, @Param("content") String content, @Param("path") String path, @Param("version") Integer version);
+
+    @Query("select (count(p) > 0) from PageModel p where p.path = ?1")
+    boolean existsByPath(String path);
 }

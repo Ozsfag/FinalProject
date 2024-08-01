@@ -45,7 +45,6 @@ public class Morphology {
     /**
      * Calculates the frequency of each word in the given content.
      *
-     * @param  content         the content to analyze
      * @param  notLetterRegex  the regular expression pattern for non-letter characters
      * @param  luceneMorphology the LuceneMorphology object for the morphology analysis
      * @param  particles       the array of particle strings to check against
@@ -88,7 +87,6 @@ public class Morphology {
     /**
      * Returns a stream of lemmas from the given query, based on the language.
      *
-     * @param query          the search query
      * @param nonLetters      a regular expression pattern for non-letter characters
      * @param luceneMorphology1  the LuceneMorphology object for the first language
      * @param luceneMorphology2  the LuceneMorphology object for the second language
@@ -100,16 +98,13 @@ public class Morphology {
         return getLoweredReplacedAndSplittedQuery(query, nonLetters)
                 .parallel()
                 .filter(word -> validator.wordIsNotParticle(word, luceneMorphology1, particles))
-                .flatMap(queryWord -> queryWord.matches(onlyLetters)?
-                        luceneMorphology2.getNormalForms(queryWord).stream():
-                        luceneMorphology1.getNormalForms(queryWord).stream());
+                .flatMap(queryWord-> getInfinitivesByLanguage(queryWord, onlyLetters, luceneMorphology2, luceneMorphology1));
     }
     /**
      * Returns a stream of strings obtained by converting the given query to lowercase,
      * replacing non-letter characters with an empty string, and splitting the resulting
      * string using the splitter specified in the morphology settings.
      *
-     * @param  query     the query string to be processed
      * @param  nonLetters  the regular expression pattern representing non-letter characters
      * @return           a stream of strings obtained by processing the query
      */
@@ -117,6 +112,11 @@ public class Morphology {
         return Arrays.stream(query.toLowerCase()
                 .replaceAll(nonLetters, morphologySettings.getEmptyString())
                 .split(morphologySettings.getSplitter()));
+    }
+    private Stream<String> getInfinitivesByLanguage(String queryWord, String onlyLetters, LuceneMorphology luceneMorphology2, LuceneMorphology luceneMorphology1){
+        return queryWord.matches(onlyLetters)?
+                luceneMorphology2.getNormalForms(queryWord).stream():
+                luceneMorphology1.getNormalForms(queryWord).stream();
     }
 }
 

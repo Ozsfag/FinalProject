@@ -14,8 +14,8 @@ import searchengine.model.SiteModel;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.utils.dataTransfer.DataTransformer;
+import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.scraper.WebScraper;
-import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.validator.Validator;
 
@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 @Lazy
 @RequiredArgsConstructor
 public class SearchingImpl implements SearchingService {
-    private final EntityHandler entityHandler;
     private final Morphology morphology;
     private final PageRepository pageRepository;
     private final IndexRepository indexRepository;
@@ -37,6 +36,7 @@ public class SearchingImpl implements SearchingService {
     private final MorphologySettings morphologySettings;
     private final DataTransformer dataTransformer;
     private final Validator validator;
+    private final SiteHandler siteHandler;
 
     /**
      * A description of the entire Java function.
@@ -51,7 +51,7 @@ public class SearchingImpl implements SearchingService {
     public ResponseInterface search(String query, String url, int offset, int limit) {
         SiteModel siteModel = url == null ?
                 null :
-                entityHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
+                siteHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
                         .stream()
                         .findFirst()
                         .get();

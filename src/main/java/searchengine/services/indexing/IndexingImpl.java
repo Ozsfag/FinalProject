@@ -19,6 +19,7 @@ import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.dataTransfer.DataTransformer;
 import searchengine.utils.entityFactory.EntityFactory;
+import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.scraper.WebScraper;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.morphology.Morphology;
@@ -56,6 +57,8 @@ public class IndexingImpl implements IndexingService {
     @Lazy
     private final DataTransformer dataTransformer;
     @Lazy
+    private final SiteHandler siteHandler;
+    @Lazy
     public static volatile boolean isIndexing = true;
 
     /**
@@ -69,7 +72,7 @@ public class IndexingImpl implements IndexingService {
         CompletableFuture.runAsync(() -> {
             Collection<CompletableFuture<Void>> futures = new ArrayList<>();
 
-            Collection<SiteModel> siteModels = entityHandler.getIndexedSiteModelFromSites(sitesList.getSites());
+            Collection<SiteModel> siteModels = siteHandler.getIndexedSiteModelFromSites(sitesList.getSites());
             entityHandler.saveEntities(siteModels);
 
             siteModels.forEach(siteModel -> {
@@ -109,7 +112,7 @@ public class IndexingImpl implements IndexingService {
     @SneakyThrows
     @Override
     public ResponseInterface indexPage(String url) {
-        SiteModel siteModel = entityHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url)).iterator().next();
+        SiteModel siteModel = siteHandler.getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url)).iterator().next();
         entityHandler.processIndexing(dataTransformer.transformUrlToUrls(url), siteModel);
         return new Successful(true);
     }
