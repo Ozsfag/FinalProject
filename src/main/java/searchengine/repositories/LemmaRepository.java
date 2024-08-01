@@ -41,4 +41,7 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
     @Modifying
     @Query("UPDATE LemmaModel l SET l.frequency = CASE WHEN (l.frequency >= :frequency) THEN (l.frequency) ELSE (:frequency) END  WHERE l.lemma = :lemma AND l.site.id = :siteId")
     void merge(@Param("lemma") String lemma, @Param("siteId") Integer siteId, @Param("frequency") Integer frequency);
+
+    @Query("select (count(l) > 0) from LemmaModel l where l.lemma = ?1")
+    boolean existsByLemma(String lemma);
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
+import searchengine.model.PageModel;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,7 +43,7 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
      * @return            a list of IndexModel objects that match the given page ID and lemmas
      */
     @Query("SELECT i FROM IndexModel i JOIN FETCH i.page p WHERE p.id = :id AND i.lemma IN :lemmas")
-    List<IndexModel> findByPage_IdAndLemmaIn(@Param("id") Integer id, @Param("lemmas") Collection<LemmaModel> lemmas);
+    Set<IndexModel> findByPage_IdAndLemmaIn(@Param("id") Integer id, @Param("lemmas") Collection<LemmaModel> lemmas);
     /**
      * Updates the rank of an IndexModel in the database by subtracting the given rank from the current rank.
      *
@@ -54,4 +55,7 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
     @Modifying
     @Query("UPDATE IndexModel i SET i.rank = CASE WHEN (i.rank >= :rank) THEN (i.rank) ELSE (:rank) END WHERE i.lemma = :lemma AND i.page.id = :pageId")
     void merge(@Param("lemma") String lemma,@Param("pageId") Integer id, @Param("rank") Float rank);
+
+    @Query("select (count(i) > 0) from IndexModel i where i.page.id = ?1 and i.lemma.id = ?2")
+    boolean existsByPage_IdAndLemma_Id(Integer id, Integer id1);
 }

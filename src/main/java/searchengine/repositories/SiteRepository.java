@@ -57,4 +57,7 @@ public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
     @Modifying
     @Query("update SiteModel s set s.status = ?1, s.statusTime = ?2 where s.url = ?3")
     void updateStatusAndStatusTimeByUrl(Status status, Date statusTime, String url);
+
+    @Query("select (count(s) > 0) from SiteModel s where s.url = ?1")
+    boolean existsByUrl(String url);
 }
