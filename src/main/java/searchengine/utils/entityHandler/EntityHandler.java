@@ -33,6 +33,7 @@ public class EntityHandler {
     private final EntityFactory entityFactory;
     private final LemmaHandler lemmaHandler;
     private final IndexHandler indexHandler;
+    private final PageHandler pageHandler;
 
 
     /**
@@ -54,7 +55,7 @@ public class EntityHandler {
      * @param siteModel
      */
     public void processIndexing(Collection<String> urlsToParse, SiteModel siteModel) {
-        Collection<PageModel> pages = getIndexedPageModelsFromUrls(urlsToParse, siteModel);
+        Collection<PageModel> pages = pageHandler.getIndexedPageModelsFromUrls(urlsToParse, siteModel);
         saveEntities(pages);
 
         pages.forEach(page -> {
@@ -67,25 +68,7 @@ public class EntityHandler {
         });
     }
 
-    /**
-     * Retrieves the indexed PageModel list from the list of URLs.
-     *
-     * @param urlsToParse the list of URLs to parse
-     * @param siteModel   the SiteModel containing the content
-     * @return the set of indexed PageModels
-     */
-    public Set<PageModel> getIndexedPageModelsFromUrls(Collection<String> urlsToParse, SiteModel siteModel) {
-        return urlsToParse.parallelStream()
-                .map(url -> {
-                    PageModel pageModel = entityFactory.createPageModel(siteModel, url);
-                    if (!isIndexing) {
-                        throw new StoppedExecutionException("Индексация остановлена пользователем");
-                    }
-                    return pageModel;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-    }
+
 
 
 
