@@ -31,6 +31,8 @@ public class EntityHandler {
     public final Morphology morphology;
     private final PageRepository pageRepository;
     private final EntityFactory entityFactory;
+    private final LemmaHandler lemmaHandler;
+    private final IndexHandler indexHandler;
 
 
     /**
@@ -57,9 +59,9 @@ public class EntityHandler {
 
         pages.forEach(page -> {
             Map<String, Integer> wordsCount = morphology.wordCounter(page.getContent());
-            Collection<LemmaModel> lemmas = getIndexedLemmaModelsFromCountedWords(siteModel, wordsCount);
+            Collection<LemmaModel> lemmas = lemmaHandler.getIndexedLemmaModelsFromCountedWords(siteModel, wordsCount);
             saveEntities(lemmas);
-            Collection<IndexModel> indexes = getIndexedIndexModelFromCountedWords(page, lemmas, wordsCount);
+            Collection<IndexModel> indexes = indexHandler.getIndexedIndexModelFromCountedWords(page, lemmas);
             saveEntities(indexes);
             siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
         });
@@ -85,68 +87,7 @@ public class EntityHandler {
                 .collect(Collectors.toSet());
     }
 
-    /**
-     * Retrieves the indexed LemmaModel list from the content of a SiteModel.
-     *
-     * @param siteModel    the SiteModel containing the content
-     * @param wordsCount a map of word frequencies in the content
-     * @return the set of indexed LemmaModels
-     */
-    public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(SiteModel siteModel, Map<String, Integer> wordsCount) {
 
-        Collection<LemmaModel> existingLemmaModels =
-                lemmaRepository.findByLemmaInAndSite_Id(wordsCount.keySet(), siteModel.getId())
-                        .parallelStream()
-                        .collect(Collectors.toSet());
-
-        wordsCount.entrySet().removeIf(entry -> existingLemmaModels.parallelStream()
-                .map(LemmaModel::getLemma)
-                .toList()
-                .contains(entry.getKey()));
-
-        existingLemmaModels.addAll(wordsCount.entrySet().stream()
-                .map(entry -> entityFactory.createLemmaModel(siteModel, entry.getKey(), entry.getValue()))
-                .collect(Collectors.toSet())
-        );
-
-        return existingLemmaModels;
-    }
-
-    /**
-     * Retrieves the IndexModel list from the content of a PageModel.
-     *
-     * @param pageModel    the PageModel to retrieve indexes from
-     * @param lemmas       the set of LemmaModels to search for in the content
-     * @param wordsCount a map of word frequencies in the content
-     * @return the list of IndexModels generated from the content
-     */
-    public Collection<IndexModel> getIndexedIndexModelFromCountedWords(PageModel pageModel, Collection<LemmaModel> lemmas, Map<String, Integer> wordsCount) {
-        Collection<IndexModel> existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas)
-                .parallelStream()
-                .collect(Collectors.toSet());
-
-        wordsCount.entrySet().removeIf(entry -> existingIndexModels.parallelStream()
-                .map(IndexModel::getLemma)
-                .toList()
-                .contains(lemmas.stream()
-                        .filter(lemma -> lemma.getLemma().equals(entry.getKey()))
-                        .findFirst()
-                ));
-
-        existingIndexModels.addAll(wordsCount.entrySet().parallelStream()
-                .map(word2Count -> {
-                    try {
-                        LemmaModel lemmaModel = lemmas.stream().filter(lemma -> lemma.getLemma().equals(word2Count.getKey())).findFirst().get();
-                        return entityFactory.createIndexModel(pageModel, lemmaModel, (float) word2Count.getValue());
-                    } catch (StoppedExecutionException e) {
-                        throw new RuntimeException(e.getLocalizedMessage());
-                    }
-                })
-                .collect(Collectors.toSet())
-        );
-
-        return existingIndexModels;
-    }
 
     /**
      * Saves a set of entities to the database using the provided JpaRepository.
