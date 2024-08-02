@@ -5,7 +5,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import searchengine.config.MorphologySettings;
 import searchengine.config.SitesList;
 import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
@@ -13,16 +12,11 @@ import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
-import searchengine.repositories.IndexRepository;
-import searchengine.repositories.LemmaRepository;
-import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.dataTransfer.DataTransformer;
-import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.scraper.WebScraper;
 import searchengine.utils.entityHandler.EntityHandler;
-import searchengine.utils.morphology.Morphology;
 import searchengine.utils.parser.Parser;
 
 import java.util.*;
@@ -37,23 +31,11 @@ public class IndexingImpl implements IndexingService {
     @Lazy
     private final SiteRepository siteRepository;
     @Lazy
-    private final PageRepository pageRepository;
-    @Lazy
     private final ForkJoinPool forkJoinPool;
-    @Lazy
-    private final Morphology morphology;
     @Lazy
     private final EntityHandler entityHandler;
     @Lazy
-    private final EntityFactory entityFactory;
-    @Lazy
     private final WebScraper webScraper;
-    @Lazy
-    private final MorphologySettings morphologySettings;
-    @Lazy
-    private final LemmaRepository lemmaRepository;
-    @Lazy
-    private final IndexRepository indexRepository;
     @Lazy
     private final DataTransformer dataTransformer;
     @Lazy
