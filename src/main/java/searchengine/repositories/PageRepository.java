@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.PageModel;
 
@@ -23,6 +24,7 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
      */
 
     @Query("SELECT p.path FROM PageModel p JOIN SiteModel s ON p.site = s.id WHERE s.id = :siteId AND p.path IN :paths")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     Set<String> findAllPathsBySiteAndPathIn(@Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);
     /**
      * A description of the entire Java function.

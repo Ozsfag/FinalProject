@@ -91,7 +91,7 @@ public class WebScraper {
      *
      * @return a set of URLs to parse
      */
-    public Collection<String> getUrlsToParse(SiteModel siteModel, String href) {
+    public synchronized Collection<String> getUrlsToParse(SiteModel siteModel, String href) {
         Collection<String> urls = getConnectionResponse(href).getUrls();
         Collection<String> alreadyParsed = pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
         urls.removeAll(alreadyParsed);
