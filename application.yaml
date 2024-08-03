@@ -15,12 +15,12 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       minimum-idle: 2
-      idle-timeout: 600000
+      idle-timeout: 6000000
       maximum-pool-size: 10
       auto-commit: true
       pool-name: HikariCorePool
       max-lifetime: 0
-      connection-timeout: 30000
+      connection-timeout: 300000
 
   jpa:
     properties:
@@ -36,18 +36,18 @@ spring:
 
 indexing-settings:
   sites:
-    - url: https://lenta.ru/
-      name: Лента.ру
-    - url: https://skillbox.ru/
-      name: Skillbox
-    - url: http://www.playback.ru/
-      name: PlayBack.Ru
+#    - url: https://lenta.ru/
+#      name: Лента.ру
+#    - url: https://skillbox.ru/
+#      name: Skillbox
+#    - url: http://www.playback.ru/
+#      name: PlayBack.Ru
 #    - url: https://domrebenka.belzdrav.ru/
 #      name: Дом Ребенка
 #    - url: https://amurkino.ru/
 #      name: Амуркино
-#    - url: https://sendel.ru/
-#      name: sendel
+    - url: https://sendel.ru/
+      name: sendel
 
 
 connection-settings:

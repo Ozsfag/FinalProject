@@ -23,7 +23,7 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
      * @return          a set of page paths that match the given site ID and collection of paths
      */
 
-    @Query("SELECT p.path FROM PageModel p JOIN SiteModel s ON p.site = s.id WHERE s.id = :siteId AND p.path IN :paths")
+    @Query("SELECT DISTINCT p.path FROM PageModel p JOIN SiteModel s ON p.site = s.id WHERE s.id = :siteId AND p.path IN :paths")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     Set<String> findAllPathsBySiteAndPathIn(@Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);
     /**
