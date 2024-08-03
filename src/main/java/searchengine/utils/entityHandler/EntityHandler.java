@@ -22,7 +22,7 @@ public class EntityHandler {
     private final SiteRepository siteRepository;
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
-    public final Morphology morphology;
+    private final Morphology morphology;
     private final PageRepository pageRepository;
     private final LemmaHandler lemmaHandler;
     private final IndexHandler indexHandler;

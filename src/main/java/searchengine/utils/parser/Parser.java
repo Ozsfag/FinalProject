@@ -29,7 +29,7 @@ public class Parser extends RecursiveTask<Boolean> {
         Collection<String> urlsToParse = webScraper.getUrlsToParse(siteModel, href);
         if (!urlsToParse.isEmpty()) {
             entityHandler.processIndexing(urlsToParse, siteModel);
-            List<Parser> subtasks = urlsToParse.stream()
+            Collection<Parser> subtasks = urlsToParse.parallelStream()
                     .map(url -> new Parser(
                             entityHandler,
                             webScraper,
