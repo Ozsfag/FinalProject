@@ -17,7 +17,7 @@ public class EntityFactoryTest {
 
     @BeforeEach
     public void setup() {
-        ConnectionSettings connectionSettings = new ConnectionSettings("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36", "https://www.google.com");
+        ConnectionSettings connectionSettings = new ConnectionSettings("EmelianSearchBot", "https://www.google.com", 5000);
         WebScraper webScraper = new WebScraper(connectionSettings);
         factory = new EntityFactory(webScraper);
     }
