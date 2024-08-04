@@ -30,16 +30,8 @@ public class CachingConfig {
     public CacheManager cacheManager() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         caffeineCacheManager.setCaffeine(Caffeine.newBuilder()
-                .expireAfterWrite(7, TimeUnit.MINUTES)
+                .expireAfterWrite(2, TimeUnit.MINUTES)
                 .executor(forkJoinPool));
         return caffeineCacheManager;
     }
-
-    /**
-     * Creates and returns a new instance of CustomKeyGenerator.
-     *
-     * @return         an instance of CustomKeyGenerator
-     */
-    @Bean
-    public CustomKeyGenerator customKeyGenerator(){return new CustomKeyGenerator();}
 }

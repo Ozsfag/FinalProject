@@ -42,6 +42,7 @@ public class WebScraper {
                     .userAgent(connectionSettings.getUserAgent())
                     .referrer(connectionSettings.getReferrer())
                     .ignoreHttpErrors(true)
+                    .timeout(connectionSettings.getTimeout())
                     .get();
         } catch (IOException e) {
             throw new RuntimeException(e.getCause());

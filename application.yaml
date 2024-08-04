@@ -48,11 +48,14 @@ indexing-settings:
 #      name: Амуркино
     - url: https://sendel.ru/
       name: sendel
+#    - url: http://kremlin.ru/
+#      name: Кремль
 
 
 connection-settings:
-  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36
+  user-agent: EmelianSearchBot
   referrer: https://www.google.com
+  timeout: 5100
 
 morphology-settings:
   maxFrequency: 500
@@ -96,3 +99,4 @@ morphology-settings:
     - .sql
     - .yaml
     - .yml
+    - .zip
