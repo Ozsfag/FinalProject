@@ -8,6 +8,6 @@ import searchengine.dto.statistics.StatisticsData;
 @Data
 @RequiredArgsConstructor
 public class StatisticsResponse implements ResponseInterface {
-    private final boolean result;
-    private final StatisticsData statistics;
+  private final boolean result;
+  private final StatisticsData statistics;
 }

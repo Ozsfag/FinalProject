@@ -10,7 +10,7 @@ import org.springframework.retry.annotation.EnableRetry;
 @EnableRetry()
 @EnableJpaRepositories(bootstrapMode = BootstrapMode.LAZY)
 public class Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(Application.class, args);
+  }
 }

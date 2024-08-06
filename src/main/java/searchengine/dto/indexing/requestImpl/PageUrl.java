@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class PageUrl {
-    private String url;
+  private String url;
 }

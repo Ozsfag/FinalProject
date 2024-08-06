@@ -1,5 +1,5 @@
 package searchengine.dto;
 
 public interface ResponseInterface {
-    boolean result = true;
+  boolean result = true;
 }

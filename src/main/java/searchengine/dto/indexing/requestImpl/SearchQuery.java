@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class SearchQuery {
-    private String query;
+  private String query;
 }

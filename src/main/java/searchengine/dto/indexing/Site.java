@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 public class Site {
-    public String url;
-    public String name;
+  public String url;
+  public String name;
 }

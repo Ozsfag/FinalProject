@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 public class DetailedSearchResponse {
-    String site;
-    String siteName;
-    String uri;
-    String title;
-    String snippet;
-    double relevance;
+  String site;
+  String siteName;
+  String uri;
+  String title;
+  String snippet;
+  double relevance;
 }

@@ -1,51 +1,56 @@
 package searchengine.utils.dataTransfer;
 
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Collections;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
+import searchengine.model.EntityInterface;
 import searchengine.utils.validator.Validator;
-
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Collections;
 
 @Component
 @Data
 @RequiredArgsConstructor
 public class DataTransformer {
-    private final SitesList sitesList;
-    private final Validator validator;
+  private final SitesList sitesList;
+  private final Validator validator;
 
-    /**
-     * Transforms a single URL into a collection of URLs containing only the input URL.
-     *
-     * @param  url  the URL to be transformed
-     * @return      a collection containing the input URL
-     */
-    public Collection<String> transformUrlToUrls(String url){
-        return Collections.singletonList(url);
-    }
+  /**
+   * Transforms a single URL into a collection of URLs containing only the input URL.
+   *
+   * @param url the URL to be transformed
+   * @return a collection containing the input URL
+   */
+  public Collection<String> transformUrlToUrls(String url) {
+    return Collections.singletonList(url);
+  }
 
-    /**
-     * Transforms a collection of URLs into a collection of Site objects.
-     *
-     * @param  url  the collection of URLs to be transformed
-     * @return      a collection of Site objects
-     */
-    @SneakyThrows
-    public Collection<Site> transformUrlToSites(String url) {
-        return transformUrlToUrls(url).stream().map(href -> sitesList.getSites().stream()
-                .filter(siteUrl -> siteUrl.getUrl().equals(url))
-                .findFirst()
-                .orElseGet(()-> {
-                    try {
-                        return new Site(href, validator.getValidUrlComponents(href)[2]);
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                })).toList();
-    }
+  /**
+   * Transforms a collection of URLs into a collection of Site objects.
+   *
+   * @param url the collection of URLs to be transformed
+   * @return a collection of Site objects
+   */
+  @SneakyThrows
+  public Collection<Site> transformUrlToSites(String url) {
+    return transformUrlToUrls(url).stream()
+        .map(
+            href ->
+                sitesList.getSites().stream()
+                    .filter(siteUrl -> siteUrl.getUrl().equals(url))
+                    .findFirst()
+                    .orElseGet(
+                        () -> {
+                          try {
+                            return new Site(href, validator.getValidUrlComponents(href)[2]);
+                          } catch (URISyntaxException e) {
+                            throw new RuntimeException(e);
+                          }
+                        }))
+        .toList();
+  }
 }

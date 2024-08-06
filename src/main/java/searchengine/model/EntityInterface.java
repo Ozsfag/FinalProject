@@ -1,2 +1,3 @@
-package searchengine.model;public interface EntityInterface {
-}
+package searchengine.model;
+
+public interface EntityInterface {}

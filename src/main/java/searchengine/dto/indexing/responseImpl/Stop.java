@@ -7,6 +7,6 @@ import searchengine.dto.ResponseInterface;
 @Value
 @AllArgsConstructor
 public class Stop implements ResponseInterface {
-    boolean result;
-    String error;
+  boolean result;
+  String error;
 }

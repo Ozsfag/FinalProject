@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "connection-settings")
 public class ConnectionSettings {
-    public String userAgent;
-    public String referrer;
-    public int timeout;
+  public String userAgent;
+  public String referrer;
+  public int timeout;
 }

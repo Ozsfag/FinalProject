@@ -7,5 +7,5 @@ import searchengine.dto.ResponseInterface;
 @Value
 @AllArgsConstructor
 public class Successful implements ResponseInterface {
-    boolean result;
+  boolean result;
 }

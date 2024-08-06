@@ -12,15 +12,15 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "morphology-settings")
 public class MorphologySettings {
-    private String[] russianParticleNames;
-    private String[] englishParticlesNames;
-    private String notCyrillicLetters;
-    private String notLatinLetters;
-    private String splitter;
-    private String emptyString;
-    private String[] formats;
-    private String[] allowedSchemas;
-    private String onlyLatinLetters;
-    private String onlyCyrillicLetters;
-    private int maxFrequency;
+  private String[] russianParticleNames;
+  private String[] englishParticlesNames;
+  private String notCyrillicLetters;
+  private String notLatinLetters;
+  private String splitter;
+  private String emptyString;
+  private String[] formats;
+  private String[] allowedSchemas;
+  private String onlyLatinLetters;
+  private String onlyCyrillicLetters;
+  private int maxFrequency;
 }
