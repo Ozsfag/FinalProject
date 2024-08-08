@@ -53,12 +53,12 @@ public class MorphologyTest {
   }
 
   @Test
-  public void testWordCounter() {
+  public void testCountWordFrequencyByLanguage() {
     // Arrange
     String content = "This is a test content";
 
     // Act
-    Map<String, Integer> result = morphology.wordCounter(content);
+    Map<String, Integer> result = morphology.countWordFrequencyByLanguage(content);
 
     // Assert
     Map<String, Integer> expected = new HashMap<>();

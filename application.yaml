@@ -75,6 +75,7 @@ morphology-settings:
   onlyCyrillicLetters: "[а-я]+"
   splitter: "\\s+"
   emptyString: " "
+
   allowedSchemas:
     - http
     - https

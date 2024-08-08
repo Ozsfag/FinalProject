@@ -33,19 +33,17 @@ public class Morphology {
    * @param content from page
    * @return the amount of words at page
    */
-  public Map<String, Integer> wordCounter(String content) {
-    WordCounter russianCounter =
-        wordsCounterFactory.createRussianWordCounter(russianLuceneMorphology);
-    WordCounter englishCounter =
-        wordsCounterFactory.createEnglishWordCounter(englishLuceneMorphology);
+  public Map<String, Integer> countWordFrequencyByLanguage(String content) {
+    Map<String, Integer> result = new HashMap<>();
+
+    WordCounter russianCounter = wordsCounterFactory.createRussianWordCounter();
+    WordCounter englishCounter = wordsCounterFactory.createEnglishWordCounter();
     Map<String, Integer> englishWordFrequency = englishCounter.countWordsFromContent(content);
     Map<String, Integer> russianWordFrequency = russianCounter.countWordsFromContent(content);
 
-    return Stream.concat(
-            russianWordFrequency.entrySet().parallelStream(),
-            englishWordFrequency.entrySet().parallelStream())
-        .parallel()
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    result.putAll(englishWordFrequency);
+    result.putAll(russianWordFrequency);
+    return result;
   }
 
   /**

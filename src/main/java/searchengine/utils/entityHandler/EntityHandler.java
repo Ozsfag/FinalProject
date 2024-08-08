@@ -39,7 +39,7 @@ public class EntityHandler {
 
     pages.forEach(
         page -> {
-          Map<String, Integer> wordsCount = morphology.wordCounter(page.getContent());
+          Map<String, Integer> wordsCount = morphology.countWordFrequencyByLanguage(page.getContent());
           Collection<LemmaModel> lemmas =
               lemmaHandler.getIndexedLemmaModelsFromCountedWords(siteModel, wordsCount);
           saveEntities(lemmas);

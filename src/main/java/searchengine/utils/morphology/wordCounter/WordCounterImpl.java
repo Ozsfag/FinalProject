@@ -9,7 +9,7 @@ import org.apache.lucene.morphology.LuceneMorphology;
 import searchengine.utils.validator.Validator;
 
 @RequiredArgsConstructor
-public class MorphologyWordCounter implements WordCounter {
+public class WordCounterImpl implements WordCounter {
   private final LuceneMorphology luceneMorphology;
   private final String notLetterRegex;
   private final String[] particles;
@@ -25,7 +25,8 @@ public class MorphologyWordCounter implements WordCounter {
         .collect(Collectors.toMap(word -> word, word -> 1, Integer::sum));
   }
 
-  private Stream<String> getLoweredReplacedAndSplittedContent(String content) {
+  @Override
+  public Stream<String> getLoweredReplacedAndSplittedContent(String content) {
     return Arrays.stream(
         content.toLowerCase().replaceAll(notLetterRegex, emptyString).split(splitter));
   }
