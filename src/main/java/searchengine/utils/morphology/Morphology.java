@@ -9,6 +9,8 @@ import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
+import searchengine.utils.morphology.wordCounter.WordCounter;
+import searchengine.utils.morphology.wordCounter.WordsCounterFactory;
 import searchengine.utils.validator.Validator;
 
 /**
@@ -23,6 +25,7 @@ public class Morphology {
   private final EnglishLuceneMorphology englishLuceneMorphology;
   private final MorphologySettings morphologySettings;
   private final Validator validator;
+  private final WordsCounterFactory wordsCounterFactory;
 
   /**
    * counts words in the transmitted text
@@ -31,46 +34,18 @@ public class Morphology {
    * @return the amount of words at page
    */
   public Map<String, Integer> wordCounter(String content) {
-    Map<String, Integer> russianCounter =
-        wordFrequency(
-            content,
-            morphologySettings.getNotCyrillicLetters(),
-            russianLuceneMorphology,
-            morphologySettings.getRussianParticleNames());
-    Map<String, Integer> englishCounter =
-        wordFrequency(
-            content,
-            morphologySettings.getNotLatinLetters(),
-            englishLuceneMorphology,
-            morphologySettings.getEnglishParticlesNames());
+    WordCounter russianCounter =
+        wordsCounterFactory.createRussianWordCounter(russianLuceneMorphology);
+    WordCounter englishCounter =
+        wordsCounterFactory.createEnglishWordCounter(englishLuceneMorphology);
+    Map<String, Integer> englishWordFrequency = englishCounter.countWordsFromContent(content);
+    Map<String, Integer> russianWordFrequency = russianCounter.countWordsFromContent(content);
 
     return Stream.concat(
-            russianCounter.entrySet().parallelStream(), englishCounter.entrySet().parallelStream())
+            russianWordFrequency.entrySet().parallelStream(),
+            englishWordFrequency.entrySet().parallelStream())
         .parallel()
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-  }
-
-  /**
-   * Calculates the frequency of each word in the given content.
-   *
-   * @param notLetterRegex the regular expression pattern for non-letter characters
-   * @param luceneMorphology the LuceneMorphology object for the morphology analysis
-   * @param particles the array of particle strings to check against
-   * @return a map containing each word and its frequency in the content
-   */
-  public Map<String, Integer> wordFrequency(
-      String content,
-      String notLetterRegex,
-      LuceneMorphology luceneMorphology,
-      String[] particles) {
-    return getLoweredReplacedAndSplittedQuery(content, notLetterRegex)
-        .parallel()
-        .filter(word -> validator.wordIsNotParticle(word, luceneMorphology, particles))
-        //                .map(luceneMorphology::getNormalForms)
-        //                .flatMap(Collection::stream)
-        //                .map(forms -> forms.get(0))
-        //                .filter(Objects::nonNull)
-        .collect(Collectors.toMap(word -> word, word -> 1, Integer::sum));
   }
 
   /**

@@ -1,5 +1,6 @@
 package searchengine;
 
+import java.util.Date;
 import org.junit.jupiter.api.*;
 import org.rnorth.testcontainers.containers.PostgreSQLContainer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,6 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-
-import java.util.Date;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ApplicationTest {

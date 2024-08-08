@@ -9,7 +9,6 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
-import searchengine.model.EntityInterface;
 import searchengine.utils.validator.Validator;
 
 @Component
