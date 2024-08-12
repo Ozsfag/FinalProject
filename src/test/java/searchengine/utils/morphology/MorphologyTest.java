@@ -1,5 +1,5 @@
 //package searchengine.utils.morphology;
-//
+
 //import static org.junit.jupiter.api.Assertions.*;
 //
 //import java.util.*;
@@ -47,9 +47,9 @@
 //            .build();
 //    russianLuceneMorphology = new RussianLuceneMorphology();
 //    englishLuceneMorphology = new EnglishLuceneMorphology();
-//    morphology =
-//        new Morphology(
-//            russianLuceneMorphology, englishLuceneMorphology, morphologySettings, validator);
+////    morphology =
+////        new Morphology(
+////            russianLuceneMorphology, englishLuceneMorphology, morphologySettings, validator);
 //  }
 //
 //  @Test
@@ -67,19 +67,19 @@
 //    expected.put("content", 1);
 //    assertEquals(expected, result);
 //  }
-//
+
 //  @Test
 //  public void testWordFrequency() {
 //    // Arrange
 //    String content = "Hello world! This is a test.";
 //
 //    // Act
-//    Map<String, Integer> result =
-//        morphology.wordFrequency(
-//            content,
-//            morphologySettings.getNotLatinLetters(),
-//            englishLuceneMorphology,
-//            morphologySettings.getEnglishParticlesNames());
+////    Map<String, Integer> result =
+////        morphology.wordFrequency(
+////            content,
+////            morphologySettings.getNotLatinLetters(),
+////            englishLuceneMorphology,
+////            morphologySettings.getEnglishParticlesNames());
 //
 //    // Assert
 //    Map<String, Integer> expectedResult = new HashMap<>();
@@ -88,7 +88,7 @@
 //    expectedResult.put("test", 1);
 //    expectedResult.put("this", 1);
 //
-//    assertEquals(expectedResult, result);
+////    assertEquals(expectedResult, result);
 //  }
 //
 //  @Test

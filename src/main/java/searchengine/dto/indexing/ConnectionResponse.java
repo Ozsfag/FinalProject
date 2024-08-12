@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConnectionDto {
+public class ConnectionResponse {
   private String path;
   private int responseCode;
   private String content;

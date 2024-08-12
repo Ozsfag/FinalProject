@@ -1,0 +1,41 @@
+Manifest-Version: 1.0
+Main-Class: searchengine.Application
+Class-Path: slf4j-api-1.7.36.jar hibernate-commons-annotations-5.1.2.Fin
+ al.jar txw2-2.3.6.jar russian-1.5.jar spring-boot-starter-json-2.7.1.ja
+ r log4j-to-slf4j-2.17.2.jar spring-boot-starter-cache-2.7.1.jar spring-
+ data-commons-2.7.1.jar spring-web-5.3.21.jar spring-beans-5.3.21.jar to
+ mcat-embed-core-9.0.64.jar spring-tx-5.3.21.jar jul-to-slf4j-1.7.36.jar
+  error_prone_annotations-2.10.0.jar morph-1.5.jar spring-boot-starter-w
+ eb-2.7.1.jar tomcat-embed-el-9.0.64.jar spring-boot-2.7.1.jar jakarta.t
+ ransaction-api-1.3.3.jar logback-core-1.2.11.jar postgresql-42.7.3.jar 
+ spring-orm-5.3.21.jar jackson-datatype-jdk8-2.13.3.jar maven-common-art
+ ifact-filters-3.3.2.jar jsoup-1.16.1.jar aspectjweaver-1.9.7.jar spring
+ -boot-starter-thymeleaf-2.7.1.jar spring-context-support-5.3.21.jar jac
+ kson-datatype-jsr310-2.13.3.jar httpclient-4.5.13.jar jakarta.annotatio
+ n-api-1.3.5.jar spring-boot-starter-data-jpa-2.7.1.jar spring-boot-star
+ ter-2.7.1.jar lucene-analyzers-common-8.11.0.jar jackson-databind-2.13.
+ 3.jar commons-codec-1.15.jar spring-webmvc-5.3.21.jar lucene-core-8.11.
+ 0.jar mapstruct-1.5.5.Final.jar caffeine-2.9.3.jar spring-boot-starter-
+ aop-2.7.1.jar classmate-1.5.1.jar jakarta.xml.bind-api-2.3.3.jar log4j-
+ api-2.17.2.jar thymeleaf-3.0.15.RELEASE.jar antlr-2.7.7.jar spring-retr
+ y-2.0.3.jar spring-core-5.3.21.jar jakarta.activation-api-1.2.2.jar jak
+ arta.activation-1.2.2.jar morphology-1.5.jar tomlj-1.0.0.jar spring-boo
+ t-starter-tomcat-2.7.1.jar hibernate-ehcache-5.4.21.Final.jar commons-l
+ ang3-3.12.0.jar antlr4-runtime-4.7.2.jar jna-platform-5.7.0.jar lombok-
+ 1.18.24.jar spring-jdbc-5.3.21.jar attoparser-2.0.5.RELEASE.jar jboss-l
+ ogging-3.4.3.Final.jar spring-boot-starter-jdbc-2.7.1.jar spring-jcl-5.
+ 3.21.jar spring-context-5.3.21.jar spring-boot-loader-tools-2.7.1.jar s
+ pring-aop-5.3.21.jar snakeyaml-1.30.jar byte-buddy-1.14.18.jar HikariCP
+ -5.1.0.jar jna-5.7.0.jar jackson-module-parameter-names-2.13.3.jar ehca
+ che-2.10.9.2.jar logback-classic-1.2.11.jar jackson-core-2.13.3.jar hib
+ ernate-core-5.6.9.Final.jar istack-commons-runtime-3.0.12.jar jsr305-3.
+ 0.2.jar jandex-2.4.2.Final.jar thymeleaf-extras-java8time-3.0.4.RELEASE
+ .jar spring-boot-maven-plugin-3.3.2.jar english-1.5.jar thymeleaf-sprin
+ g5-3.0.15.RELEASE.jar spring-expression-5.3.21.jar jackson-annotations-
+ 2.13.3.jar unbescape-1.1.6.RELEASE.jar jakarta.persistence-api-2.2.3.ja
+ r tomcat-embed-websocket-9.0.64.jar spring-boot-autoconfigure-2.7.1.jar
+  commons-compress-1.21.jar plexus-build-api-0.0.7.jar checker-qual-3.19
+ .0.jar jaxb-runtime-2.3.6.jar spring-data-jpa-2.7.1.jar spring-aspects-
+ 5.3.21.jar spring-boot-buildpack-platform-2.7.1.jar dictionary-reader-1
+ .5.jar spring-boot-starter-logging-2.7.1.jar httpcore-4.4.15.jar
+

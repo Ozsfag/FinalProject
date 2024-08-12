@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.ConnectionSettings;
-import searchengine.dto.indexing.ConnectionDto;
+import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
 import searchengine.utils.validator.Validator;
@@ -55,7 +55,7 @@ public class WebScraper {
    * @param url the URL to establish a connection with
    * @return the ConnectionResponse containing URL, HTTP status, content, URLs, and an empty string
    */
-  public ConnectionDto getConnectionDto(String url) {
+  public ConnectionResponse getConnectionDto(String url) {
     try {
       Document document = getDocument(url);
       String content = Optional.of(document.body().text()).orElseThrow();
@@ -65,9 +65,9 @@ public class WebScraper {
               .collect(Collectors.toSet());
       String title = document.select("title").text();
 
-      return new ConnectionDto(url, HttpStatus.OK.value(), content, urls, "", title);
+      return new ConnectionResponse(url, HttpStatus.OK.value(), content, urls, "", title);
     } catch (Exception e) {
-      return new ConnectionDto(
+      return new ConnectionResponse(
           url,
           HttpStatus.NOT_FOUND.value(),
           "",

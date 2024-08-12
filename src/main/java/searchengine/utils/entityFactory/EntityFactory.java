@@ -3,7 +3,7 @@ package searchengine.utils.entityFactory;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import searchengine.dto.indexing.ConnectionDto;
+import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.dto.indexing.Site;
 import searchengine.model.*;
 import searchengine.utils.scraper.WebScraper;
@@ -37,12 +37,12 @@ public class EntityFactory {
    * @return the newly created PageModel object
    */
   public PageModel createPageModel(SiteModel siteModel, String path) {
-    ConnectionDto connectionDto = webScraper.getConnectionDto(path);
+    ConnectionResponse connectionResponse = webScraper.getConnectionDto(path);
     return PageModel.builder()
         .site(siteModel)
         .path(path)
-        .code(connectionDto.getResponseCode())
-        .content(connectionDto.getContent())
+        .code(connectionResponse.getResponseCode())
+        .content(connectionResponse.getContent())
         .build();
   }
 
