@@ -18,7 +18,7 @@ import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.dataTransfer.DataTransformer;
+import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.scraper.WebScraper;

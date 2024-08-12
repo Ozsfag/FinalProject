@@ -16,7 +16,7 @@ import searchengine.dto.indexing.responseImpl.Successful;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.dataTransfer.DataTransformer;
+import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.parser.Parser;

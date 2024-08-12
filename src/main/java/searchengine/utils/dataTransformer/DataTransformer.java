@@ -1,4 +1,4 @@
-package searchengine.utils.dataTransfer;
+package searchengine.utils.dataTransformer;
 
 import java.net.URISyntaxException;
 import java.util.Collection;
