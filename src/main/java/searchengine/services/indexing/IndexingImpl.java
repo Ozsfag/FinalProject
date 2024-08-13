@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,7 @@ public class IndexingImpl implements IndexingService {
   @Lazy private final DataTransformer dataTransformer;
   @Lazy private final SiteHandler siteHandler;
   @Lazy private final SiteMapper siteMapper;
-  @Lazy public static volatile boolean isIndexing = true;
+  public static volatile boolean isIndexing = true;
 
   /**
    * Starts the indexing process for all sites in the sitesList asynchronously.
@@ -99,7 +98,7 @@ public class IndexingImpl implements IndexingService {
    * @param url the URL of the page to be indexed
    * @return a ResponseInterface object indicating the success or failure of the indexing process
    */
-  @SneakyThrows
+
   @Override
   public ResponseInterface indexPage(String url) {
     SiteModel siteModel =
@@ -107,7 +106,9 @@ public class IndexingImpl implements IndexingService {
             .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
             .iterator()
             .next();
-    entityHandler.processIndexing(dataTransformer.transformUrlToUrls(url), siteModel);
+    siteRepository.saveAndFlush(siteModel);
+    SiteDto siteDto = siteMapper.modelToDto(siteModel);
+    entityHandler.processIndexing(dataTransformer.transformUrlToUrls(url), siteDto);
     return new Successful(true);
   }
 }

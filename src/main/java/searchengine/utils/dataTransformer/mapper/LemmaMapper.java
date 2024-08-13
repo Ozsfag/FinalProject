@@ -14,4 +14,5 @@ public interface LemmaMapper {
     LemmaDto modelToDto(LemmaModel lemmaModel);
 
     Collection<LemmaDto> toCollectionDto(Collection<LemmaModel> lemmaModels);
+    Collection<LemmaModel> toCollectionModel(Collection<LemmaDto> lemmasDto);
 }

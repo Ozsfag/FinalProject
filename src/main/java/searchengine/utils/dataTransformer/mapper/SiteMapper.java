@@ -1,7 +1,9 @@
 package searchengine.utils.dataTransformer.mapper;
 
 import org.mapstruct.Mapper;
+import searchengine.dto.indexing.LemmaDto;
 import searchengine.dto.indexing.SiteDto;
+import searchengine.model.LemmaModel;
 import searchengine.model.SiteModel;
 
 import java.util.Collection;
@@ -13,4 +15,6 @@ public interface SiteMapper {
     SiteDto modelToDto(SiteModel siteModel);
 
     Collection<SiteDto> toCollectionDto(Collection<SiteModel> siteModels);
+
+    Collection<SiteModel> toCollectionModel(Collection<SiteDto> sitesDto);
 }

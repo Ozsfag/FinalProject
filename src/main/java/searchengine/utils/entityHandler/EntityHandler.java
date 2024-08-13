@@ -3,6 +3,7 @@ package searchengine.utils.entityHandler;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import searchengine.dto.indexing.LemmaDto;
 import searchengine.dto.indexing.PageDto;
 import searchengine.dto.indexing.SiteDto;
 import searchengine.model.*;
@@ -10,6 +11,8 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
+import searchengine.utils.dataTransformer.mapper.LemmaMapper;
+import searchengine.utils.dataTransformer.mapper.PageMapper;
 import searchengine.utils.morphology.Morphology;
 
 /**
@@ -28,6 +31,8 @@ public class EntityHandler {
   private final LemmaHandler lemmaHandler;
   private final IndexHandler indexHandler;
   private final PageHandler pageHandler;
+  private final PageMapper pageMapper;
+  private final LemmaMapper lemmaMapper;
 
   /**
    * Indexes the lemmas and indexes for a list of pages.
@@ -38,16 +43,17 @@ public class EntityHandler {
   public void processIndexing(Collection<String> urlsToParse, SiteDto siteDto) {
     Collection<PageModel> pages = pageHandler.getIndexedPageModelsFromUrls(urlsToParse, siteDto);
     saveEntities(pages);
-    Collection<PageDto> pagesDto = pa
+    Collection<PageDto> pagesDto = pageMapper.toCollectionDto(pages);
 
-    pages.forEach(
-        page -> {
-          Map<String, Integer> wordsCount = morphology.countWordFrequencyByLanguage(page.getContent());
+    pagesDto.forEach(
+        pageDto -> {
+          Map<String, Integer> wordsCount = morphology.countWordFrequencyByLanguage(pageDto.getContent());
           Collection<LemmaModel> lemmas =
               lemmaHandler.getIndexedLemmaModelsFromCountedWords(siteDto, wordsCount);
           saveEntities(lemmas);
+          Collection<LemmaDto> lemmasDto = lemmaMapper.toCollectionDto(lemmas);
           Collection<IndexModel> indexes =
-              indexHandler.getIndexedIndexModelFromCountedWords(page, lemmas);
+              indexHandler.getIndexedIndexModelFromCountedWords(pageDto, lemmasDto);
           saveEntities(indexes);
           siteRepository.updateStatusTimeByUrl(new Date(), siteDto.getUrl());
         });

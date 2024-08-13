@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
@@ -34,7 +33,7 @@ public class DataTransformer {
    * @param url the collection of URLs to be transformed
    * @return a collection of Site objects
    */
-  @SneakyThrows
+
   public Collection<Site> transformUrlToSites(String url) {
     return transformUrlToUrls(url).stream()
         .map(

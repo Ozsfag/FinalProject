@@ -4,10 +4,16 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import searchengine.dto.indexing.IndexDto;
+import searchengine.dto.indexing.LemmaDto;
+import searchengine.dto.indexing.PageDto;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.repositories.IndexRepository;
+import searchengine.utils.dataTransformer.mapper.IndexMapper;
+import searchengine.utils.dataTransformer.mapper.LemmaMapper;
+import searchengine.utils.dataTransformer.mapper.PageMapper;
 import searchengine.utils.entityFactory.EntityFactory;
 
 @Component
@@ -15,40 +21,48 @@ import searchengine.utils.entityFactory.EntityFactory;
 public class IndexHandler {
   private final IndexRepository indexRepository;
   private final EntityFactory entityFactory;
+  private final LemmaMapper lemmaMapper;
+  private final IndexMapper indexMapper;
+  private final PageMapper pageMapper;
 
-  private PageModel pageModel;
-  private Collection<LemmaModel> lemmas;
-  private Collection<IndexModel> existingIndexModels;
+  private PageDto pageDto;
+  private Collection<LemmaDto> lemmasDto;
+  private Collection<IndexDto> existingIndexModels;
 
   public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
-      PageModel pageModel, Collection<LemmaModel> lemmas) {
-    this.pageModel = pageModel;
-    this.lemmas = lemmas;
+          PageDto pageDto, Collection<LemmaDto> lemmasDto) {
+    this.pageDto = pageDto;
+    this.lemmasDto = lemmasDto;
 
     getExistingIndexes();
     removeExistedIndexesFromNew();
     existingIndexModels.addAll(createNewFromNotExisted());
 
-    return existingIndexModels;
+    return indexMapper.toCollectionModel(existingIndexModels);
   }
 
   private void getExistingIndexes() {
-    existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas);
+    Collection<LemmaModel>  lemmaModels = lemmaMapper.toCollectionModel(lemmasDto);
+    Collection<IndexModel> indexes = indexRepository.findByPage_IdAndLemmaIn(pageDto.getId(), lemmaModels);
+    existingIndexModels = indexMapper.toCollectionDto(indexes);
   }
 
   private void removeExistedIndexesFromNew() {
-    lemmas.removeIf(
-        lemma ->
+    lemmasDto.removeIf(
+        lemmaDto ->
             existingIndexModels.parallelStream()
-                .map(IndexModel::getLemma)
+                .map(IndexDto::getLemma)
                 .toList()
-                .contains(lemma.getLemma()));
+                .contains(lemmaDto.getLemma()));
   }
 
-  private Collection<IndexModel> createNewFromNotExisted() {
-    return lemmas.parallelStream()
-        .map(
-            lemma -> entityFactory.createIndexModel(pageModel, lemma, (float) lemma.getFrequency()))
-        .collect(Collectors.toSet());
+  private Collection<IndexDto> createNewFromNotExisted() {
+    Collection<LemmaModel> lemmaModel = lemmaMapper.toCollectionModel(lemmasDto);
+    PageModel pageModel = pageMapper.dtoToModel(pageDto);
+    Collection<IndexModel> indexes = lemmaModel.parallelStream()
+            .map(
+                    lemma -> entityFactory.createIndexModel(pageModel, lemma, (float) lemma.getFrequency()))
+            .collect(Collectors.toSet());
+    return indexMapper.toCollectionDto(indexes);
   }
 }
