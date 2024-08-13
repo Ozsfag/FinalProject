@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
 import searchengine.dto.ResponseInterface;
+import searchengine.dto.indexing.SiteDto;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
@@ -17,6 +18,7 @@ import searchengine.model.SiteModel;
 import searchengine.model.Status;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.dataTransformer.DataTransformer;
+import searchengine.utils.dataTransformer.mapper.SiteMapper;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.parser.Parser;
@@ -33,6 +35,7 @@ public class IndexingImpl implements IndexingService {
   @Lazy private final WebScraper webScraper;
   @Lazy private final DataTransformer dataTransformer;
   @Lazy private final SiteHandler siteHandler;
+  @Lazy private final SiteMapper siteMapper;
   @Lazy public static volatile boolean isIndexing = true;
 
   /**
@@ -50,24 +53,25 @@ public class IndexingImpl implements IndexingService {
           Collection<SiteModel> siteModels =
               siteHandler.getIndexedSiteModelFromSites(sitesList.getSites());
           entityHandler.saveEntities(siteModels);
+          Collection<SiteDto> sitesDto = siteMapper.toCollectionDto(siteModels);
 
-          siteModels.forEach(
-              siteModel -> {
+            sitesDto.forEach(
+              siteDto -> {
                 CompletableFuture<Void> future =
                     CompletableFuture.runAsync(
                         () -> {
                           try {
                             forkJoinPool.invoke(
                                 new Parser(
-                                    entityHandler, webScraper, siteModel, siteModel.getUrl()));
+                                    entityHandler, webScraper, siteDto, siteDto.getUrl()));
                             siteRepository.updateStatusAndStatusTimeByUrl(
-                                Status.INDEXED, new Date(), siteModel.getUrl());
+                                Status.INDEXED, new Date(), siteDto.getUrl());
                           } catch (Error re) {
                             siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(
                                 Status.FAILED,
                                 new Date(),
                                 re.getLocalizedMessage(),
-                                siteModel.getUrl());
+                                siteDto.getUrl());
                           }
                         });
                 futures.add(future);

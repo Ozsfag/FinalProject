@@ -3,6 +3,8 @@ package searchengine.utils.entityHandler;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import searchengine.dto.indexing.PageDto;
+import searchengine.dto.indexing.SiteDto;
 import searchengine.model.*;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
@@ -31,22 +33,23 @@ public class EntityHandler {
    * Indexes the lemmas and indexes for a list of pages.
    *
    * @param urlsToParse the list of pages to index
-   * @param siteModel
+   * @param siteDto
    */
-  public void processIndexing(Collection<String> urlsToParse, SiteModel siteModel) {
-    Collection<PageModel> pages = pageHandler.getIndexedPageModelsFromUrls(urlsToParse, siteModel);
+  public void processIndexing(Collection<String> urlsToParse, SiteDto siteDto) {
+    Collection<PageModel> pages = pageHandler.getIndexedPageModelsFromUrls(urlsToParse, siteDto);
     saveEntities(pages);
+    Collection<PageDto> pagesDto = pa
 
     pages.forEach(
         page -> {
           Map<String, Integer> wordsCount = morphology.countWordFrequencyByLanguage(page.getContent());
           Collection<LemmaModel> lemmas =
-              lemmaHandler.getIndexedLemmaModelsFromCountedWords(siteModel, wordsCount);
+              lemmaHandler.getIndexedLemmaModelsFromCountedWords(siteDto, wordsCount);
           saveEntities(lemmas);
           Collection<IndexModel> indexes =
               indexHandler.getIndexedIndexModelFromCountedWords(page, lemmas);
           saveEntities(indexes);
-          siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
+          siteRepository.updateStatusTimeByUrl(new Date(), siteDto.getUrl());
         });
   }
 

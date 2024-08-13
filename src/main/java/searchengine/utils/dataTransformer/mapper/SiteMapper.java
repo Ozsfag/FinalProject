@@ -1,10 +1,10 @@
-package searchengine.utils.mapper;
+package searchengine.utils.dataTransformer.mapper;
 
 import org.mapstruct.Mapper;
 import searchengine.dto.indexing.SiteDto;
 import searchengine.model.SiteModel;
 
-import java.util.List;
+import java.util.Collection;
 
 @Mapper(componentModel = "spring")
 public interface SiteMapper {
@@ -12,5 +12,5 @@ public interface SiteMapper {
 
     SiteDto modelToDto(SiteModel siteModel);
 
-    List<SiteDto> toListDto(List<SiteModel> siteModels);
+    Collection<SiteDto> toCollectionDto(Collection<SiteModel> siteModels);
 }

@@ -1,9 +1,10 @@
-package searchengine.utils.mapper;
+package searchengine.utils.dataTransformer.mapper;
 
 import org.mapstruct.Mapper;
 import searchengine.dto.indexing.PageDto;
 import searchengine.model.PageModel;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -12,5 +13,5 @@ public interface PageMapper {
 
     PageDto modelToDto(PageModel pageModel);
 
-    List<PageDto> toListDto(List<PageModel> pageModels);
+    Collection<PageDto> toCollectionDto(Collection<PageModel> pageModels);
 }

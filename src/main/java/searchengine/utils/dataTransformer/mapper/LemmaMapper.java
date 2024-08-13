@@ -1,9 +1,10 @@
-package searchengine.utils.mapper;
+package searchengine.utils.dataTransformer.mapper;
 
 import org.mapstruct.Mapper;
 import searchengine.dto.indexing.LemmaDto;
 import searchengine.model.LemmaModel;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -12,5 +13,5 @@ public interface LemmaMapper {
 
     LemmaDto modelToDto(LemmaModel lemmaModel);
 
-    List<LemmaDto> toListDto(List<LemmaModel> lemmaModels);
+    Collection<LemmaDto> toCollectionDto(Collection<LemmaModel> lemmaModels);
 }

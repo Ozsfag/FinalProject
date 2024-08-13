@@ -12,8 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.ConnectionResponse;
+import searchengine.dto.indexing.SiteDto;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
+import searchengine.utils.dataTransformer.mapper.SiteMapper;
 import searchengine.utils.validator.Validator;
 
 /**
@@ -82,14 +84,14 @@ public class WebScraper {
    *
    * @return a set of URLs to parse
    */
-  public synchronized Collection<String> getUrlsToParse(SiteModel siteModel, String href) {
+  public synchronized Collection<String> getUrlsToParse(SiteDto siteDto, String href) {
     Collection<String> urls = getConnectionDto(href).getUrls();
     Collection<String> alreadyParsed =
-        pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
+        pageRepository.findAllPathsBySiteAndPathIn(siteDto.getId(), urls);
     urls.removeAll(alreadyParsed);
 
     return urls.parallelStream()
-        .filter(url -> validator.urlHasCorrectForm(url, siteModel.getUrl()))
+        .filter(url -> validator.urlHasCorrectForm(url, siteDto.getUrl()))
         .collect(Collectors.toSet());
   }
 }
