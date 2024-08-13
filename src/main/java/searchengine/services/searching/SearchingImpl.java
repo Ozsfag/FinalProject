@@ -145,7 +145,7 @@ public class SearchingImpl implements SearchingService {
                     Float::sum,
                     HashMap::new));
 
-    var maxValues = pageId2AbsRank.values().stream().max(Float::compareTo).orElse(1f);
+    float maxValues = pageId2AbsRank.values().stream().max(Float::compareTo).orElse(1f);
 
     return pageId2AbsRank.entrySet().stream()
         .collect(

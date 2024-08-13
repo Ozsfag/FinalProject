@@ -1,12 +1,13 @@
 package searchengine.utils.dataTransformer.mapper;
 
+import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.IndexDto;
-import searchengine.dto.indexing.PageDto;
 import searchengine.model.IndexModel;
-import searchengine.model.PageModel;
 
 import java.util.Collection;
-
+@Mapper(componentModel = "spring")
+@Component
 public interface IndexMapper {
     IndexModel dtoToModel(IndexDto indexDto);
 
