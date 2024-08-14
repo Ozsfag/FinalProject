@@ -5,13 +5,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import searchengine.dto.indexing.LemmaDto;
-import searchengine.dto.indexing.SiteDto;
 import searchengine.model.LemmaModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.LemmaRepository;
-import searchengine.utils.dataTransformer.mapper.LemmaMapper;
-import searchengine.utils.dataTransformer.mapper.SiteMapper;
 import searchengine.utils.entityFactory.EntityFactory;
 
 @Component
@@ -19,46 +15,42 @@ import searchengine.utils.entityFactory.EntityFactory;
 public class LemmaHandler {
   private final LemmaRepository lemmaRepository;
   private final EntityFactory entityFactory;
-  private final SiteMapper siteMapper;
-  private final LemmaMapper lemmaMapper;
 
-  private SiteDto siteDto;
+  private SiteModel siteModel;
   private Map<String, Integer> wordsCount;
-  private Collection<LemmaDto> existingLemmaModels;
+  private Collection<LemmaModel> existingLemmaModels;
 
   public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
-          SiteDto siteDto, Map<String, Integer> wordsCount) {
-    this.siteDto = siteDto;
+          SiteModel siteModel, Map<String, Integer> wordsCount) {
+    this.siteModel = siteModel;
     this.wordsCount = wordsCount;
 
     getExistingLemmas();
     removeExistedLemmasFromNew();
     existingLemmaModels.addAll(createNewFromNotExisted());
 
-    return lemmaMapper.toCollectionModel(existingLemmaModels);
+    return existingLemmaModels;
   }
 
   private void getExistingLemmas() {
-    Collection<LemmaModel> lemmas = lemmaRepository.findByLemmaInAndSite_Id(wordsCount.keySet(), siteDto.getId());
-    existingLemmaModels = lemmaMapper.toCollectionDto(lemmas);
+    existingLemmaModels =
+            lemmaRepository.findByLemmaInAndSite_Id(wordsCount.keySet(), siteModel.getId());
   }
 
   private void removeExistedLemmasFromNew() {
     wordsCount
-        .entrySet()
-        .removeIf(
-            entry ->
-                existingLemmaModels.parallelStream()
-                    .map(LemmaDto::getLemma)
-                    .toList()
-                    .contains(entry.getKey()));
+            .entrySet()
+            .removeIf(
+                    entry ->
+                            existingLemmaModels.parallelStream()
+                                    .map(LemmaModel::getLemma)
+                                    .toList()
+                                    .contains(entry.getKey()));
   }
 
-  private Collection<LemmaDto> createNewFromNotExisted() {
-    SiteModel siteModel = siteMapper.dtoToModel(siteDto);
-    Collection<LemmaModel> newLemmas = wordsCount.entrySet().parallelStream()
+  private Collection<LemmaModel> createNewFromNotExisted() {
+    return wordsCount.entrySet().parallelStream()
             .map(entry -> entityFactory.createLemmaModel(siteModel, entry.getKey(), entry.getValue()))
             .collect(Collectors.toSet());
-    return lemmaMapper.toCollectionDto(newLemmas);
   }
 }

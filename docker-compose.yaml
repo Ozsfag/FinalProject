@@ -1,13 +1,54 @@
-version: '3.8'
-
+version: '3.9'
 services:
   postgres:
-    image: 'postgres:16.1-alpine'
-    container_name: 'java-postgres'
-    ports:
-      - 5432:5432
+    container_name: postgres_container
+    image: postgres:16.1-alpine
     environment:
-      - 'POSTGRES_USER=postgres'
-      - 'POSTGRES_PASSWORD=30091998As!'
-      - 'POSTGRES_HOST_AUTH_METHOD=trust'
-      - 'POSTGRES_DB=search_engine'
+      POSTGRES_DB: "search_engine"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "30091998As!"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d search_engine"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+    networks:
+      - postgres
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4:7.2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "Ozsfag3154artem@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "30091998As!"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+    networks:
+      - postgres
+
+volumes:
+  habrdb-data:
+  pgadmin-data:
+
+networks:
+  postgres:
+    driver: bridge

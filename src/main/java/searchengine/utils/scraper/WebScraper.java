@@ -12,10 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.ConnectionResponse;
-import searchengine.dto.indexing.SiteDto;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.dataTransformer.mapper.SiteMapper;
 import searchengine.utils.validator.Validator;
 
 /**
@@ -41,11 +39,11 @@ public class WebScraper {
   public Document getDocument(String url) {
     try {
       return Jsoup.connect(url)
-          .userAgent(connectionSettings.getUserAgent())
-          .referrer(connectionSettings.getReferrer())
-          .ignoreHttpErrors(true)
-          .timeout(connectionSettings.getTimeout())
-          .get();
+              .userAgent(connectionSettings.getUserAgent())
+              .referrer(connectionSettings.getReferrer())
+              .ignoreHttpErrors(true)
+              .timeout(connectionSettings.getTimeout())
+              .get();
     } catch (IOException e) {
       throw new RuntimeException(e.getCause());
     }
@@ -62,20 +60,20 @@ public class WebScraper {
       Document document = getDocument(url);
       String content = Optional.of(document.body().text()).orElseThrow();
       Set<String> urls =
-          document.select("a[href]").stream()
-              .map(element -> element.absUrl("href"))
-              .collect(Collectors.toSet());
+              document.select("a[href]").stream()
+                      .map(element -> element.absUrl("href"))
+                      .collect(Collectors.toSet());
       String title = document.select("title").text();
 
       return new ConnectionResponse(url, HttpStatus.OK.value(), content, urls, "", title);
     } catch (Exception e) {
       return new ConnectionResponse(
-          url,
-          HttpStatus.NOT_FOUND.value(),
-          "",
-          new HashSet<>(),
-          HttpStatus.NOT_FOUND.getReasonPhrase(),
-          "");
+              url,
+              HttpStatus.NOT_FOUND.value(),
+              "",
+              new HashSet<>(),
+              HttpStatus.NOT_FOUND.getReasonPhrase(),
+              "");
     }
   }
 
@@ -84,14 +82,14 @@ public class WebScraper {
    *
    * @return a set of URLs to parse
    */
-  public synchronized Collection<String> getUrlsToParse(SiteDto siteDto, String href) {
+  public synchronized Collection<String> getUrlsToParse(SiteModel siteModel, String href) {
     Collection<String> urls = getConnectionDto(href).getUrls();
     Collection<String> alreadyParsed =
-        pageRepository.findAllPathsBySiteAndPathIn(siteDto.getId(), urls);
+            pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
     urls.removeAll(alreadyParsed);
 
     return urls.parallelStream()
-        .filter(url -> validator.urlHasCorrectForm(url, siteDto.getUrl()))
-        .collect(Collectors.toSet());
+            .filter(url -> validator.urlHasCorrectForm(url, siteModel.getUrl()))
+            .collect(Collectors.toSet());
   }
 }

@@ -3,7 +3,6 @@ package searchengine.utils.parser;
 import java.util.*;
 import java.util.concurrent.RecursiveTask;
 import lombok.RequiredArgsConstructor;
-import searchengine.dto.indexing.SiteDto;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.scraper.WebScraper;
@@ -17,7 +16,7 @@ import searchengine.utils.scraper.WebScraper;
 public class Parser extends RecursiveTask<Boolean> {
   private final EntityHandler entityHandler;
   private final WebScraper webScraper;
-  private final SiteDto siteDto;
+  private final SiteModel siteModel;
   private final String href;
 
   /**
@@ -27,13 +26,13 @@ public class Parser extends RecursiveTask<Boolean> {
    */
   @Override
   protected Boolean compute() {
-    Collection<String> urlsToParse = webScraper.getUrlsToParse(siteDto, href);
+    Collection<String> urlsToParse = webScraper.getUrlsToParse(siteModel, href);
     if (!urlsToParse.isEmpty()) {
-      entityHandler.processIndexing(urlsToParse, siteDto);
+      entityHandler.processIndexing(urlsToParse, siteModel);
       Collection<Parser> subtasks =
-          urlsToParse.parallelStream()
-              .map(url -> new Parser(entityHandler, webScraper, siteDto, url))
-              .toList();
+              urlsToParse.parallelStream()
+                      .map(url -> new Parser(entityHandler, webScraper, siteModel, url))
+                      .toList();
       invokeAll(subtasks);
     }
     return true;
