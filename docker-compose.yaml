@@ -8,6 +8,15 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "30091998As!"
       PGDATA: "/var/lib/postgresql/data/pgdata"
+      MAX_CONNECTION: 200
+
+
+    volumes:
+      - type: bind
+        source: /opt/docker_postgres/postgres_data  # Source directory on the host machine
+        target: /var/lib/postgresql/data/  # Target directory inside the container
+      - ../2. Init Database:/docker-entrypoint-initdb.d  # Source directory on the host machine
+      - search-engine-data:/var/lib/postgresql/data  # Name of the volume and target directory inside the container
     ports:
       - "5432:5432"
     healthcheck:
@@ -46,7 +55,7 @@ services:
       - postgres
 
 volumes:
-  habrdb-data:
+  search-engine-data:
   pgadmin-data:
 
 networks:
