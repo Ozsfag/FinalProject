@@ -2,6 +2,7 @@ package searchengine.utils.entityHandler;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,11 +18,11 @@ public class LemmaHandler {
   private final EntityFactory entityFactory;
 
   private SiteModel siteModel;
-  private Map<String, Integer> wordsCount;
+  private Map<String, AtomicInteger> wordsCount;
   private Collection<LemmaModel> existingLemmaModels;
 
   public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
-          SiteModel siteModel, Map<String, Integer> wordsCount) {
+          SiteModel siteModel, Map<String, AtomicInteger> wordsCount) {
     this.siteModel = siteModel;
     this.wordsCount = wordsCount;
 
@@ -50,7 +51,7 @@ public class LemmaHandler {
 
   private Collection<LemmaModel> createNewFromNotExisted() {
     return wordsCount.entrySet().parallelStream()
-            .map(entry -> entityFactory.createLemmaModel(siteModel, entry.getKey(), entry.getValue()))
+            .map(entry -> entityFactory.createLemmaModel(siteModel, entry.getKey(), entry.getValue().get()))
             .collect(Collectors.toSet());
   }
 }

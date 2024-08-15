@@ -1,6 +1,8 @@
 package searchengine.utils.entityHandler;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
@@ -39,7 +41,7 @@ public class EntityHandler {
 
     pages.forEach(
             page -> {
-              Map<String, Integer> wordsCount = morphology.countWordFrequencyByLanguage(page.getContent());
+              Map<String, AtomicInteger> wordsCount = morphology.countWordFrequencyByLanguage(page.getContent());
               Collection<LemmaModel> lemmas =
                       lemmaHandler.getIndexedLemmaModelsFromCountedWords(siteModel, wordsCount);
               saveEntities(lemmas);
@@ -103,7 +105,9 @@ public class EntityHandler {
                     LemmaModel lemmaModel = (LemmaModel) entity;
                     if (lemmaRepository.existsByLemma(lemmaModel.getLemma())) break;
                     lemmaRepository.merge(
-                            lemmaModel.getLemma(), lemmaModel.getSite().getId(), lemmaModel.getFrequency());
+                            lemmaModel.getLemma(),
+                            lemmaModel.getSite().getId(),
+                            lemmaModel.getFrequency());
                     break;
                   case "IndexModel":
                     IndexModel indexModel = (IndexModel) entity;
