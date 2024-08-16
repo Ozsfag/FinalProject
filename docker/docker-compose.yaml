@@ -1,16 +1,26 @@
 services:
-  search-engine:
+
+  app:
     build:
-      context: .
+      context: services/app
       dockerfile: Dockerfile
+    command: java -jar ./app.jar
+    environment:
+      - PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres/search_engine
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
     ports:
-      - 8181:8181
-    volumes:
-      - ./target/app.jar:/app/app.jar
-      - ./src:/app/src
-      - ./pom.xml:/app/pom.xml
-      - ./application.yaml:/app/application.yaml
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - postgres
+
+
   postgres:
+    build:
+      context: services/postgres
+      dockerfile: ../Dockerfile
     container_name: postgres_container
     image: postgres:16.1-alpine
     environment:
@@ -24,6 +34,8 @@ services:
       - search-engine-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d search_engine"]
       interval: 10s
