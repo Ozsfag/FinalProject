@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   search-engine:
     build:
@@ -7,7 +6,7 @@ services:
     ports:
       - 8181:8181
     volumes:
-      - ./target:/app/target
+      - ./target/app.jar:/app/app.jar
       - ./src:/app/src
       - ./pom.xml:/app/pom.xml
       - ./application.yaml:/app/application.yaml
