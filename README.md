@@ -1,85 +1,38 @@
-## **Приложение, позволяющее индексировать web-страницы и осуществлять по ним быстрый поиск.**
+# **Application for Indexing Web Pages and Performing Fast Search**
 
-<!-- TOC -->
+**This application allows you to index web pages and perform fast search on them. The search engine is developed on the Spring framework and works in a multi-threaded mode, visiting all website pages starting from the homepage.**
 
-* движок разрабатывается на фреймворке Spring;
-* в многопоточном режиме обходит все страницы сайта начиная с главной;
-* индексирует страницы сайта — подсчитывая слова на страницах сайта и по поисковому запросу определять наиболее
-  релевантные (соответствующие поисковому запросу) страницы;
-* реализована система поиска информации с использованием созданного поискового индекса.
+## **Installation**
 
-### **Для работы приложения необходимо, установить на компьютер _Postgres_ для хранения данных проиндексированных
-сайтов.**
+**To run the application, you need to follow these steps:**
 
--[ ] В application.yml указать ваши учетные данные и список сайтов для индексации, например :
+### Steps to Install and Run the Application
 
- <!-- TOC -->
+* **Step 1: Install Docker**
+  + Run the following command in the terminal: `docker-compose -f docker/docker-compose.yaml up`
+* **Step 2: Open Browser**
+  + Open a browser and enter the search query: `http://localhost:5050/browser/`
+* **Step 3: Enter Password**
+  + Enter the password as shown below:
+    - ![RootPasswordExample](src/main/resources/readme/RootPasswordExample.jpg "Optional Title")
+* **Step 4: Create PostgreSQL Server**
+  + Create a PostgreSQL 16 server as shown below:
+    - ![HowToCreateServer](src/main/resources/readme/HowToCreateServer.png "Optional Title")
+    - ![ServerRegisterGeneral](src/main/resources/readme/ServerRegisterGeneral.jpg "Optional Title")
+    - ![ServerRegisterConnection](src/main/resources/readme/ServerRegisterConnection.jpg "Optional Title")
+* **Step 5: Create Search Engine Schema**
+  + Create the `search_engine` schema as shown below:
+    - ![HowToCreateSchema](src/main/resources/readme/HowToCreateSchema.jpg "Optional Title")
+    - ![SchemaGeneral](src/main/resources/readme/SchemaGeneral.jpg "Optional Title")
+* **Step 6: Run Application**
+  + Run the application
+* **Step 7: Enter URL**
+  + Enter the URL `http://localhost:8080/` in the browser address bar
 
-            server:
-                port: 8080
-                max-http-header-size: 20000
+## **Contributing**
 
-            spring:
-                datasource:
-                    driver-class-name: org.postgresql.Driver
-                    password: 30091998As!
-                    url: jdbc:postgresql://localhost:5432/search_engine
-                    username: postgres
-                    type: com.zaxxer.hikari.HikariDataSource
-                hikari:
-                    minimum-idle: 2
-                    idle-timeout: 600000
-                    maximum-pool-size: 10
-                    auto-commit: true
-                    pool-name: HikariCorePool
-                    max-lifetime: 1800000
-                    connection-timeout: 30000
+**If you would like to contribute to this project, please follow the guidelines in the CONTRIBUTING.md file.**
 
-            jpa:
-                properties:
-                    hibernate:
-                        dialect: org.hibernate.dialect.PostgreSQLDialect
-                hibernate:
-                    ddl-auto: update
-                show-sql: true
+## **Contact**
 
-            indexing-settings:
-                sites:
-                    - url: https://lenta.ru/
-                      name: Лента.ру
-                    - url: https://skillbox.ru/
-                      name: Skillbox
-                    - url: http://www.playback.ru/
-                      name: PlayBack.Ru
-
-            connection-settings:
-                user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
-                referrer: https://www.google.com
-
-            morphology-settings:
-                russianParticleNames:
-                    - МЕЖД
-                    - ПРЕДЛ
-                    - СОЮЗ
-                englishParticlesNames:
-                    - CONJ
-                    - PREP
-                    - ARTICLE
-                    - INT
-                    - PART
-                notCyrillicLetters: "[^а-я]"
-                notLatinLetters: "[^a-z]"
-                splitter: "\\s+"
-                emptyString: " "
-                formats:
-                    - .pdf
-                    - .jpg
-                    - .docx
-                    - .doc
-                    - .JPG
-                    - .jpeg
-                    - "#"
-
-<!-- TOC -->
-
--[ ] Запустите приложение. В адресную строку введите http://localhost:8080/.
+**If you have any questions or issues, please contact me at [Ozsfag3154artem@gmail.com](mailto:Ozsfag3154artem@gmail.com).**

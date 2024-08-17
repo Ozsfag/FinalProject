@@ -1,22 +1,5 @@
 services:
 
-  app:
-    build:
-      context: services/app
-      dockerfile: Dockerfile
-    command: java -jar ./app.jar
-    environment:
-      - PORT=8080
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres/search_engine
-      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    networks:
-      - postgres
-
-
   postgres:
     build:
       context: services/postgres
@@ -24,16 +7,16 @@ services:
     container_name: postgres_container
     image: postgres:16.1-alpine
     environment:
-      POSTGRES_DB: "search_engine"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "30091998As!"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
+      POSTGRES_DB: search_engine
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 30091998As!
+      PGDATA: /var/lib/postgresql/data/pgdata
       MAX_CONNECTION: 200
     volumes:
       - ./src/main/resources/init-scripts/init-database.sql:/docker-entrypoint-initdb.d/init-database.sql
       - search-engine-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - 5432:5432
 
 
     healthcheck:
@@ -53,7 +36,7 @@ services:
 
   pgadmin:
     container_name: pgadmin_container
-    image: dpage/pgadmin4:7.2
+    image: dpage/pgadmin4:8.10
     environment:
       PGADMIN_DEFAULT_EMAIL: "Ozsfag3154artem@gmail.com"
       PGADMIN_DEFAULT_PASSWORD: "30091998As!"
