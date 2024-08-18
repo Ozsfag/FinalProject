@@ -17,17 +17,16 @@ public class Parser extends RecursiveTask<Boolean> {
   private final SiteModel siteModel;
   private final String href;
 
-
   @Override
   protected Boolean compute() {
     entityHandler.indexingUrl(href, siteModel);
-    invokeAll(getSubtasks(href, siteModel));
+    invokeAll(getSubtasks());
     return true;
   }
 
 
-  private Collection<Parser> getSubtasks(String href, SiteModel siteModel) {
-    return entityHandler.checkingUrls(href, siteModel).parallelStream().map(this::createParser).toList();
+  private synchronized Collection<Parser> getSubtasks() {
+    return entityHandler.getUrlsToParse().stream().map(this::createParser).toList();
   }
 
 
