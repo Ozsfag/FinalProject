@@ -21,15 +21,16 @@ public class WordCounterImpl implements WordCounter {
   @Override
   public ConcurrentMap<String, AtomicInteger> countWordsFromContent(String content) {
     return getLoweredReplacedAndSplittedContent(content)
-            .parallel()
-            .filter(word -> validator.wordIsNotParticle(word, luceneMorphology, particles))
-            .collect(Collectors.toConcurrentMap(
-                    word -> word,
-                    word -> new AtomicInteger(1),
-                    (a, b) -> {
-                      a.addAndGet(b.get());
-                      return a;
-                    }));
+        .parallel()
+        .filter(word -> validator.wordIsNotParticle(word, luceneMorphology, particles))
+        .collect(
+            Collectors.toConcurrentMap(
+                word -> word,
+                word -> new AtomicInteger(1),
+                (a, b) -> {
+                  a.addAndGet(b.get());
+                  return a;
+                }));
   }
 
   @Override

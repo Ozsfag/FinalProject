@@ -1,9 +1,12 @@
 package searchengine.utils.entityHandler;
 
+import static searchengine.services.indexing.IndexingImpl.isIndexing;
+
 import java.util.Collection;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
@@ -20,8 +23,8 @@ public class IndexHandler {
   private Collection<LemmaModel> lemmas;
   private Collection<IndexModel> existingIndexModels;
 
-  public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
-          PageModel pageModel, Collection<LemmaModel> lemmas) {
+  public synchronized Collection<IndexModel> getIndexedIndexModelFromCountedWords(
+      PageModel pageModel, Collection<LemmaModel> lemmas) {
     this.pageModel = pageModel;
     this.lemmas = lemmas;
 
@@ -38,17 +41,19 @@ public class IndexHandler {
 
   private void removeExistedIndexesFromNew() {
     lemmas.removeIf(
-            lemma ->
-                    existingIndexModels.parallelStream()
-                            .map(IndexModel::getLemma)
-                            .toList()
-                            .contains(lemma.getLemma()));
+        lemma ->
+            existingIndexModels.parallelStream()
+                .map(IndexModel::getLemma)
+                .toList()
+                .contains(lemma.getLemma()));
   }
 
   private Collection<IndexModel> createNewFromNotExisted() {
-    return lemmas.parallelStream()
-            .map(
-                    lemma -> entityFactory.createIndexModel(pageModel, lemma, (float) lemma.getFrequency()))
-            .collect(Collectors.toSet());
+    return lemmas.stream().map(this::getIndexModelByLemmaAndFrequency).collect(Collectors.toSet());
+  }
+
+  private IndexModel getIndexModelByLemmaAndFrequency(LemmaModel lemma) {
+    if (!isIndexing) throw new StoppedExecutionException("Индексация остановлена пользователем");
+    return entityFactory.createIndexModel(pageModel, lemma, Float.valueOf(lemma.getFrequency()));
   }
 }

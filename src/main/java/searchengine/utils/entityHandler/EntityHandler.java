@@ -2,15 +2,18 @@ package searchengine.utils.entityHandler;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
-import searchengine.repositories.IndexRepository;
-import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
+import searchengine.utils.entitySaver.EntitySaver;
 import searchengine.utils.morphology.Morphology;
+import searchengine.utils.scraper.WebScraper;
+import searchengine.utils.validator.Validator;
 
 /**
  * Util that handle and process kind of entities
@@ -20,106 +23,79 @@ import searchengine.utils.morphology.Morphology;
 @Component
 @RequiredArgsConstructor
 public class EntityHandler {
-  private final SiteRepository siteRepository;
-  private final LemmaRepository lemmaRepository;
-  private final IndexRepository indexRepository;
-  private final Morphology morphology;
+  private final WebScraper webScraper;
   private final PageRepository pageRepository;
+  private final Validator validator;
+  @Getter private Collection<String> urlsToParse;
+  private final PageHandler pageHandler;
+  private final EntitySaver entitySaver;
+  private final Morphology morphology;
+  private Map<String, AtomicInteger> wordsCount;
   private final LemmaHandler lemmaHandler;
   private final IndexHandler indexHandler;
-  private final PageHandler pageHandler;
+  private final SiteRepository siteRepository;
 
-  /**
-   * Indexes the lemmas and indexes for a list of pages.
-   *
-   * @param urlsToParse the list of pages to index
-   * @param siteModel
-   */
-  public void processIndexing(Collection<String> urlsToParse, SiteModel siteModel) {
-    Collection<PageModel> pages = pageHandler.getIndexedPageModelsFromUrls(urlsToParse, siteModel);
-    saveEntities(pages);
-
-    pages.forEach(
-            page -> {
-              Map<String, AtomicInteger> wordsCount = morphology.countWordFrequencyByLanguage(page.getContent());
-              Collection<LemmaModel> lemmas =
-                      lemmaHandler.getIndexedLemmaModelsFromCountedWords(siteModel, wordsCount);
-              saveEntities(lemmas);
-              Collection<IndexModel> indexes =
-                      indexHandler.getIndexedIndexModelFromCountedWords(page, lemmas);
-              saveEntities(indexes);
-              siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
-            });
+  public void indexingUrl(String href, SiteModel siteModel) {
+    checkingUrls(href, siteModel);
+    processIndexing(siteModel);
   }
 
-  /**
-   * Saves a set of entities to the database using the provided JpaRepository. If an exception
-   * occurs during the save operation, the entities are saved individually using the respective
-   * repository merge methods.
-   *
-   * @param entities the set of entities to save
-   */
-  public void saveEntities(Collection<?> entities) {
-    try {
-      Class<?> repositoryClass = entities.iterator().next().getClass();
-      switch (repositoryClass.getSimpleName()) {
-        case "SiteModel":
-          Collection<SiteModel> sites = (Collection<SiteModel>) entities;
-          siteRepository.saveAllAndFlush(sites);
-          break;
-        case "PageModel":
-          Collection<PageModel> pages = (Collection<PageModel>) entities;
-          pageRepository.saveAllAndFlush(pages);
-          break;
-        case "LemmaModel":
-          Collection<LemmaModel> lemmas = (Collection<LemmaModel>) entities;
-          lemmaRepository.saveAllAndFlush(lemmas);
-          break;
-        case "IndexModel":
-          Collection<IndexModel> indexes = (Collection<IndexModel>) entities;
-          indexRepository.saveAllAndFlush(indexes);
-          break;
-      }
-    } catch (Exception e) {
-      entities.forEach(
-              entity -> {
-                Class<?> aClass = entity.getClass();
-                switch (aClass.getSimpleName()) {
-                  case "SiteModel":
-                    SiteModel siteModel = (SiteModel) entity;
-                    if (siteRepository.existsByUrl(siteModel.getUrl())) break;
-                    siteRepository.saveAndFlush(siteModel);
-                    break;
-                  case "PageModel":
-                    PageModel pageModel = (PageModel) entity;
-                    if (pageRepository.existsByPath(pageModel.getPath())) break;
-                    pageRepository.merge(
-                            pageModel.getId(),
-                            pageModel.getCode(),
-                            pageModel.getSite().getId(),
-                            pageModel.getContent(),
-                            pageModel.getPath(),
-                            pageModel.getVersion());
-                    break;
-                  case "LemmaModel":
-                    LemmaModel lemmaModel = (LemmaModel) entity;
-                    if (lemmaRepository.existsByLemma(lemmaModel.getLemma())) break;
-                    lemmaRepository.merge(
-                            lemmaModel.getLemma(),
-                            lemmaModel.getSite().getId(),
-                            lemmaModel.getFrequency());
-                    break;
-                  case "IndexModel":
-                    IndexModel indexModel = (IndexModel) entity;
-                    if (indexRepository.existsByPage_IdAndLemma_Id(
-                            indexModel.getPage().getId(), indexModel.getLemma().getId())) break;
-                    indexRepository.merge(
-                            indexModel.getLemma().getLemma(),
-                            indexModel.getPage().getId(),
-                            indexModel.getRank());
-                    break;
-                }
-              });
-    }
+
+  private void checkingUrls(String href, SiteModel siteModel) {
+    Collection<String> urls = webScraper.getConnectionResponse(href).getUrls();
+    Collection<String> alreadyParsed =
+        pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
+    urls.removeAll(alreadyParsed);
+
+    this.urlsToParse =
+        urls.parallelStream()
+            .filter(url -> validator.urlHasCorrectForm(url, siteModel.getUrl()))
+            .collect(Collectors.toSet());
+  }
+
+
+  private void processIndexing(SiteModel siteModel) {
+    Collection<PageModel> pages = getIndexedPages(siteModel);
+    save(pages);
+    pages.forEach(
+        page -> {
+          countWordsFromPage(page);
+          Collection<LemmaModel> lemmas = getIndexedLemmas(siteModel);
+          save(lemmas);
+          Collection<IndexModel> indexes = getIndexedIndexesFromPageAndLemmas(page, lemmas);
+          save(indexes);
+          updateSiteInfo(siteModel);
+        });
+  }
+
+
+  private Collection<PageModel> getIndexedPages(SiteModel siteModel) {
+    return pageHandler.getIndexedPageModelsFromUrls(urlsToParse, siteModel);
+  }
+
+
+  private void save(Collection<?> entities) {
+    entitySaver.saveEntities(entities);
+  }
+
+
+  private void countWordsFromPage(PageModel page) {
+    this.wordsCount = morphology.countWordFrequencyByLanguage(page.getContent());
+  }
+
+
+  private Collection<LemmaModel> getIndexedLemmas(SiteModel siteModel) {
+    return lemmaHandler.getIndexedLemmaModelsFromCountedWords(siteModel, wordsCount);
+  }
+
+
+  private Collection<IndexModel> getIndexedIndexesFromPageAndLemmas(
+      PageModel page, Collection<LemmaModel> lemmas) {
+    return indexHandler.getIndexedIndexModelFromCountedWords(page, lemmas);
+  }
+
+
+  private void updateSiteInfo(SiteModel siteModel) {
+    siteRepository.updateStatusTimeByUrl(new Date(), siteModel.getUrl());
   }
 }

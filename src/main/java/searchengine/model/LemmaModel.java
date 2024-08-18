@@ -39,8 +39,4 @@ public class LemmaModel implements Serializable, EntityInterface {
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   private List<IndexModel> indexModels;
-
-  @Version
-  @Column(name = "version")
-  private Integer version;
 }

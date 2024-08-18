@@ -5,7 +5,6 @@ import java.util.concurrent.RecursiveTask;
 import lombok.RequiredArgsConstructor;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityHandler.EntityHandler;
-import searchengine.utils.scraper.WebScraper;
 
 /**
  * Recursively index page and it`s subpage.
@@ -15,26 +14,24 @@ import searchengine.utils.scraper.WebScraper;
 @RequiredArgsConstructor
 public class Parser extends RecursiveTask<Boolean> {
   private final EntityHandler entityHandler;
-  private final WebScraper webScraper;
   private final SiteModel siteModel;
   private final String href;
 
-  /**
-   * Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed.
-   *
-   * @return null
-   */
+
   @Override
   protected Boolean compute() {
-    Collection<String> urlsToParse = webScraper.getUrlsToParse(siteModel, href);
-    if (!urlsToParse.isEmpty()) {
-      entityHandler.processIndexing(urlsToParse, siteModel);
-      Collection<Parser> subtasks =
-              urlsToParse.parallelStream()
-                      .map(url -> new Parser(entityHandler, webScraper, siteModel, url))
-                      .toList();
-      invokeAll(subtasks);
-    }
+    entityHandler.indexingUrl(href, siteModel);
+    invokeAll(getSubtasks(href, siteModel));
     return true;
+  }
+
+
+  private Collection<Parser> getSubtasks(String href, SiteModel siteModel) {
+    return entityHandler.checkingUrls(href, siteModel).parallelStream().map(this::createParser).toList();
+  }
+
+
+  private Parser createParser(String url) {
+    return new Parser(entityHandler, siteModel, url);
   }
 }

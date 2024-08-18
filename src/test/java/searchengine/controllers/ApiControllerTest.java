@@ -1,21 +1,21 @@
-//package searchengine.controllers;
+// package searchengine.controllers;
 //
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.mockito.Mockito.*;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.mockito.Mockito.*;
 //
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.MockitoAnnotations;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.test.util.ReflectionTestUtils;
-//import searchengine.dto.ResponseInterface;
-//import searchengine.dto.indexing.responseImpl.Successful;
-//import searchengine.services.deleting.DeletingService;
-//import searchengine.services.indexing.IndexingService;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.mockito.InjectMocks;
+// import org.mockito.Mock;
+// import org.mockito.MockitoAnnotations;
+// import org.springframework.http.ResponseEntity;
+// import org.springframework.test.util.ReflectionTestUtils;
+// import searchengine.dto.ResponseInterface;
+// import searchengine.dto.indexing.responseImpl.Successful;
+// import searchengine.services.deleting.DeletingService;
+// import searchengine.services.indexing.IndexingService;
 //
-//class ApiControllerTest {
+// class ApiControllerTest {
 //
 //  @InjectMocks private ApiController apiController;
 //
@@ -44,4 +44,4 @@
 //    verify(deletingService, times(1)).deleteData();
 //    verify(indexingService, times(1)).startIndexing();
 //  }
-//}
+// }
