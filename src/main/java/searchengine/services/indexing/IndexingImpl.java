@@ -22,8 +22,7 @@ import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.entitySaver.EntitySaver;
 import searchengine.utils.parser.Parser;
-import searchengine.utils.scraper.WebScraper;
-import searchengine.utils.validator.Validator;
+import searchengine.utils.urlsChecker.UrlsChecker;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +33,9 @@ public class IndexingImpl implements IndexingService {
   @Lazy private final ForkJoinPool forkJoinPool;
   @Lazy private final EntityHandler entityHandler;
   @Lazy private final EntitySaver entitySaver;
-  @Lazy private final WebScraper webScraper;
+  @Lazy private final UrlsChecker urlsChecker;
   @Lazy private final DataTransformer dataTransformer;
   @Lazy private final SiteHandler siteHandler;
-  @Lazy private final Validator validator;
   @Lazy public static volatile boolean isIndexing = true;
 
   /**
@@ -63,7 +61,7 @@ public class IndexingImpl implements IndexingService {
                         () -> {
                           try {
                             forkJoinPool.invoke(
-                                new Parser(entityHandler, siteModel, siteModel.getUrl()));
+                                new Parser(entityHandler, urlsChecker,siteModel, siteModel.getUrl()));
                             siteRepository.updateStatusAndStatusTimeByUrl(
                                 Status.INDEXED, new Date(), siteModel.getUrl());
                           } catch (StoppedExecutionException | Error re) {
@@ -107,7 +105,7 @@ public class IndexingImpl implements IndexingService {
             .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
             .iterator()
             .next();
-    entityHandler.indexingUrl(url, siteModel);
+    entityHandler.processIndexing(siteModel, dataTransformer.transformUrlToUrls(url));
     return new Successful(true);
   }
 }
