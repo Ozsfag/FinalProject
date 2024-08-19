@@ -16,10 +16,10 @@ public class SiteHandler {
   private final SiteRepository siteRepository;
   private final EntityFactory entityFactory;
 
-  public synchronized Collection<SiteModel> getIndexedSiteModelFromSites(
+  public Collection<SiteModel> getIndexedSiteModelFromSites(
       Collection<Site> sitesToParse) {
     return sitesToParse.stream()
-        .map(site -> getSiteIfExistOrCreate(site))
+        .map(this::getSiteIfExistOrCreate)
         .collect(Collectors.toList());
   }
 

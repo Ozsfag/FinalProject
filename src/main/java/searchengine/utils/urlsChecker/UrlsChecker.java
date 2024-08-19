@@ -1,5 +1,8 @@
 package searchengine.utils.urlsChecker;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
@@ -7,19 +10,17 @@ import searchengine.repositories.PageRepository;
 import searchengine.utils.scraper.WebScraper;
 import searchengine.utils.validator.Validator;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 @Component
+@Data
 @RequiredArgsConstructor
 public class UrlsChecker {
   private final WebScraper webScraper;
   private final PageRepository pageRepository;
   private final Validator validator;
 
-  public Collection<String> getCheckedUrls(String href, SiteModel siteModel) {
+  public synchronized Collection<String> getCheckedUrls(String href, SiteModel siteModel) {
     Collection<String> urls = getNewUrlsParsedFromHref(href);
-    Collection<String> alreadyParsed = findDuplicateUrlsInNew(siteModel.getId(), urls);
+    Collection<String> alreadyParsed = findDuplicateUrlsInNew(siteModel, urls);
 
     urls.removeAll(alreadyParsed);
 
@@ -32,7 +33,7 @@ public class UrlsChecker {
     return webScraper.getConnectionResponse(href).getUrls();
   }
 
-  private Collection<String> findDuplicateUrlsInNew(Integer siteId, Collection<String> urls) {
-    return pageRepository.findAllPathsBySiteAndPathIn(siteId, urls);
+  private synchronized Collection<String> findDuplicateUrlsInNew(SiteModel siteModel, Collection<String> urls) {
+    return pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
   }
 }

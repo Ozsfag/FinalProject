@@ -61,7 +61,8 @@ public class IndexingImpl implements IndexingService {
                         () -> {
                           try {
                             forkJoinPool.invoke(
-                                new Parser(entityHandler, urlsChecker,siteModel, siteModel.getUrl()));
+                                new Parser(
+                                    entityHandler, urlsChecker, siteModel, siteModel.getUrl()));
                             siteRepository.updateStatusAndStatusTimeByUrl(
                                 Status.INDEXED, new Date(), siteModel.getUrl());
                           } catch (StoppedExecutionException | Error re) {

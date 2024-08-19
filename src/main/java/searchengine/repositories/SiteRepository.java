@@ -13,13 +13,33 @@ import searchengine.model.Status;
 @Repository
 public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
 
+  /**
+   * Finds a SiteModel by its URL.
+   *
+   * @param path the URL of the site to find
+   * @return the SiteModel corresponding to the given URL, or null if not found
+   */
   SiteModel findSiteByUrl(String path);
 
+  /**
+   * Updates the status time of a SiteModel with the given URL to the specified status time.
+   *
+   * @param statusTime the new status time to set
+   * @param url the URL of the SiteModel to update
+   */
   @Transactional
   @Modifying
   @Query("update SiteModel s set s.statusTime = ?1 where s.url = ?2")
   void updateStatusTimeByUrl(Date statusTime, String url);
 
+  /**
+   * Updates the status, status time, and last error of a SiteModel with the given URL.
+   *
+   * @param status the new status to set
+   * @param statusTime the new status time to set
+   * @param lastError the new last error to set
+   * @param url the URL of the SiteModel to update
+   */
   @Transactional
   @Modifying
   @Query(
@@ -27,6 +47,13 @@ public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
   void updateStatusAndStatusTimeAndLastErrorByUrl(
       Status status, Date statusTime, String lastError, String url);
 
+  /**
+   * Updates the status and status time of a SiteModel with the given URL.
+   *
+   * @param status the new status to set
+   * @param statusTime the new status time to set
+   * @param url the URL of the SiteModel to update
+   */
   @Transactional
   @Modifying
   @Query("update SiteModel s set s.status = ?1, s.statusTime = ?2 where s.url = ?3")

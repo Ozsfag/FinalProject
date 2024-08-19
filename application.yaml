@@ -42,12 +42,12 @@ indexing-settings:
 #      name: Skillbox
 #    - url: http://www.playback.ru/
 #      name: PlayBack.Ru
-#    - url: https://domrebenka.belzdrav.ru/
-#      name: Дом Ребенка
+    - url: https://domrebenka.belzdrav.ru/
+      name: Дом Ребенка
     - url: https://sendel.ru/
       name: sendel
-    - url: http://kremlin.ru/
-      name: Кремль
+#    - url: http://kremlin.ru/
+#      name: Кремль
 
 
 connection-settings:

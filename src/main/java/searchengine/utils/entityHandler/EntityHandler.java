@@ -2,7 +2,7 @@ package searchengine.utils.entityHandler;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
@@ -16,6 +16,7 @@ import searchengine.utils.morphology.Morphology;
  * @author Ozsfag
  */
 @Component
+@Data
 @RequiredArgsConstructor
 public class EntityHandler {
   private final PageHandler pageHandler;
