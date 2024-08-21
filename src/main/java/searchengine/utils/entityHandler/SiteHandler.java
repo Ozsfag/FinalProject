@@ -2,6 +2,7 @@ package searchengine.utils.entityHandler;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ public class SiteHandler {
       Collection<Site> sitesToParse) {
     return sitesToParse.stream()
         .map(this::getSiteIfExistOrCreate)
-        .collect(Collectors.toList());
+        .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
   }
 
   private SiteModel getSiteIfExistOrCreate(Site site) {

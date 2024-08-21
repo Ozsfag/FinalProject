@@ -3,6 +3,7 @@ package searchengine.utils.entityHandler;
 import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
 import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class IndexHandler {
   private Collection<LemmaModel> lemmas;
   private Collection<IndexModel> existingIndexModels;
 
-  public synchronized Collection<IndexModel> getIndexedIndexModelFromCountedWords(
+  public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
       PageModel pageModel, Collection<LemmaModel> lemmas) {
     this.pageModel = pageModel;
     this.lemmas = lemmas;
@@ -32,7 +33,7 @@ public class IndexHandler {
     removeExistedIndexesFromNew();
     existingIndexModels.addAll(createNewFromNotExisted());
 
-    return existingIndexModels;
+    return existingIndexModels.parallelStream().collect(Collectors.toCollection(CopyOnWriteArraySet::new));
   }
 
   private void getExistingIndexes() {

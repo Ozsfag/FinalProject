@@ -4,6 +4,7 @@ import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,14 +20,14 @@ public class PageHandler {
 
   private SiteModel siteModel;
 
-  public synchronized Collection<PageModel> getIndexedPageModelsFromUrls(
+  public Collection<PageModel> getIndexedPageModelsFromUrls(
       Collection<String> urlsToParse, SiteModel siteModel) {
     this.siteModel = siteModel;
 
     return urlsToParse.parallelStream()
         .map(this::getPageModelByUrl)
         .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
+        .collect(Collectors.toCollection(CopyOnWriteArraySet::new));
   }
 
   private PageModel getPageModelByUrl(String url) {

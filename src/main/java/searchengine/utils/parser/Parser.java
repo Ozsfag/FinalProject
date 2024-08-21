@@ -1,7 +1,10 @@
 package searchengine.utils.parser;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RecursiveTask;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityHandler.EntityHandler;

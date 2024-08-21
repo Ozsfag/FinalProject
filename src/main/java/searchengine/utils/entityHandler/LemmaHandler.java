@@ -4,6 +4,7 @@ import static searchengine.services.indexing.IndexingImpl.isIndexing;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class LemmaHandler {
   private Map<String, AtomicInteger> wordsCount;
   private Collection<LemmaModel> existingLemmaModels;
 
-  public synchronized Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
+  public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
       SiteModel siteModel, Map<String, AtomicInteger> wordsCount) {
     this.siteModel = siteModel;
     this.wordsCount = wordsCount;
@@ -33,7 +34,7 @@ public class LemmaHandler {
     removeExistedLemmasFromNew();
     existingLemmaModels.addAll(createNewFromNotExisted());
 
-    return existingLemmaModels;
+    return existingLemmaModels.parallelStream().collect(Collectors.toCollection(CopyOnWriteArraySet::new));
   }
 
   private void getExistingLemmas() {

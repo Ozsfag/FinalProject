@@ -2,6 +2,7 @@ package searchengine.utils.scraper;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import org.jsoup.Jsoup;
@@ -68,7 +69,7 @@ public class WebScraper {
     this.urls =
         document.select("a[href]").stream()
             .map(element -> element.absUrl("href"))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(CopyOnWriteArraySet::new));
   }
 
   private void getTitle() {
