@@ -21,8 +21,8 @@ public class LemmaHandler {
   private Map<String, AtomicInteger> wordsCount;
   private Collection<LemmaModel> existingLemmaModels;
 
-  public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
-          SiteModel siteModel, Map<String, AtomicInteger> wordsCount) {
+  public synchronized Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
+      SiteModel siteModel, Map<String, AtomicInteger> wordsCount) {
     this.siteModel = siteModel;
     this.wordsCount = wordsCount;
 
@@ -35,23 +35,25 @@ public class LemmaHandler {
 
   private void getExistingLemmas() {
     existingLemmaModels =
-            lemmaRepository.findByLemmaInAndSite_Id(wordsCount.keySet(), siteModel.getId());
+        lemmaRepository.findByLemmaInAndSite_Id(wordsCount.keySet(), siteModel.getId());
   }
 
   private void removeExistedLemmasFromNew() {
     wordsCount
-            .entrySet()
-            .removeIf(
-                    entry ->
-                            existingLemmaModels.parallelStream()
-                                    .map(LemmaModel::getLemma)
-                                    .toList()
-                                    .contains(entry.getKey()));
+        .entrySet()
+        .removeIf(
+            entry ->
+                existingLemmaModels.parallelStream()
+                    .map(LemmaModel::getLemma)
+                    .toList()
+                    .contains(entry.getKey()));
   }
 
   private Collection<LemmaModel> createNewFromNotExisted() {
     return wordsCount.entrySet().parallelStream()
-            .map(entry -> entityFactory.createLemmaModel(siteModel, entry.getKey(), entry.getValue().get()))
-            .collect(Collectors.toSet());
+        .map(
+            entry ->
+                entityFactory.createLemmaModel(siteModel, entry.getKey(), entry.getValue().get()))
+        .collect(Collectors.toSet());
   }
 }

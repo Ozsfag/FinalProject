@@ -19,8 +19,12 @@ public class IndexingConfiguration {
   @Bean
   public ForkJoinPool forkJoinPool() {
     return new ForkJoinPool(
-        Math.min(Runtime.getRuntime().availableProcessors() - 1, sitesList.getSites().size() + 1), ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, true);
+        Math.min(Runtime.getRuntime().availableProcessors() - 1, sitesList.getSites().size() + 1),
+        ForkJoinPool.defaultForkJoinWorkerThreadFactory,
+        null,
+        true);
   }
+
   /**
    * Returns a new instance of the ConnectionResponse class.
    *

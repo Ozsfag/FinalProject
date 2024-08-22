@@ -20,8 +20,8 @@ public class IndexHandler {
   private Collection<LemmaModel> lemmas;
   private Collection<IndexModel> existingIndexModels;
 
-  public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
-          PageModel pageModel, Collection<LemmaModel> lemmas) {
+  public synchronized Collection<IndexModel> getIndexedIndexModelFromCountedWords(
+      PageModel pageModel, Collection<LemmaModel> lemmas) {
     this.pageModel = pageModel;
     this.lemmas = lemmas;
 
@@ -38,17 +38,17 @@ public class IndexHandler {
 
   private void removeExistedIndexesFromNew() {
     lemmas.removeIf(
-            lemma ->
-                    existingIndexModels.parallelStream()
-                            .map(IndexModel::getLemma)
-                            .toList()
-                            .contains(lemma.getLemma()));
+        lemma ->
+            existingIndexModels.parallelStream()
+                .map(IndexModel::getLemma)
+                .toList()
+                .contains(lemma.getLemma()));
   }
 
   private Collection<IndexModel> createNewFromNotExisted() {
     return lemmas.parallelStream()
-            .map(
-                    lemma -> entityFactory.createIndexModel(pageModel, lemma, (float) lemma.getFrequency()))
-            .collect(Collectors.toSet());
+        .map(
+            lemma -> entityFactory.createIndexModel(pageModel, lemma, (float) lemma.getFrequency()))
+        .collect(Collectors.toSet());
   }
 }

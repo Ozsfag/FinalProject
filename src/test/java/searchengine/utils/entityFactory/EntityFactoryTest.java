@@ -1,17 +1,17 @@
-//package searchengine.utils.entityFactory;
+// package searchengine.utils.entityFactory;
 //
-//import static org.junit.jupiter.api.Assertions.assertAll;
-//import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertAll;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
 //
-//import java.util.Date;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import searchengine.config.ConnectionSettings;
-//import searchengine.dto.indexing.Site;
-//import searchengine.model.*;
-//import searchengine.utils.scraper.WebScraper;
+// import java.util.Date;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import searchengine.config.ConnectionSettings;
+// import searchengine.dto.indexing.Site;
+// import searchengine.model.*;
+// import searchengine.utils.scraper.WebScraper;
 //
-//public class EntityFactoryTest {
+// public class EntityFactoryTest {
 //  private EntityFactory factory;
 //
 //  @BeforeEach
@@ -106,4 +106,4 @@
 //        () -> assertEquals(excepted.getVersion(), actual.getVersion()),
 //        () -> assertEquals(excepted.getId(), actual.getId()));
 //  }
-//}
+// }

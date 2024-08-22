@@ -1,13 +1,13 @@
-//package searchengine.utils.validator;
+// package searchengine.utils.validator;
 //
-//import static org.junit.jupiter.api.Assertions.*;
+// import static org.junit.jupiter.api.Assertions.*;
 //
-//import java.net.URISyntaxException;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import searchengine.config.MorphologySettings;
+// import java.net.URISyntaxException;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import searchengine.config.MorphologySettings;
 //
-//public class ValidatorTest {
+// public class ValidatorTest {
 //
 //  private Validator validator;
 //
@@ -66,10 +66,11 @@
 //    String url = "http://example.com/path/to/file";
 //    String[] actual = validator.getValidUrlComponents(url);
 //    assertArrayEquals(expected, actual);
-//    assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents("/path/to/file"));
+//    assertThrows(URISyntaxException.class, () ->
+// validator.getValidUrlComponents("/path/to/file"));
 //    assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(""));
 //    assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents("invalid url"));
 //    assertThrows(
 //        URISyntaxException.class, () -> validator.getValidUrlComponents("file:///path/to/file"));
 //  }
-//}
+// }

@@ -1,23 +1,23 @@
-//package searchengine;
+// package searchengine;
 //
-//import java.util.Date;
-//import org.junit.jupiter.api.*;
-//import org.rnorth.testcontainers.containers.PostgreSQLContainer;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.test.web.client.TestRestTemplate;
-//import org.springframework.boot.test.web.server.LocalServerPort;
-//import org.springframework.test.context.DynamicPropertyRegistry;
-//import org.springframework.test.context.DynamicPropertySource;
-//import searchengine.model.SiteModel;
-//import searchengine.model.Status;
-//import searchengine.repositories.IndexRepository;
-//import searchengine.repositories.LemmaRepository;
-//import searchengine.repositories.PageRepository;
-//import searchengine.repositories.SiteRepository;
+// import java.util.Date;
+// import org.junit.jupiter.api.*;
+// import org.rnorth.testcontainers.containers.PostgreSQLContainer;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.test.context.SpringBootTest;
+// import org.springframework.boot.test.web.client.TestRestTemplate;
+// import org.springframework.boot.test.web.server.LocalServerPort;
+// import org.springframework.test.context.DynamicPropertyRegistry;
+// import org.springframework.test.context.DynamicPropertySource;
+// import searchengine.model.SiteModel;
+// import searchengine.model.Status;
+// import searchengine.repositories.IndexRepository;
+// import searchengine.repositories.LemmaRepository;
+// import searchengine.repositories.PageRepository;
+// import searchengine.repositories.SiteRepository;
 //
-//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//public class ApplicationTest {
+// @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+// public class ApplicationTest {
 //
 //  @LocalServerPort private Integer port;
 //  @Autowired SiteRepository siteRepository;
@@ -78,4 +78,4 @@
 //        .getRestTemplate()
 //        .getForEntity("http://localhost:" + port + "/site/https://example0.com", SiteModel.class);
 //  }
-//}
+// }

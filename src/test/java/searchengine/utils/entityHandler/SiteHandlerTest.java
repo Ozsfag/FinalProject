@@ -1,31 +1,31 @@
-//package searchengine.utils.entityHandler;
+// package searchengine.utils.entityHandler;
 //
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.mockito.ArgumentMatchers.anyString;
-//import static org.mockito.Mockito.*;
-//import static org.mockito.Mockito.times;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.mockito.ArgumentMatchers.anyString;
+// import static org.mockito.Mockito.*;
+// import static org.mockito.Mockito.times;
 //
-//import java.util.Collection;
-//import java.util.Collections;
-//import java.util.Date;
-//import java.util.List;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.Mockito;
-//import org.mockito.MockitoAnnotations;
-//import searchengine.dto.indexing.Site;
-//import searchengine.model.SiteModel;
-//import searchengine.model.Status;
-//import searchengine.repositories.IndexRepository;
-//import searchengine.repositories.LemmaRepository;
-//import searchengine.repositories.PageRepository;
-//import searchengine.repositories.SiteRepository;
-//import searchengine.utils.entityFactory.EntityFactory;
-//import searchengine.utils.morphology.Morphology;
+// import java.util.Collection;
+// import java.util.Collections;
+// import java.util.Date;
+// import java.util.List;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.mockito.InjectMocks;
+// import org.mockito.Mock;
+// import org.mockito.Mockito;
+// import org.mockito.MockitoAnnotations;
+// import searchengine.dto.indexing.Site;
+// import searchengine.model.SiteModel;
+// import searchengine.model.Status;
+// import searchengine.repositories.IndexRepository;
+// import searchengine.repositories.LemmaRepository;
+// import searchengine.repositories.PageRepository;
+// import searchengine.repositories.SiteRepository;
+// import searchengine.utils.entityFactory.EntityFactory;
+// import searchengine.utils.morphology.Morphology;
 //
-//public class SiteHandlerTest {
+// public class SiteHandlerTest {
 //  @Mock private SiteRepository siteRepository;
 //  @Mock private LemmaRepository lemmaRepository;
 //  @Mock private IndexRepository indexRepository;
@@ -114,10 +114,11 @@
 //    when(entityFactory.createSiteModel(site)).thenReturn(siteModel);
 //
 //    List<SiteModel> result =
-//        (List<SiteModel>) siteHandler.getIndexedSiteModelFromSites(Collections.singletonList(site));
+//        (List<SiteModel>)
+// siteHandler.getIndexedSiteModelFromSites(Collections.singletonList(site));
 //
 //    assertEquals(siteModel, result);
 //    verify(siteRepository, times(1)).findSiteByUrl(anyString());
 //    verify(entityFactory, times(1)).createSiteModel(site);
 //  }
-//}
+// }

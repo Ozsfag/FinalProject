@@ -30,9 +30,9 @@ public class Parser extends RecursiveTask<Boolean> {
     if (!urlsToParse.isEmpty()) {
       entityHandler.processIndexing(urlsToParse, siteModel);
       Collection<Parser> subtasks =
-              urlsToParse.parallelStream()
-                      .map(url -> new Parser(entityHandler, webScraper, siteModel, url))
-                      .toList();
+          urlsToParse.parallelStream()
+              .map(url -> new Parser(entityHandler, webScraper, siteModel, url))
+              .toList();
       invokeAll(subtasks);
     }
     return true;

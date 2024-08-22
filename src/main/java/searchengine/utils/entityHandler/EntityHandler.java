@@ -2,7 +2,6 @@ package searchengine.utils.entityHandler;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
@@ -98,8 +97,7 @@ public class EntityHandler {
                             pageModel.getCode(),
                             pageModel.getSite().getId(),
                             pageModel.getContent(),
-                            pageModel.getPath(),
-                            pageModel.getVersion());
+                            pageModel.getPath());
                     break;
                   case "LemmaModel":
                     LemmaModel lemmaModel = (LemmaModel) entity;

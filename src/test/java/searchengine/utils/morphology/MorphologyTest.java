@@ -1,21 +1,21 @@
-//package searchengine.utils.morphology;
+// package searchengine.utils.morphology;
 
-//import static org.junit.jupiter.api.Assertions.*;
+// import static org.junit.jupiter.api.Assertions.*;
 //
-//import java.util.*;
-//import lombok.SneakyThrows;
-//import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
-//import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import searchengine.config.MorphologySettings;
-//import searchengine.utils.validator.Validator;
+// import java.util.*;
+// import lombok.SneakyThrows;
+// import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
+// import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.mockito.Mock;
+// import org.mockito.junit.jupiter.MockitoExtension;
+// import searchengine.config.MorphologySettings;
+// import searchengine.utils.validator.Validator;
 //
-//@ExtendWith(MockitoExtension.class)
-//public class MorphologyTest {
+// @ExtendWith(MockitoExtension.class)
+// public class MorphologyTest {
 //
 //  private MorphologySettings morphologySettings;
 //
@@ -105,4 +105,4 @@
 //    // Verify the result
 //    assertEquals(expectedResult, result);
 //  }
-//}
+// }

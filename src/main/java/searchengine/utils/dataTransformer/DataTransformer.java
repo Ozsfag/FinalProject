@@ -33,7 +33,6 @@ public class DataTransformer {
    * @param url the collection of URLs to be transformed
    * @return a collection of Site objects
    */
-
   public Collection<Site> transformUrlToSites(String url) {
     return transformUrlToUrls(url).stream()
         .map(

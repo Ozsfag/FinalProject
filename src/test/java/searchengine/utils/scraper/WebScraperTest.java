@@ -1,21 +1,21 @@
-//package searchengine.utils.scraper;
+// package searchengine.utils.scraper;
 //
-//import static org.junit.jupiter.api.Assertions.*;
+// import static org.junit.jupiter.api.Assertions.*;
 //
-//import java.io.IOException;
-//import java.util.Collections;
-//import java.util.HashSet;
-//import java.util.Set;
-//import lombok.SneakyThrows;
-//import org.jsoup.Jsoup;
-//import org.jsoup.nodes.Document;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.http.HttpStatus;
-//import searchengine.config.ConnectionSettings;
-//import searchengine.dto.indexing.ConnectionDto;
+// import java.io.IOException;
+// import java.util.Collections;
+// import java.util.HashSet;
+// import java.util.Set;
+// import lombok.SneakyThrows;
+// import org.jsoup.Jsoup;
+// import org.jsoup.nodes.Document;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.http.HttpStatus;
+// import searchengine.config.ConnectionSettings;
+// import searchengine.dto.indexing.ConnectionDto;
 //
-//public class WebScraperTest {
+// public class WebScraperTest {
 //
 //  private WebScraper webScraper;
 //  private Document document;
@@ -77,4 +77,4 @@
 //      return "";
 //    }
 //  }
-//}
+// }

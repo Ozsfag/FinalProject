@@ -9,11 +9,10 @@ import searchengine.model.SiteModel;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PageDto {
-    private Integer id;
-    private SiteModel site;
-    private String path;
-    private int code;
-    private String content;
-    private Integer version;
-
+  private Integer id;
+  private SiteModel site;
+  private String path;
+  private int code;
+  private String content;
+  private Integer version;
 }

@@ -19,14 +19,14 @@ public class PageHandler {
 
   private SiteModel siteModel;
 
-  public Collection<PageModel> getIndexedPageModelsFromUrls(
-          Collection<String> urlsToParse, SiteModel siteModel) {
+  public synchronized Collection<PageModel> getIndexedPageModelsFromUrls(
+      Collection<String> urlsToParse, SiteModel siteModel) {
     this.siteModel = siteModel;
 
     return urlsToParse.parallelStream()
-            .map(this::getPageModelByUrl)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
+        .map(this::getPageModelByUrl)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
   }
 
   private PageModel getPageModelByUrl(String url) {

@@ -1,6 +1,6 @@
-//package searchengine.utils.entityHandler;
+// package searchengine.utils.entityHandler;
 //
-//public class EntityHandlerTest {
+// public class EntityHandlerTest {
 
   //
   //    @Test
@@ -29,4 +29,4 @@
   //
   //        assertEquals(expected, result);
   //    }
-//}
+// }

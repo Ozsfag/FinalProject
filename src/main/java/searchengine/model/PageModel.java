@@ -46,8 +46,4 @@ public class PageModel implements Serializable, EntityInterface {
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   private Set<IndexModel> indexModels;
-
-  @Version
-  @Column(name = "version")
-  private Integer version;
 }
