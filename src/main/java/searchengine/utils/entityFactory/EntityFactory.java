@@ -37,7 +37,7 @@ public class EntityFactory {
    * @return the newly created PageModel object
    */
   public PageModel createPageModel(SiteModel siteModel, String path) {
-    ConnectionResponse connectionResponse = webScraper.getConnectionDto(path);
+    ConnectionResponse connectionResponse = webScraper.getConnectionResponse(path);
     return PageModel.builder()
         .site(siteModel)
         .path(path)

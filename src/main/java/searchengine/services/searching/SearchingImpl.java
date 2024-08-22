@@ -94,7 +94,7 @@ public class SearchingImpl implements SearchingService {
                 response.setSite(urlComponents[0]);
                 response.setSiteName(pageModel.getSite().getName());
                 response.setRelevance(entry.getValue());
-                response.setTitle(webScraper.getConnectionDto(pageModel.getPath()).getTitle());
+                response.setTitle(webScraper.getConnectionResponse(pageModel.getPath()).getTitle());
                 response.setSnippet(getSnippet(uniqueSet, pageModel));
               } catch (URISyntaxException e) {
                 throw new RuntimeException(e.getLocalizedMessage());
