@@ -53,7 +53,6 @@ indexing-settings:
 connection-settings:
   user-agent: EmelianSearchBot
   referrer: https://www.google.com
-  timeout: 5100
 
 morphology-settings:
   maxFrequency: 500

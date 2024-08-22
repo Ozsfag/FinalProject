@@ -5,7 +5,7 @@ import java.util.concurrent.RecursiveTask;
 import lombok.RequiredArgsConstructor;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityHandler.EntityHandler;
-import searchengine.utils.scraper.WebScraper;
+import searchengine.utils.urlsChecker.UrlsChecker;
 
 /**
  * Recursively index page and it`s subpage.
@@ -14,10 +14,10 @@ import searchengine.utils.scraper.WebScraper;
  */
 @RequiredArgsConstructor
 public class Parser extends RecursiveTask<Boolean> {
-  private final EntityHandler entityHandler;
-  private final WebScraper webScraper;
+  private final UrlsChecker urlsChecker;
   private final SiteModel siteModel;
   private final String href;
+  private final EntityHandler entityHandler;
 
   /**
    * Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed.
@@ -26,12 +26,12 @@ public class Parser extends RecursiveTask<Boolean> {
    */
   @Override
   protected Boolean compute() {
-    Collection<String> urlsToParse = webScraper.getUrlsToParse(siteModel, href);
+    Collection<String> urlsToParse = urlsChecker.getCheckedUrls(href, siteModel);
     if (!urlsToParse.isEmpty()) {
       entityHandler.processIndexing(urlsToParse, siteModel);
       Collection<Parser> subtasks =
           urlsToParse.parallelStream()
-              .map(url -> new Parser(entityHandler, webScraper, siteModel, url))
+              .map(url -> new Parser(urlsChecker, siteModel, url, entityHandler))
               .toList();
       invokeAll(subtasks);
     }

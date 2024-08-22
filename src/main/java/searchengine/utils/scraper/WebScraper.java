@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.config.ConnectionSettings;
 import searchengine.dto.indexing.ConnectionResponse;
-import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
 import searchengine.utils.validator.Validator;
 
@@ -41,8 +40,7 @@ public class WebScraper {
       return Jsoup.connect(url)
           .userAgent(connectionSettings.getUserAgent())
           .referrer(connectionSettings.getReferrer())
-          .ignoreHttpErrors(true)
-          .timeout(connectionSettings.getTimeout())
+          .ignoreHttpErrors(false)
           .get();
     } catch (IOException e) {
       throw new RuntimeException(e.getCause());
@@ -55,7 +53,7 @@ public class WebScraper {
    * @param url the URL to establish a connection with
    * @return the ConnectionResponse containing URL, HTTP status, content, URLs, and an empty string
    */
-  public ConnectionResponse getConnectionDto(String url) {
+  public ConnectionResponse getConnectionResponse(String url) {
     try {
       Document document = getDocument(url);
       String content = Optional.of(document.body().text()).orElseThrow();
@@ -75,21 +73,5 @@ public class WebScraper {
           HttpStatus.NOT_FOUND.getReasonPhrase(),
           "");
     }
-  }
-
-  /**
-   * Retrieves a set of URLs to parse based on the provided list of all URLs by site.
-   *
-   * @return a set of URLs to parse
-   */
-  public synchronized Collection<String> getUrlsToParse(SiteModel siteModel, String href) {
-    Collection<String> urls = getConnectionDto(href).getUrls();
-    Collection<String> alreadyParsed =
-        pageRepository.findAllPathsBySiteAndPathIn(siteModel.getId(), urls);
-    urls.removeAll(alreadyParsed);
-
-    return urls.parallelStream()
-        .filter(url -> validator.urlHasCorrectForm(url, siteModel.getUrl()))
-        .collect(Collectors.toSet());
   }
 }

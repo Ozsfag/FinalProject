@@ -1,9 +1,7 @@
 package searchengine.repositories;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

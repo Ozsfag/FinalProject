@@ -19,8 +19,9 @@ import searchengine.repositories.SiteRepository;
 import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.entityHandler.SiteHandler;
+import searchengine.utils.entitySaver.EntitySaver;
 import searchengine.utils.parser.Parser;
-import searchengine.utils.scraper.WebScraper;
+import searchengine.utils.urlsChecker.UrlsChecker;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,8 @@ public class IndexingImpl implements IndexingService {
   @Lazy private final SiteRepository siteRepository;
   @Lazy private final ForkJoinPool forkJoinPool;
   @Lazy private final EntityHandler entityHandler;
-  @Lazy private final WebScraper webScraper;
+  @Lazy private final EntitySaver entitySaver;
+  @Lazy private final UrlsChecker urlsChecker;
   @Lazy private final DataTransformer dataTransformer;
   @Lazy private final SiteHandler siteHandler;
   @Lazy public static volatile boolean isIndexing = true;
@@ -49,7 +51,7 @@ public class IndexingImpl implements IndexingService {
 
           Collection<SiteModel> siteModels =
               siteHandler.getIndexedSiteModelFromSites(sitesList.getSites());
-          entityHandler.saveEntities(siteModels);
+          entitySaver.saveEntities(siteModels);
 
           siteModels.forEach(
               siteModel -> {
@@ -59,7 +61,7 @@ public class IndexingImpl implements IndexingService {
                           try {
                             forkJoinPool.invoke(
                                 new Parser(
-                                    entityHandler, webScraper, siteModel, siteModel.getUrl()));
+                                    urlsChecker, siteModel, siteModel.getUrl(), entityHandler));
                             siteRepository.updateStatusAndStatusTimeByUrl(
                                 Status.INDEXED, new Date(), siteModel.getUrl());
                           } catch (Error re) {

@@ -1,7 +1,6 @@
 package searchengine.utils.entitySaver;
 
 import java.util.Collection;
-import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
@@ -18,56 +17,66 @@ import searchengine.repositories.SiteRepository;
 @RequiredArgsConstructor
 public class EntitySaver {
   private final SiteRepository siteRepository;
+  private final PageRepository pageRepository;
   private final LemmaRepository lemmaRepository;
   private final IndexRepository indexRepository;
-  private final PageRepository pageRepository;
 
   public void saveEntities(Collection<?> entities) {
-    saveEntitiesInBatch(entities);
-  }
-
-  private void saveEntitiesInBatch(Collection<?> entities) {
     try {
-      getRepository(entities).saveAllAndFlush(entities);
+      saveAllAndFlush(entities);
     } catch (Exception e) {
-      saveEntitiesIndividually(entities);
+      saveIndividually(entities);
     }
   }
 
-  private void saveEntitiesIndividually(Collection<?> entities) {
+  private void saveAllAndFlush(Collection<?> entities) {
+    if (entities.isEmpty()) {
+      return;
+    }
+
+    Object entity = entities.iterator().next();
+    JpaRepository repository = getRepository(entity);
+
+    if (repository != null) {
+      repository.saveAllAndFlush(entities);
+    }
+  }
+
+  private JpaRepository getRepository(Object entity) {
+    if (entity instanceof SiteModel) {
+      return siteRepository;
+    } else if (entity instanceof PageModel) {
+      return pageRepository;
+    } else if (entity instanceof LemmaModel) {
+      return lemmaRepository;
+    } else if (entity instanceof IndexModel) {
+      return indexRepository;
+    }
+    return null;
+  }
+
+  private void saveIndividually(Collection<?> entities) {
     entities.forEach(this::saveEntity);
   }
 
   private void saveEntity(Object entity) {
-    getRepository(entity).save(entity);
+    if (entity instanceof SiteModel siteModel) {
+      saveSiteModel(siteModel);
+    } else if (entity instanceof PageModel pageModel) {
+      savePageModel(pageModel);
+    } else if (entity instanceof LemmaModel lemmaModel) {
+      saveLemmaModel(lemmaModel);
+    } else if (entity instanceof IndexModel indexModel) {
+      saveIndexModel(indexModel);
+    }
   }
 
-  private JpaRepository getRepository(Collection<?> entities) {
-    return getRepository(entities.iterator().next());
-  }
-
-  private JpaRepository getRepository(Object entity) {
-    return switch (entity.getClass().getSimpleName()) {
-      case "SiteModel" -> siteRepository;
-      case "PageModel" -> pageRepository;
-      case "LemmaModel" -> lemmaRepository;
-      case "IndexModel" -> indexRepository;
-      default -> throw new UnsupportedOperationException("Unsupported entity type");
-    };
-  }
-
-  private void save(SiteModel siteModel) {
+  private void saveSiteModel(SiteModel siteModel) {
     if (siteRepository.existsByUrl(siteModel.getUrl())) return;
-    siteRepository.merge(
-        siteModel.getId(),
-        siteModel.getStatus(),
-        new Date(),
-        siteModel.getLastError(),
-        siteModel.getUrl(),
-        siteModel.getName());
+    siteRepository.saveAndFlush(siteModel);
   }
 
-  private void save(PageModel pageModel) {
+  private void savePageModel(PageModel pageModel) {
     if (pageRepository.existsByPath(pageModel.getPath())) return;
     pageRepository.merge(
         pageModel.getId(),
@@ -77,13 +86,13 @@ public class EntitySaver {
         pageModel.getPath());
   }
 
-  private void save(LemmaModel lemmaModel) {
+  private void saveLemmaModel(LemmaModel lemmaModel) {
     if (lemmaRepository.existsByLemma(lemmaModel.getLemma())) return;
     lemmaRepository.merge(
         lemmaModel.getLemma(), lemmaModel.getSite().getId(), lemmaModel.getFrequency());
   }
 
-  private void save(IndexModel indexModel) {
+  private void saveIndexModel(IndexModel indexModel) {
     if (indexRepository.existsByPage_IdAndLemma_Id(
         indexModel.getPage().getId(), indexModel.getLemma().getId())) return;
     indexRepository.merge(
