@@ -19,7 +19,7 @@ public class UrlsChecker {
   private final PageRepository pageRepository;
   private final Validator validator;
 
-  public synchronized Collection<String> getCheckedUrls(String href, SiteModel siteModel) {
+  public Collection<String> getCheckedUrls(String href, SiteModel siteModel) {
     Collection<String> urls = getNewUrlsParsedFromHref(href);
     Collection<String> alreadyParsed = findDuplicateUrlsInNew(siteModel, urls);
 
