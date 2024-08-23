@@ -4,7 +4,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 import searchengine.model.LemmaModel;
 import searchengine.model.SiteModel;
@@ -13,6 +16,9 @@ import searchengine.utils.entityFactory.EntityFactory;
 
 @Component
 @RequiredArgsConstructor
+@Setter
+@Getter
+@EqualsAndHashCode
 public class LemmaHandler {
   private final LemmaRepository lemmaRepository;
   private final EntityFactory entityFactory;
@@ -23,37 +29,39 @@ public class LemmaHandler {
 
   public synchronized Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
       SiteModel siteModel, Map<String, AtomicInteger> wordsCount) {
-    this.siteModel = siteModel;
-    this.wordsCount = wordsCount;
 
-    getExistingLemmas();
+    setSiteModel(siteModel);
+    setWordsCount(wordsCount);
+
+    setExistingLemmas();
     removeExistedLemmasFromNew();
-    existingLemmaModels.addAll(createNewFromNotExisted());
+    getExistingLemmaModels().addAll(createNewFromNotExisted());
 
-    return existingLemmaModels;
+    return getExistingLemmaModels();
   }
 
-  private void getExistingLemmas() {
+  private void setExistingLemmas() {
     existingLemmaModels =
-        lemmaRepository.findByLemmaInAndSite_Id(wordsCount.keySet(), siteModel.getId());
+        lemmaRepository.findByLemmaInAndSite_Id(getWordsCount().keySet(), getSiteModel().getId());
   }
 
   private void removeExistedLemmasFromNew() {
-    wordsCount
+    getWordsCount()
         .entrySet()
         .removeIf(
             entry ->
-                existingLemmaModels.parallelStream()
+                getExistingLemmaModels().parallelStream()
                     .map(LemmaModel::getLemma)
                     .toList()
                     .contains(entry.getKey()));
   }
 
   private Collection<LemmaModel> createNewFromNotExisted() {
-    return wordsCount.entrySet().parallelStream()
+    return getWordsCount().entrySet().parallelStream()
         .map(
             entry ->
-                entityFactory.createLemmaModel(siteModel, entry.getKey(), entry.getValue().get()))
+                entityFactory.createLemmaModel(
+                    getSiteModel(), entry.getKey(), entry.getValue().get()))
         .collect(Collectors.toSet());
   }
 }

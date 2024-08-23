@@ -18,6 +18,7 @@ public class SiteHandler {
 
   public synchronized Collection<SiteModel> getIndexedSiteModelFromSites(
       Collection<Site> sitesToParse) {
+
     return sitesToParse.parallelStream()
         .map(this::getSiteIfExistOrCreate)
         .collect(Collectors.toList());

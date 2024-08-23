@@ -3,6 +3,7 @@ package searchengine.services.indexing;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -44,39 +45,63 @@ public class IndexingImpl implements IndexingService {
    */
   @Override
   public ResponseInterface startIndexing() {
-    if (!isIndexing) return new Bad(false, "Индексация уже запущена");
-    CompletableFuture.runAsync(
-        () -> {
-          Collection<CompletableFuture<Void>> futures = new ArrayList<>();
+    if (isIndexingAlreadyRunning()) {
+      return new Bad(false, "Индексация уже запущена");
+    }
 
-          Collection<SiteModel> siteModels =
-              siteHandler.getIndexedSiteModelFromSites(sitesList.getSites());
-          entitySaver.saveEntities(siteModels);
+    return startIndexingProcess();
+  }
 
-          siteModels.forEach(
-              siteModel -> {
-                CompletableFuture<Void> future =
-                    CompletableFuture.runAsync(
-                        () -> {
-                          try {
-                            forkJoinPool.invoke(
-                                new Parser(
-                                    urlsChecker, siteModel, siteModel.getUrl(), entityHandler));
-                            siteRepository.updateStatusAndStatusTimeByUrl(
-                                Status.INDEXED, new Date(), siteModel.getUrl());
-                          } catch (Error re) {
-                            siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(
-                                Status.FAILED,
-                                new Date(),
-                                re.getLocalizedMessage(),
-                                siteModel.getUrl());
-                          }
-                        });
-                futures.add(future);
-              });
-          CompletableFuture.allOf((CompletableFuture<?>) futures).join();
-        });
+  private boolean isIndexingAlreadyRunning() {
+    return !isIndexing;
+  }
+
+  private ResponseInterface startIndexingProcess() {
+    CompletableFuture.runAsync(this::executeIndexingProcess);
     return new Successful(true);
+  }
+
+  private void executeIndexingProcess() {
+    Collection<CompletableFuture<Void>> futures = getFuturesForSiteModels();
+
+    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+  }
+
+  private Collection<CompletableFuture<Void>> getFuturesForSiteModels() {
+    Collection<SiteModel> siteModels = getSiteModels();
+    entitySaver.saveEntities(siteModels);
+
+    return siteModels.stream().map(this::getFutureForSiteModel).collect(Collectors.toList());
+  }
+
+  private Collection<SiteModel> getSiteModels() {
+    return siteHandler.getIndexedSiteModelFromSites(sitesList.getSites());
+  }
+
+  private CompletableFuture<Void> getFutureForSiteModel(SiteModel siteModel) {
+    return CompletableFuture.runAsync(() -> processSiteModel(siteModel));
+  }
+
+  private void processSiteModel(SiteModel siteModel) {
+    try {
+      forkJoinPool.invoke(createSubtaskForSite(siteModel));
+      updateSiteWhenSuccessful(siteModel);
+    } catch (Error re) {
+      updateSiteWhenFailed(siteModel, re);
+    }
+  }
+
+  private Parser createSubtaskForSite(SiteModel siteModel) {
+    return new Parser(urlsChecker, siteModel, siteModel.getUrl(), entityHandler);
+  }
+
+  private void updateSiteWhenSuccessful(SiteModel siteModel) {
+    siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteModel.getUrl());
+  }
+
+  private void updateSiteWhenFailed(SiteModel siteModel, Throwable re) {
+    siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(
+        Status.FAILED, new Date(), re.getLocalizedMessage(), siteModel.getUrl());
   }
 
   /**

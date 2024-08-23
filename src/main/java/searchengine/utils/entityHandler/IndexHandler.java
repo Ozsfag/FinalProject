@@ -2,7 +2,10 @@ package searchengine.utils.entityHandler;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -12,6 +15,9 @@ import searchengine.utils.entityFactory.EntityFactory;
 
 @Component
 @RequiredArgsConstructor
+@Setter
+@Getter
+@EqualsAndHashCode
 public class IndexHandler {
   private final IndexRepository indexRepository;
   private final EntityFactory entityFactory;
@@ -22,33 +28,36 @@ public class IndexHandler {
 
   public synchronized Collection<IndexModel> getIndexedIndexModelFromCountedWords(
       PageModel pageModel, Collection<LemmaModel> lemmas) {
-    this.pageModel = pageModel;
-    this.lemmas = lemmas;
+    setPageModel(pageModel);
+    setLemmas(lemmas);
 
-    getExistingIndexes();
+    setExistingIndexes();
     removeExistedIndexesFromNew();
-    existingIndexModels.addAll(createNewFromNotExisted());
+    getExistingIndexModels().addAll(createNewFromNotExisted());
 
-    return existingIndexModels;
+    return getExistingIndexModels();
   }
 
-  private void getExistingIndexes() {
-    existingIndexModels = indexRepository.findByPage_IdAndLemmaIn(pageModel.getId(), lemmas);
+  private void setExistingIndexes() {
+    existingIndexModels =
+        indexRepository.findByPage_IdAndLemmaIn(getPageModel().getId(), getLemmas());
   }
 
   private void removeExistedIndexesFromNew() {
-    lemmas.removeIf(
-        lemma ->
-            existingIndexModels.parallelStream()
-                .map(IndexModel::getLemma)
-                .toList()
-                .contains(lemma.getLemma()));
+    getLemmas()
+        .removeIf(
+            lemma ->
+                getExistingIndexModels().parallelStream()
+                    .map(IndexModel::getLemma)
+                    .toList()
+                    .contains(lemma.getLemma()));
   }
 
   private Collection<IndexModel> createNewFromNotExisted() {
-    return lemmas.parallelStream()
+    return getLemmas().parallelStream()
         .map(
-            lemma -> entityFactory.createIndexModel(pageModel, lemma, (float) lemma.getFrequency()))
+            lemma ->
+                entityFactory.createIndexModel(getPageModel(), lemma, (float) lemma.getFrequency()))
         .collect(Collectors.toSet());
   }
 }
