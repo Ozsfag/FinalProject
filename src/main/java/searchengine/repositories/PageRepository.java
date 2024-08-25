@@ -1,13 +1,14 @@
 package searchengine.repositories;
 
 import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.PageModel;
 
@@ -21,9 +22,9 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
    * @param paths the collection of paths to filter the pages by
    * @return a set of page paths that match the given site ID and collection of paths
    */
-  @Query(
-      "SELECT DISTINCT p.path FROM PageModel p JOIN SiteModel s ON p.site = s.id WHERE s.id = :siteId AND p.path IN :paths")
-  CopyOnWriteArraySet<String> findAllPathsBySiteAndPathIn(
+  @Transactional (timeout = 2, propagation = Propagation.REQUIRES_NEW)
+  @Query("SELECT DISTINCT p.path FROM PageModel p WHERE p.site.id = :siteId AND p.path IN :paths")
+  Set<String> findAllPathsBySiteAndPathIn(
       @Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);
 
   /**

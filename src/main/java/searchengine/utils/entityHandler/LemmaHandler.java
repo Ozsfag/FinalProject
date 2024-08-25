@@ -25,7 +25,7 @@ public class LemmaHandler {
 
   private SiteModel siteModel;
   private Map<String, AtomicInteger> wordsCount;
-  private Collection<LemmaModel> existingLemmaModels;
+  private Collection<LemmaModel> existedLemmaModels;
 
   public synchronized Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
       SiteModel siteModel, Map<String, AtomicInteger> wordsCount) {
@@ -35,33 +35,34 @@ public class LemmaHandler {
 
     setExistingLemmas();
     removeExistedLemmasFromNew();
-    getExistingLemmaModels().addAll(createNewFromNotExisted());
+    getExistedLemmaModels().addAll(getNewLemmas());
 
-    return getExistingLemmaModels();
+    return getExistedLemmaModels();
   }
 
   private void setExistingLemmas() {
-    existingLemmaModels =
+    existedLemmaModels =
         lemmaRepository.findByLemmaInAndSite_Id(getWordsCount().keySet(), getSiteModel().getId());
   }
 
   private void removeExistedLemmasFromNew() {
-    getWordsCount()
-        .entrySet()
-        .removeIf(
-            entry ->
-                getExistingLemmaModels().parallelStream()
-                    .map(LemmaModel::getLemma)
-                    .toList()
-                    .contains(entry.getKey()));
+    getWordsCount().entrySet().removeIf(this::isExistedLemma);
   }
 
-  private Collection<LemmaModel> createNewFromNotExisted() {
+  private boolean isExistedLemma(Map.Entry<String, AtomicInteger> entry) {
+    return getExistedLemmaModels().parallelStream()
+        .map(LemmaModel::getLemma)
+        .toList()
+        .contains(entry.getKey());
+  }
+
+  private Collection<LemmaModel> getNewLemmas() {
     return getWordsCount().entrySet().parallelStream()
-        .map(
-            entry ->
-                entityFactory.createLemmaModel(
-                    getSiteModel(), entry.getKey(), entry.getValue().get()))
+        .map(this::createLemmaModel)
         .collect(Collectors.toSet());
+  }
+
+  private LemmaModel createLemmaModel(Map.Entry<String, AtomicInteger> entry) {
+    return entityFactory.createLemmaModel(getSiteModel(), entry.getKey(), entry.getValue().get());
   }
 }

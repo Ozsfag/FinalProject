@@ -43,7 +43,7 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
    * @param lemmas the collection of LemmaModel objects to search for
    * @return a list of IndexModel objects that match the given page ID and lemmas
    */
-  @Query("SELECT i FROM IndexModel i JOIN FETCH i.page p WHERE p.id = :id AND i.lemma IN :lemmas")
+  @Query("SELECT i FROM IndexModel i  WHERE i.page.id = :id AND i.lemma IN :lemmas")
   Set<IndexModel> findByPage_IdAndLemmaIn(
       @Param("id") Integer id, @Param("lemmas") Collection<LemmaModel> lemmas);
 

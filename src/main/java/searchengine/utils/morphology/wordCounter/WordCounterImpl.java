@@ -1,7 +1,7 @@
 package searchengine.utils.morphology.wordCounter;
 
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,12 +19,12 @@ public class WordCounterImpl implements WordCounter {
   private final Validator validator;
 
   @Override
-  public ConcurrentMap<String, AtomicInteger> countWordsFromContent(String content) {
+  public Map<String, AtomicInteger> countWordsFromContent(String content) {
     return getLoweredReplacedAndSplittedContent(content)
         .parallel()
-        .filter(word -> validator.wordIsNotParticle(word, luceneMorphology, particles))
+        .filter(this::wordIsNotParticle)
         .collect(
-            Collectors.toConcurrentMap(
+            Collectors.toMap(
                 word -> word,
                 word -> new AtomicInteger(1),
                 (a, b) -> {
@@ -37,5 +37,9 @@ public class WordCounterImpl implements WordCounter {
   public Stream<String> getLoweredReplacedAndSplittedContent(String content) {
     return Arrays.stream(
         content.toLowerCase().replaceAll(notLetterRegex, emptyString).split(splitter));
+  }
+
+  private boolean wordIsNotParticle(String word) {
+    return validator.wordIsNotParticle(word, luceneMorphology, particles);
   }
 }

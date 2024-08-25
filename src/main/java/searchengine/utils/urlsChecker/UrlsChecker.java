@@ -1,7 +1,6 @@
 package searchengine.utils.urlsChecker;
 
 import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import lombok.*;
 import org.springframework.stereotype.Component;
@@ -34,8 +33,8 @@ public class UrlsChecker {
     getUrlsParsedFromHref().removeAll(getAlreadyParsed());
 
     return getUrlsParsedFromHref().parallelStream()
-        .filter(url -> validator.urlHasCorrectForm(url, getSiteModel().getUrl()))
-        .collect(Collectors.toCollection(CopyOnWriteArraySet::new));
+        .filter(this::urlHasCorrectForm)
+        .collect(Collectors.toSet());
   }
 
   private void setUrlsParsedFromHref() {
@@ -45,5 +44,9 @@ public class UrlsChecker {
   private void findDuplicateUrlsInUrlsParsedFromHref() {
     alreadyParsed =
         pageRepository.findAllPathsBySiteAndPathIn(getSiteModel().getId(), getUrlsParsedFromHref());
+  }
+
+  private boolean urlHasCorrectForm(String url) {
+    return validator.urlHasCorrectForm(url, getSiteModel().getUrl());
   }
 }

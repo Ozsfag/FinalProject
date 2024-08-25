@@ -33,7 +33,7 @@ public class IndexHandler {
 
     setExistingIndexes();
     removeExistedIndexesFromNew();
-    getExistingIndexModels().addAll(createNewFromNotExisted());
+    getExistingIndexModels().addAll(getNewIndexes());
 
     return getExistingIndexModels();
   }
@@ -44,20 +44,21 @@ public class IndexHandler {
   }
 
   private void removeExistedIndexesFromNew() {
-    getLemmas()
-        .removeIf(
-            lemma ->
-                getExistingIndexModels().parallelStream()
-                    .map(IndexModel::getLemma)
-                    .toList()
-                    .contains(lemma.getLemma()));
+    getLemmas().removeIf(this::isExistedLemma);
   }
 
-  private Collection<IndexModel> createNewFromNotExisted() {
-    return getLemmas().parallelStream()
-        .map(
-            lemma ->
-                entityFactory.createIndexModel(getPageModel(), lemma, (float) lemma.getFrequency()))
-        .collect(Collectors.toSet());
+  private boolean isExistedLemma(LemmaModel lemmaModel) {
+    return getExistingIndexModels().parallelStream()
+        .map(IndexModel::getLemma)
+        .toList()
+        .contains(lemmaModel.getLemma());
+  }
+
+  private Collection<IndexModel> getNewIndexes() {
+    return getLemmas().parallelStream().map(this::createIndexModel).collect(Collectors.toSet());
+  }
+
+  private IndexModel createIndexModel(LemmaModel lemma) {
+    return entityFactory.createIndexModel(getPageModel(), lemma, (float) lemma.getFrequency());
   }
 }

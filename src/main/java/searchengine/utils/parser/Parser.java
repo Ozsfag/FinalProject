@@ -1,9 +1,7 @@
 package searchengine.utils.parser;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RecursiveTask;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityHandler.EntityHandler;
@@ -48,10 +46,7 @@ public class Parser extends RecursiveTask<Boolean> {
   }
 
   private void setSubtasks() {
-    subtasks =
-        urlsToParse.parallelStream()
-            .map(this::createSubtask)
-            .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+    subtasks = urlsToParse.parallelStream().map(this::createSubtask).toList();
   }
 
   private Parser createSubtask(String url) {
