@@ -25,7 +25,7 @@ public class PageHandler {
   private Collection<String> urlsToParse;
   private SiteModel siteModel;
 
-  public synchronized Collection<PageModel> getIndexedPageModelsFromUrls(
+  public Collection<PageModel> getIndexedPageModelsFromUrls(
       Collection<String> urlsToParse, SiteModel siteModel) {
 
     setUrlsToParse(urlsToParse);

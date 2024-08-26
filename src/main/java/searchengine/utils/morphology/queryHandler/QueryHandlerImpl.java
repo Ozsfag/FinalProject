@@ -24,17 +24,15 @@ public class QueryHandlerImpl implements QueryHandler {
         .flatMap(this::getInfinitivesByLanguage);
   }
 
-  @Override
-  public Stream<String> getLoweredReplacedAndSplittedQuery(String query) {
+  private Stream<String> getLoweredReplacedAndSplittedQuery(String query) {
     return Arrays.stream(query.toLowerCase().replaceAll(nonLetters, emptyString).split(splitter));
   }
 
-  private boolean wordIsNotParticle(String word){
+  private boolean wordIsNotParticle(String word) {
     return validator.wordIsNotParticle(word, luceneMorphology1, particles);
   }
 
-  @Override
-  public Stream<String> getInfinitivesByLanguage(String queryWord) {
+  private Stream<String> getInfinitivesByLanguage(String queryWord) {
     return queryWord.matches(onlyLetters)
         ? luceneMorphology2.getNormalForms(queryWord).stream()
         : luceneMorphology1.getNormalForms(queryWord).stream();

@@ -3,7 +3,6 @@ package searchengine.services.indexing;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -49,16 +48,12 @@ public class IndexingImpl implements IndexingService {
       return new Bad(false, "Индексация уже запущена");
     }
 
-    return startIndexingProcess();
+    CompletableFuture.runAsync(this::executeIndexingProcess);
+    return new Successful(true);
   }
 
   private boolean isIndexingAlreadyRunning() {
     return !isIndexing;
-  }
-
-  private ResponseInterface startIndexingProcess() {
-    CompletableFuture.runAsync(this::executeIndexingProcess);
-    return new Successful(true);
   }
 
   private void executeIndexingProcess() {
@@ -71,7 +66,7 @@ public class IndexingImpl implements IndexingService {
     Collection<SiteModel> siteModels = getSiteModels();
     entitySaver.saveEntities(siteModels);
 
-    return siteModels.stream().map(this::getFutureForSiteModel).collect(Collectors.toList());
+    return siteModels.stream().map(this::getFutureForSiteModel).toList();
   }
 
   private Collection<SiteModel> getSiteModels() {
@@ -125,12 +120,15 @@ public class IndexingImpl implements IndexingService {
   @SneakyThrows
   @Override
   public ResponseInterface indexPage(String url) {
-    SiteModel siteModel =
-        siteHandler
-            .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
-            .iterator()
-            .next();
+    SiteModel siteModel = getSiteModelByUrl(url);
     entityHandler.processIndexing(dataTransformer.transformUrlToUrls(url), siteModel);
     return new Successful(true);
+  }
+
+  private SiteModel getSiteModelByUrl(String url) {
+    return siteHandler
+        .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
+        .iterator()
+        .next();
   }
 }

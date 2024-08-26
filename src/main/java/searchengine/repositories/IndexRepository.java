@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -20,6 +21,7 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
    * @param frequency description of parameter
    * @return description of return value
    */
+  @Transactional(timeout = 2, propagation = Propagation.REQUIRES_NEW)
   @Query("select i from IndexModel i where i.lemma.lemma = ?1 and i.lemma.frequency < ?2")
   Set<IndexModel> findIndexBy2Params(String lemma, int frequency);
 
@@ -31,6 +33,7 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
    * @param siteId the SiteModel object associated with the IndexModel
    * @return a set of IndexModel objects that match the given parameters
    */
+  @Transactional(timeout = 2, propagation = Propagation.REQUIRES_NEW)
   @Query(
       "select i from IndexModel i where i.lemma.lemma = ?1 and i.lemma.frequency < ?2 and i.lemma.site.id = ?3")
   Set<IndexModel> findIndexBy3Params(String lemma, int frequency, Integer siteId);

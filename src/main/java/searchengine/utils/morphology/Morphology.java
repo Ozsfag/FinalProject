@@ -30,7 +30,6 @@ public class Morphology {
   private final WordsCounterFactory wordsCounterFactory;
   private final QueryHandlerFactory queryHandlerFactory;
 
-
   public Map<String, AtomicInteger> countWordFrequencyByLanguage(String content) {
     Map<String, AtomicInteger> result = new HashMap<>();
 

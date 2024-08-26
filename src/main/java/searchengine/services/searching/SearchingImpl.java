@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -48,14 +49,7 @@ public class SearchingImpl implements SearchingService {
    */
   @Override
   public ResponseInterface search(String query, String url, int offset, int limit) {
-    SiteModel siteModel =
-        url == null
-            ? null
-            : siteHandler
-                .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
-                .stream()
-                .findFirst()
-                .get();
+    SiteModel siteModel = getSiteModel(url);
 
     Collection<IndexModel> uniqueSet = transformQueryToIndexModelSet(query, siteModel);
     if (uniqueSet.isEmpty()) {
@@ -70,70 +64,37 @@ public class SearchingImpl implements SearchingService {
     return new TotalSearchResponse(true, detailedSearchResponse.size(), detailedSearchResponse);
   }
 
-  /**
-   * Generates a list of detailed search responses based on the given parameters.
-   *
-   * @param rel a map containing the page ID and relevance
-   * @param offset the number of responses to skip
-   * @param limit the maximum number of responses to return
-   * @param uniqueSet a set of unique IndexModel objects
-   * @return a list of DetailedSearchResponse objects
-   */
-  private Collection<DetailedSearchResponse> getDetailedSearchResponses(
-      Map<Integer, Float> rel, int offset, int limit, Collection<IndexModel> uniqueSet) {
-    return rel.entrySet().stream()
-        .skip(offset)
-        .limit(limit)
-        .map(
-            entry -> {
-              DetailedSearchResponse response = new DetailedSearchResponse();
-              try {
-                PageModel pageModel = pageRepository.findById(entry.getKey()).orElseThrow();
-                String[] urlComponents = validator.getValidUrlComponents(pageModel.getPath());
-                response.setUri(urlComponents[1]);
-                response.setSite(urlComponents[0]);
-                response.setSiteName(pageModel.getSite().getName());
-                response.setRelevance(entry.getValue());
-                response.setTitle(webScraper.getConnectionResponse(pageModel.getPath()).getTitle());
-                response.setSnippet(getSnippet(uniqueSet, pageModel));
-              } catch (URISyntaxException e) {
-                throw new RuntimeException(e.getLocalizedMessage());
-              }
-              return response;
-            })
-        .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
-        .collect(Collectors.toCollection(LinkedList::new));
+  private SiteModel getSiteModel(String url) {
+    return url == null
+        ? null
+        : siteHandler
+            .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
+            .stream()
+            .findFirst()
+            .get();
   }
 
-  /**
-   * Transforms a query string into a set of IndexModel objects.
-   *
-   * @param query the query string to transform
-   * @param siteModel the SiteModel object to filter the query by, or null to search all sites
-   * @return a set of IndexModel objects representing the query
-   */
   private Collection<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
     return morphology.getUniqueLemmasFromSearchQuery(query).stream()
-        .flatMap(
-            queryWord ->
-                siteModel == null
-                    ? indexRepository
-                        .findIndexBy2Params(queryWord, morphologySettings.getMaxFrequency())
-                        .stream()
-                    : indexRepository
-                        .findIndexBy3Params(
-                            queryWord, morphologySettings.getMaxFrequency(), siteModel.getId())
-                        .stream())
+        .flatMap(queryWord -> findIndexes(queryWord, siteModel))
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
-  /**
-   * Transforms a set of IndexModel objects into a map of page IDs to their normalized absolute
-   * ranks.
-   *
-   * @param uniqueSet the set of unique IndexModel objects
-   * @return a map of page IDs to their normalized absolute ranks
-   */
+  private Stream<IndexModel> findIndexes(String queryWord, SiteModel siteModel) {
+    return siteModel == null
+        ? findIndexesBy2Params(queryWord).stream()
+        : findIndexesBy3Params(queryWord, siteModel).stream();
+  }
+
+  private Collection<IndexModel> findIndexesBy2Params(String queryWord) {
+    return indexRepository.findIndexBy2Params(queryWord, morphologySettings.getMaxFrequency());
+  }
+
+  private Collection<IndexModel> findIndexesBy3Params(String queryWord, SiteModel siteModel) {
+    return indexRepository.findIndexBy3Params(
+        queryWord, morphologySettings.getMaxFrequency(), siteModel.getId());
+  }
+
   private Map<Integer, Float> getPageId2AbsRank(Collection<IndexModel> uniqueSet) {
 
     Map<Integer, Float> pageId2AbsRank =
@@ -153,32 +114,87 @@ public class SearchingImpl implements SearchingService {
   }
 
   /**
-   * Retrieves matching snippets from the content of a page based on the given IndexModel set and
-   * PageModel.
+   * Generates a list of detailed search responses based on the given parameters.
    *
-   * @param uniqueSet the set of unique IndexModel objects
-   * @param pageModel the PageModel to retrieve snippets from
-   * @return a concatenated string of matching snippets with highlighted words
+   * @param rel a map containing the page ID and relevance
+   * @param offset the number of responses to skip
+   * @param limit the maximum number of responses to return
+   * @param uniqueSet a set of unique IndexModel objects
+   * @return a list of DetailedSearchResponse objects
    */
+  private Collection<DetailedSearchResponse> getDetailedSearchResponses(
+      Map<Integer, Float> rel, int offset, int limit, Collection<IndexModel> uniqueSet) {
+    return rel.entrySet().stream()
+        .skip(offset)
+        .limit(limit)
+        .map(entry -> getDetailedSearchResponse(entry, uniqueSet))
+        .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
+        .collect(Collectors.toCollection(LinkedList::new));
+  }
+
+  private DetailedSearchResponse getDetailedSearchResponse(
+      Map.Entry<Integer, Float> entry, Collection<IndexModel> uniqueSet) {
+    try {
+      PageModel pageModel = getPageModel(entry);
+      String[] urlComponents = getUrlComponents(pageModel.getPath());
+      String siteName = pageModel.getSite().getName();
+      double relevance = entry.getValue();
+      String tittle = getTittle(pageModel.getPath());
+      String snippet = getSnippet(uniqueSet, pageModel);
+      return DetailedSearchResponse.builder()
+          .uri(urlComponents[1])
+          .site(urlComponents[0])
+          .title(tittle)
+          .snippet(snippet)
+          .siteName(siteName)
+          .relevance(relevance)
+          .build();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e.getLocalizedMessage());
+    }
+  }
+
+  private PageModel getPageModel(Map.Entry<Integer, Float> entry) {
+    return pageRepository.findById(entry.getKey()).orElseThrow();
+  }
+
+  private String[] getUrlComponents(String url) throws URISyntaxException {
+    return validator.getValidUrlComponents(url);
+  }
+
+  private String getTittle(String url) {
+    return webScraper.getConnectionResponse(url).getTitle();
+  }
+
   public String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel) {
-    List<String> matchingSentences = new ArrayList<>();
-    uniqueSet.stream()
-        .filter(item -> item.getPage().equals(pageModel))
-        .forEach(
-            item -> {
-              String content = pageModel.getContent().toLowerCase(Locale.ROOT);
-              String word = item.getLemma().getLemma();
-              Matcher matcher = Pattern.compile(Pattern.quote(word)).matcher(content);
-              String matchingSentence = null;
-              while (matcher.find()) {
-                int start = Math.max(matcher.start() - 100, 0);
-                int end = Math.min(matcher.end() + 100, content.length());
-                word = matcher.group();
-                matchingSentence = content.substring(start, end);
-                matchingSentence = matchingSentence.replaceAll(word, "<b>" + word + "</b>");
-              }
-              matchingSentences.add(matchingSentence);
-            });
+    Collection<String> matchingSentences =
+        uniqueSet.stream()
+            .filter(item -> itemPageIsEqualToPage(item, pageModel))
+            .map(item -> getMatchingSentences(item, pageModel))
+            .toList();
     return String.join("............. ", matchingSentences);
+  }
+
+  private boolean itemPageIsEqualToPage(IndexModel item, PageModel pageModel) {
+    return item.getPage().equals(pageModel);
+  }
+
+  private String getMatchingSentences(IndexModel item, PageModel pageModel) {
+    String content = getContent(pageModel);
+    String word = item.getLemma().getLemma();
+    Matcher matcher = Pattern.compile(Pattern.quote(word)).matcher(content);
+    String matchingSentence = null;
+    while (matcher.find()) {
+      int start = Math.max(matcher.start() - 100, 0);
+      int end = Math.min(matcher.end() + 100, content.length());
+      word = matcher.group();
+      matchingSentence = content.substring(start, end);
+      matchingSentence = matchingSentence.replaceAll(word, "<b>" + word + "</b>");
+    }
+    return matchingSentence;
+  }
+
+  private String getContent(PageModel pageModel) {
+    return pageModel.getContent().toLowerCase(Locale.ROOT);
   }
 }
