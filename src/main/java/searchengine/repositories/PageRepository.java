@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.PageModel;
@@ -22,7 +23,7 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
    * @param paths the collection of paths to filter the pages by
    * @return a set of page paths that match the given site ID and collection of paths
    */
-  @Transactional(timeout = 2, propagation = Propagation.REQUIRES_NEW)
+  @Transactional(timeout = 2, propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
   @Query("SELECT DISTINCT p.path FROM PageModel p WHERE p.site.id = :siteId AND p.path IN :paths")
   Set<String> findAllPathsBySiteAndPathIn(
       @Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);

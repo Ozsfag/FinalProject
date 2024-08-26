@@ -15,27 +15,36 @@ public class QueryHandlerFactory {
   private final MorphologySettings morphologySettings;
   private final Validator validator;
 
+  private QueryHandler russianQueryHandler;
+  private QueryHandler englishQueryHandler;
+
   public QueryHandler createRussianQueryHandler() {
-    return new QueryHandlerImpl(
-        morphologySettings.getNotCyrillicLetters(),
-        russianLuceneMorphology,
-        englishLuceneMorphology,
-        morphologySettings.getRussianParticleNames(),
-        morphologySettings.getOnlyLatinLetters(),
-        morphologySettings.getEmptyString(),
-        morphologySettings.getSplitter(),
-        validator);
+    if (russianQueryHandler == null) {
+      return new QueryHandlerImpl(
+          morphologySettings.getNotCyrillicLetters(),
+          russianLuceneMorphology,
+          englishLuceneMorphology,
+          morphologySettings.getRussianParticleNames(),
+          morphologySettings.getOnlyLatinLetters(),
+          morphologySettings.getEmptyString(),
+          morphologySettings.getSplitter(),
+          validator);
+    }
+    return russianQueryHandler;
   }
 
   public QueryHandler createEnglishQueryHandler() {
-    return new QueryHandlerImpl(
-        morphologySettings.getNotLatinLetters(),
-        englishLuceneMorphology,
-        russianLuceneMorphology,
-        morphologySettings.getEnglishParticlesNames(),
-        morphologySettings.getOnlyCyrillicLetters(),
-        morphologySettings.getEmptyString(),
-        morphologySettings.getSplitter(),
-        validator);
+    if (englishQueryHandler == null) {
+      return new QueryHandlerImpl(
+          morphologySettings.getNotLatinLetters(),
+          englishLuceneMorphology,
+          russianLuceneMorphology,
+          morphologySettings.getEnglishParticlesNames(),
+          morphologySettings.getOnlyCyrillicLetters(),
+          morphologySettings.getEmptyString(),
+          morphologySettings.getSplitter(),
+          validator);
+    }
+    return englishQueryHandler;
   }
 }

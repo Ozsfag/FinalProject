@@ -18,35 +18,34 @@ public class UrlsChecker {
   private final WebScraper webScraper;
   private final PageRepository pageRepository;
   private final Validator validator;
-  private String href;
-  private SiteModel siteModel;
-  private Collection<String> urlsParsedFromHref;
-  private Collection<String> alreadyParsed;
 
-  public synchronized Collection<String> getCheckedUrls(String href, SiteModel siteModel) {
+  /**
+   * Returns a collection of URLs that have been checked for correctness and duplication.
+   *
+   * @param href the URL to be checked
+   * @param siteModel the site model associated with the URL
+   * @return a collection of checked URLs
+   */
+  public Collection<String> getCheckedUrls(String href, SiteModel siteModel) {
 
-    setHref(href);
-    setSiteModel(siteModel);
+    Collection<String> urlsToCheck = fetchUrlsToCheck(href);
+    Collection<String> alreadyParsedUrls = findAlreadyParsedUrls(urlsToCheck, siteModel.getId());
+    urlsToCheck.removeAll(alreadyParsedUrls);
 
-    setUrlsParsedFromHref();
-    findDuplicateUrlsInUrlsParsedFromHref();
-    getUrlsParsedFromHref().removeAll(getAlreadyParsed());
-
-    return getUrlsParsedFromHref().parallelStream()
-        .filter(this::urlHasCorrectForm)
-        .collect(Collectors.toSet());
+    return urlsToCheck.stream()
+            .filter(url -> isValidUrl(url,siteModel.getUrl()))
+            .collect(Collectors.toSet());
   }
 
-  private void setUrlsParsedFromHref() {
-    urlsParsedFromHref = webScraper.getConnectionResponse(getHref()).getUrls();
+  private Collection<String> fetchUrlsToCheck(String href) {
+    return webScraper.getConnectionResponse(href).getUrls();
   }
 
-  private void findDuplicateUrlsInUrlsParsedFromHref() {
-    alreadyParsed =
-        pageRepository.findAllPathsBySiteAndPathIn(getSiteModel().getId(), getUrlsParsedFromHref());
+  private Collection<String> findAlreadyParsedUrls(Collection<String> urls, int id) {
+    return pageRepository.findAllPathsBySiteAndPathIn(id, urls);
   }
 
-  private boolean urlHasCorrectForm(String url) {
-    return validator.urlHasCorrectForm(url, getSiteModel().getUrl());
+  private boolean isValidUrl(String url, String siteUrl) {
+    return validator.urlHasCorrectForm(url, siteUrl);
   }
 }

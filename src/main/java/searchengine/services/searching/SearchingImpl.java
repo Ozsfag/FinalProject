@@ -74,6 +74,14 @@ public class SearchingImpl implements SearchingService {
             .get();
   }
 
+  /**
+   * Transforms a search query into a set of IndexModel objects.
+   *
+   * <p>This method takes a search query and a SiteModel object as parameters. It first retrieves
+   * unique lemmas from the search query using the Morphology service. Then, it maps each lemma to a
+   * set of IndexModel objects by calling the findIndexes method. Finally, it collects the results
+   * into a set and returns it.
+   */
   private Collection<IndexModel> transformQueryToIndexModelSet(String query, SiteModel siteModel) {
     return morphology.getUniqueLemmasFromSearchQuery(query).stream()
         .flatMap(queryWord -> findIndexes(queryWord, siteModel))
@@ -95,6 +103,14 @@ public class SearchingImpl implements SearchingService {
         queryWord, morphologySettings.getMaxFrequency(), siteModel.getId());
   }
 
+  /**
+   * Transforms a search query into a set of IndexModel objects.
+   *
+   * <p>This method takes a search query and a SiteModel object as parameters. It first retrieves
+   * unique lemmas from the search query using the Morphology service. Then, it maps each lemma to a
+   * set of IndexModel objects by calling the findIndexes method. Finally, it collects the results
+   * into a set and returns it.
+   */
   private Map<Integer, Float> getPageId2AbsRank(Collection<IndexModel> uniqueSet) {
 
     Map<Integer, Float> pageId2AbsRank =

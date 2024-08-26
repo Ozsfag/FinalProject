@@ -15,23 +15,34 @@ public class WordsCounterFactory {
   private final MorphologySettings morphologySettings;
   private final Validator validator;
 
+  private WordCounter russianWordCounter;
+  private WordCounter englishWordCounter;
+
   public WordCounter createRussianWordCounter() {
-    return new WordCounterImpl(
-        russianLuceneMorphology,
-        morphologySettings.getNotCyrillicLetters(),
-        morphologySettings.getRussianParticleNames(),
-        morphologySettings.getEmptyString(),
-        morphologySettings.getSplitter(),
-        validator);
+    if (russianWordCounter == null) {
+      russianWordCounter =
+          new WordCounterImpl(
+              russianLuceneMorphology,
+              morphologySettings.getNotCyrillicLetters(),
+              morphologySettings.getRussianParticleNames(),
+              morphologySettings.getEmptyString(),
+              morphologySettings.getSplitter(),
+              validator);
+    }
+    return russianWordCounter;
   }
 
   public WordCounter createEnglishWordCounter() {
-    return new WordCounterImpl(
-        englishLuceneMorphology,
-        morphologySettings.getNotLatinLetters(),
-        morphologySettings.getEnglishParticlesNames(),
-        morphologySettings.getEmptyString(),
-        morphologySettings.getSplitter(),
-        validator);
+    if (englishWordCounter == null) {
+      englishWordCounter =
+          new WordCounterImpl(
+              englishLuceneMorphology,
+              morphologySettings.getNotLatinLetters(),
+              morphologySettings.getEnglishParticlesNames(),
+              morphologySettings.getEmptyString(),
+              morphologySettings.getSplitter(),
+              validator);
+    }
+    return englishWordCounter;
   }
 }

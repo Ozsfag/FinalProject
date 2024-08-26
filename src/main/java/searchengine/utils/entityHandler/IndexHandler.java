@@ -26,7 +26,7 @@ public class IndexHandler {
   private Collection<LemmaModel> lemmas;
   private Collection<IndexModel> existingIndexModels;
 
-  public synchronized Collection<IndexModel> getIndexedIndexModelFromCountedWords(
+  public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
       PageModel pageModel, Collection<LemmaModel> lemmas) {
     setPageModel(pageModel);
     setLemmas(lemmas);

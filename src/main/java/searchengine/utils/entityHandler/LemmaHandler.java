@@ -27,7 +27,7 @@ public class LemmaHandler {
   private Map<String, AtomicInteger> wordsCount;
   private Collection<LemmaModel> existedLemmaModels;
 
-  public synchronized Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
+  public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
       SiteModel siteModel, Map<String, AtomicInteger> wordsCount) {
 
     setSiteModel(siteModel);

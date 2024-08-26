@@ -18,6 +18,7 @@ public class Parser extends RecursiveTask<Boolean> {
   private final SiteModel siteModel;
   private final String href;
   private final EntityHandler entityHandler;
+  
   private Collection<String> urlsToParse;
   private Collection<Parser> subtasks;
 

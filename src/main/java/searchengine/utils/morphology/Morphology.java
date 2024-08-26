@@ -30,6 +30,13 @@ public class Morphology {
   private final WordsCounterFactory wordsCounterFactory;
   private final QueryHandlerFactory queryHandlerFactory;
 
+  /**
+   * Counts the frequency of words in the given content by language.
+   *
+   * @param content the text content to analyze
+   * @return a map of words to their frequency, where each word is a key and its value is an
+   *     AtomicInteger representing its frequency
+   */
   public Map<String, AtomicInteger> countWordFrequencyByLanguage(String content) {
     Map<String, AtomicInteger> result = new HashMap<>();
 
