@@ -22,7 +22,7 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
    * @param paths the collection of paths to filter the pages by
    * @return a set of page paths that match the given site ID and collection of paths
    */
-  @Transactional (timeout = 2, propagation = Propagation.REQUIRES_NEW)
+  @Transactional(timeout = 2, propagation = Propagation.REQUIRES_NEW)
   @Query("SELECT DISTINCT p.path FROM PageModel p WHERE p.site.id = :siteId AND p.path IN :paths")
   Set<String> findAllPathsBySiteAndPathIn(
       @Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);
