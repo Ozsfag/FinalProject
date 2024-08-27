@@ -1,12 +1,18 @@
 package searchengine.utils.urlsChecker;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.model.SiteModel;
+import searchengine.model.Status;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.scraper.WebScraper;
+import searchengine.repositories.SiteRepository;
+import searchengine.utils.webScraper.WebScraper;
 import searchengine.utils.validator.Validator;
 
 @Component
@@ -37,8 +43,13 @@ public class UrlsChecker {
             .collect(Collectors.toSet());
   }
 
-  private Collection<String> fetchUrlsToCheck(String href) {
-    return webScraper.getConnectionResponse(href).getUrls();
+  private Collection<String> fetchUrlsToCheck(String href, int id) {
+    ConnectionResponse connectionResponse = webScraper.getConnectionResponse(href);
+    Collection<String> urls = connectionResponse.getUrls();
+    if (urls == null && pageRepository.notExistsBySite_Id(id)) {
+        return null;
+    }
+    return connectionResponse.getUrls();
   }
 
   private Collection<String> findAlreadyParsedUrls(Collection<String> urls, int id) {

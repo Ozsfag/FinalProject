@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.dto.indexing.Site;
 import searchengine.model.*;
-import searchengine.utils.scraper.WebScraper;
+import searchengine.utils.webScraper.WebScraper;
 
 @Component
 @RequiredArgsConstructor

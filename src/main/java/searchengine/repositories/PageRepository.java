@@ -15,28 +15,13 @@ import searchengine.model.PageModel;
 
 @Repository
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
-  /**
-   * Retrieves a set of page paths from the database based on the given site ID and collection of
-   * paths.
-   *
-   * @param siteId the ID of the site to filter the pages by
-   * @param paths the collection of paths to filter the pages by
-   * @return a set of page paths that match the given site ID and collection of paths
-   */
-  @Transactional(timeout = 2, propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+
+  @Transactional(timeout = 2, isolation = Isolation.SERIALIZABLE)
   @Query("SELECT DISTINCT p.path FROM PageModel p WHERE p.site.id = :siteId AND p.path IN :paths")
   Set<String> findAllPathsBySiteAndPathIn(
       @Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);
 
-  /**
-   * A description of the entire Java function.
-   *
-   * @param id description of parameter
-   * @param code description of parameter
-   * @param siteId description of parameter
-   * @param content description of parameter
-   * @param path description of parameter
-   */
+
   @Modifying
   @Transactional
   @Query(
@@ -47,6 +32,7 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
       @Param("siteId") Integer siteId,
       @Param("content") String content,
       @Param("path") String path);
+
 
   @Query("select (count(p) > 0) from PageModel p where p.path = ?1")
   boolean existsByPath(String path);
