@@ -22,8 +22,8 @@ import searchengine.repositories.PageRepository;
 import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.morphology.Morphology;
-import searchengine.utils.webScraper.WebScraper;
 import searchengine.utils.validator.Validator;
+import searchengine.utils.webScraper.WebScraper;
 
 @Service
 @Lazy

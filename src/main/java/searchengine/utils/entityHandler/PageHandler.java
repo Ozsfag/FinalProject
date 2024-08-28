@@ -31,7 +31,7 @@ public class PageHandler {
     setUrlsToParse(urlsToParse);
     setSiteModel(siteModel);
 
-    return urlsToParse.parallelStream()
+    return urlsToParse.stream()
         .map(this::getPageModelByUrl)
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());

@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.concurrent.RecursiveTask;
 import lombok.RequiredArgsConstructor;
 import searchengine.model.SiteModel;
-import searchengine.model.Status;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.urlsChecker.UrlsChecker;
@@ -21,7 +20,7 @@ public class Parser extends RecursiveTask<Boolean> {
   private final String href;
   private final EntityHandler entityHandler;
   private final SiteRepository siteRepository;
-  
+
   private Collection<String> urlsToParse;
   private Collection<Parser> subtasks;
 
@@ -29,11 +28,9 @@ public class Parser extends RecursiveTask<Boolean> {
   @Override
   protected Boolean compute() {
     setCheckingUrls();
-    if (urlsToParse == null) {
-      return false;
-    }
     if (checkedUrlsIsNotEmpty()) {
       indexingUrls();
+      updateSiteStatus(href);
       setSubtasks();
       invokeAll(subtasks);
     }
@@ -50,6 +47,10 @@ public class Parser extends RecursiveTask<Boolean> {
 
   private void indexingUrls() {
     entityHandler.processIndexing(urlsToParse, siteModel);
+  }
+
+  private void updateSiteStatus(String href) {
+    siteRepository.updateStatusTimeByUrl(new Date(), href);
   }
 
   private void setSubtasks() {

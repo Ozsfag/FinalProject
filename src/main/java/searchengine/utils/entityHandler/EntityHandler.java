@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
-import searchengine.repositories.SiteRepository;
 import searchengine.utils.entitySaver.EntitySaver;
 import searchengine.utils.morphology.Morphology;
 
@@ -17,12 +16,11 @@ import searchengine.utils.morphology.Morphology;
 @Component
 @RequiredArgsConstructor
 public class EntityHandler {
-  private final SiteRepository siteRepository;
+  private final PageHandler pageHandler;
+  private final EntitySaver entitySaver;
   private final Morphology morphology;
   private final LemmaHandler lemmaHandler;
   private final IndexHandler indexHandler;
-  private final PageHandler pageHandler;
-  private final EntitySaver entitySaver;
 
   /**
    * Indexes the lemmas and indexes for a list of pages.
@@ -53,8 +51,6 @@ public class EntityHandler {
 
     Collection<IndexModel> indexes = retrieveIndexedIndexModels(page, lemmas);
     saveEntities(indexes);
-
-    updateSiteStatus(page);
   }
 
   private Map<String, AtomicInteger> countWordFrequency(PageModel page) {
@@ -69,9 +65,5 @@ public class EntityHandler {
   private Collection<IndexModel> retrieveIndexedIndexModels(
       PageModel page, Collection<LemmaModel> lemmas) {
     return indexHandler.getIndexedIndexModelFromCountedWords(page, lemmas);
-  }
-
-  private void updateSiteStatus(PageModel page) {
-    siteRepository.updateStatusTimeByUrl(new Date(), page.getSite().getUrl());
   }
 }

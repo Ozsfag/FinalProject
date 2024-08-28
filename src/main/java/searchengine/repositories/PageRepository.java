@@ -16,19 +16,13 @@ import searchengine.model.PageModel;
 @Repository
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
 
-
-  @Query("select (count(p) = 0) from PageModel p where p.site.id = ?1")
-  boolean notExistsBySite_Id(Integer id);
-
-
-  @Transactional(timeout = 2, isolation = Isolation.SERIALIZABLE)
+  @Transactional()
   @Query("SELECT DISTINCT p.path FROM PageModel p WHERE p.site.id = :siteId AND p.path IN :paths")
   Set<String> findAllPathsBySiteAndPathIn(
       @Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);
 
-
-  @Modifying
   @Transactional
+  @Modifying
   @Query(
       "UPDATE PageModel p SET p.code = :code, p.site = :siteId, p.content = :content, p.path = :path WHERE p.id = :id")
   void merge(
@@ -38,7 +32,7 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
       @Param("content") String content,
       @Param("path") String path);
 
-
+  @Transactional
   @Query("select (count(p) > 0) from PageModel p where p.path = ?1")
   boolean existsByPath(String path);
 }

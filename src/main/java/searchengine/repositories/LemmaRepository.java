@@ -11,31 +11,16 @@ import searchengine.model.LemmaModel;
 
 @Repository
 public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
-  /**
-   * Returns the count of lemmas associated with a site with the given URL.
-   *
-   * @param url the URL of the site
-   * @return the count of lemmas associated with the site
-   */
+
+  @Transactional
+  @Query("SELECT count(l) FROM LemmaModel l WHERE l.site.url = :url")
   int countBySite_Url(String url);
 
-  /**
-   * Retrieves a set of LemmaModel objects that have a matching lemma and site ID.
-   *
-   * @param lemma a collection of lemmas to search for (nullable)
-   * @param siteId the ID of the site to search within
-   * @return a set of LemmaModel objects that match the criteria
-   */
+  @Transactional
   @Query("SELECT l FROM LemmaModel l WHERE l.site.id = :siteId AND l.lemma IN :lemma")
   Set<LemmaModel> findByLemmaInAndSite_Id(
       @Param("lemma") Collection<String> lemma, @Param("siteId") Integer siteId);
 
-  /**
-   * Retrieves a set of LemmaModel objects that have a matching lemma and site ID.
-   *
-   * @param lemma a collection of lemmas to search for (nullable)
-   * @param siteId the ID of the site to search within
-   */
   @Transactional()
   @Modifying
   @Query(
@@ -45,6 +30,7 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
       @Param("siteId") Integer siteId,
       @Param("frequency") Integer frequency);
 
+  @Transactional
   @Query("select (count(l) > 0) from LemmaModel l where l.lemma = ?1")
   boolean existsByLemma(String lemma);
 }

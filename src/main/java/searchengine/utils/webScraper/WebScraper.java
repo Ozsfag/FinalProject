@@ -36,53 +36,70 @@ public class WebScraper {
    * @return the ConnectionResponse containing URL, HTTP status, content, URLs, and an empty string
    */
   public ConnectionResponse getConnectionResponse(String url) {
-    Connection connection = getConnection(url);
     try {
-      Connection.Response response = getResponse(connection);
-      int statusCode = response.statusCode();
-      String reasonPhrase = response.statusMessage();
-
-      Document document = getDocument(connection);
-      String content = getContent(document);
-      Collection<String> urls = getUrlsFromDocument(document);
-      String title = getTitle(document);
-
-      return new ConnectionResponse(url, statusCode, content, urls, reasonPhrase, title);
+      ConnectionResponse response = createConnectionResponse(url);
+      return response;
     } catch (Exception e) {
-      return new ConnectionResponse(
-              url,
-              HttpStatus.NOT_FOUND.value(),
-              "",
-              null,
-              HttpStatus.NOT_FOUND.getReasonPhrase(),
-              "");
+      return handleConnectionException(url, e);
     }
   }
 
-  private Connection getConnection(String url){
-    return Jsoup.connect(url)
-            .userAgent(connectionSettings.getUserAgent())
-            .referrer(connectionSettings.getReferrer())
-            .ignoreHttpErrors(true);
-  }
-  private Connection.Response getResponse(Connection connection) throws IOException {
-      return connection.execute();
-  }
-  private Document getDocument(Connection connection) throws IOException {
-      return connection.get();
+  private ConnectionResponse createConnectionResponse(String url) throws IOException {
+    Connection connection = createConnection(url);
+    Connection.Response response = executeConnection(connection);
+    return buildConnectionResponse(url, response, connection);
   }
 
-  private String getContent(Document document) {
+  private ConnectionResponse buildConnectionResponse(
+      String url, Connection.Response response, Connection connection) throws IOException {
+    int statusCode = response.statusCode();
+    String reasonPhrase = response.statusMessage();
+    Document document = retrieveDocument(connection);
+    String content = extractContent(document);
+    Collection<String> urls = extractUrls(document);
+    String title = extractTitle(document);
+    return new ConnectionResponse(url, statusCode, content, urls, reasonPhrase, title);
+  }
+
+  private ConnectionResponse handleConnectionException(String url, Exception e) {
+    return new ConnectionResponse(
+        url, HttpStatus.NOT_FOUND.value(), "", null, HttpStatus.NOT_FOUND.getReasonPhrase(), "");
+  }
+
+  private Connection createConnection(String url) {
+    return Jsoup.connect(url)
+        .userAgent(getUserAgent())
+        .referrer(getReferrer())
+        .ignoreHttpErrors(true);
+  }
+
+  private String getUserAgent() {
+    return connectionSettings.getUserAgent();
+  }
+
+  private String getReferrer() {
+    return connectionSettings.getReferrer();
+  }
+
+  private Connection.Response executeConnection(Connection connection) throws IOException {
+    return connection.execute();
+  }
+
+  private Document retrieveDocument(Connection connection) throws IOException {
+    return connection.get();
+  }
+
+  private String extractContent(Document document) {
     return Optional.of(document.body().text()).orElseThrow();
   }
 
-  private Collection getUrlsFromDocument(Document document) {
+  private Collection extractUrls(Document document) {
     return document.select("a[href]").stream()
         .map(element -> element.absUrl("href"))
         .collect(Collectors.toSet());
   }
 
-  private String getTitle(Document document) {
+  private String extractTitle(Document document) {
     return document.select("title").text();
   }
 }
