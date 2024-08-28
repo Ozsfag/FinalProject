@@ -16,6 +16,11 @@ import searchengine.model.PageModel;
 @Repository
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
 
+
+  @Query("select (count(p) = 0) from PageModel p where p.site.id = ?1")
+  boolean notExistsBySite_Id(Integer id);
+
+
   @Transactional(timeout = 2, isolation = Isolation.SERIALIZABLE)
   @Query("SELECT DISTINCT p.path FROM PageModel p WHERE p.site.id = :siteId AND p.path IN :paths")
   Set<String> findAllPathsBySiteAndPathIn(

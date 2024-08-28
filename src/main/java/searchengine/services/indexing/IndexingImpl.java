@@ -87,7 +87,7 @@ public class IndexingImpl implements IndexingService {
   }
 
   private Parser createSubtaskForSite(SiteModel siteModel) {
-    return new Parser(urlsChecker, siteModel, siteModel.getUrl(), entityHandler);
+    return new Parser(urlsChecker, siteModel, siteModel.getUrl(), entityHandler, siteRepository);
   }
 
   private void updateSiteWhenSuccessful(SiteModel siteModel) {

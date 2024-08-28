@@ -9,7 +9,7 @@
 // import searchengine.config.ConnectionSettings;
 // import searchengine.dto.indexing.Site;
 // import searchengine.model.*;
-// import searchengine.utils.scraper.WebScraper;
+// import searchengine.utils.webScraper.WebScraper;
 //
 // public class EntityFactoryTest {
 //  private EntityFactory factory;
