@@ -2,8 +2,8 @@ package searchengine.utils.parser;
 
 import java.util.*;
 import java.util.concurrent.RecursiveTask;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
@@ -29,7 +29,7 @@ public class Parser extends RecursiveTask<Boolean> {
   /** Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed. */
   @Override
   protected Boolean compute() {
-    urlsToParse = getCheckedUrls();
+    setCheckingUrls();
     if (checkedUrlsIsNotEmpty()) {
       indexingUrls();
       updateSiteStatus(href);
@@ -39,10 +39,8 @@ public class Parser extends RecursiveTask<Boolean> {
     return true;
   }
 
-
-  @Cacheable(cacheNames="checkingUrls", cacheManager="customCacheManager", sync = true)
-  private Collection<String> getCheckedUrls() {
-    return urlsChecker.getCheckedUrls(href, siteModel);
+  private void setCheckingUrls() {
+    urlsToParse = urlsChecker.getCheckedUrls(href, siteModel);
   }
 
   private boolean checkedUrlsIsNotEmpty() {
@@ -58,7 +56,7 @@ public class Parser extends RecursiveTask<Boolean> {
   }
 
   private void setSubtasks() {
-    subtasks = urlsToParse.parallelStream().map(this::createSubtask).toList();
+    subtasks = urlsToParse.stream().map(this::createSubtask).collect(Collectors.toSet());
   }
 
   private Parser createSubtask(String url) {

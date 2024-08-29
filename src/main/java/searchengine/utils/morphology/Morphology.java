@@ -1,7 +1,6 @@
 package searchengine.utils.morphology;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -37,13 +36,13 @@ public class Morphology {
    * @return a map of words to their frequency, where each word is a key and its value is an
    *     AtomicInteger representing its frequency
    */
-  public Map<String, AtomicInteger> countWordFrequencyByLanguage(String content) {
-    Map<String, AtomicInteger> result = new HashMap<>();
+  public Map<String, Integer> countWordFrequencyByLanguage(String content) {
+    Map<String, Integer> result = new HashMap<>();
 
     WordCounter russianCounter = wordsCounterFactory.createRussianWordCounter();
     WordCounter englishCounter = wordsCounterFactory.createEnglishWordCounter();
-    Map<String, AtomicInteger> englishWordFrequency = englishCounter.countWordsFromContent(content);
-    Map<String, AtomicInteger> russianWordFrequency = russianCounter.countWordsFromContent(content);
+    Map<String, Integer> englishWordFrequency = englishCounter.countWordsFromContent(content);
+    Map<String, Integer> russianWordFrequency = russianCounter.countWordsFromContent(content);
 
     result.putAll(englishWordFrequency);
     result.putAll(russianWordFrequency);

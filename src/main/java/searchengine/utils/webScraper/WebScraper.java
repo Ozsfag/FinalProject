@@ -37,8 +37,7 @@ public class WebScraper {
    */
   public ConnectionResponse getConnectionResponse(String url) {
     try {
-      ConnectionResponse response = createConnectionResponse(url);
-      return response;
+      return createConnectionResponse(url);
     } catch (Exception e) {
       return handleConnectionException(url, e);
     }

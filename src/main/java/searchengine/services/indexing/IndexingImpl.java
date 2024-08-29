@@ -3,6 +3,10 @@ package searchengine.services.indexing;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.RecursiveAction;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -81,10 +85,8 @@ public class IndexingImpl implements IndexingService {
     try {
       forkJoinPool.invoke(createSubtaskForSite(siteModel));
       updateSiteWhenSuccessful(siteModel);
-    } catch (RuntimeException forbiddenException){
+    } catch (RuntimeException | Error forbiddenException){
       updateSiteWhenFailed(siteModel, forbiddenException);
-    } catch (Error re) {
-      updateSiteWhenFailed(siteModel, re);
     }
   }
 

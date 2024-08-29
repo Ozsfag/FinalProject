@@ -12,8 +12,7 @@ import lombok.*;
     schema = "search_engine",
     indexes = {
       @Index(name = "site_name_index", columnList = "name", unique = true),
-      @Index(name = "site_url_index", columnList = "url", unique = true),
-      @Index(name = "status_time_index", columnList = "status_time")
+      @Index(name = "site_url_index", columnList = "url", unique = true)
     })
 @Getter
 @Setter

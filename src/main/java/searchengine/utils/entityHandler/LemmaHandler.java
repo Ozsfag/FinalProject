@@ -2,7 +2,6 @@ package searchengine.utils.entityHandler;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -24,11 +23,11 @@ public class LemmaHandler {
   private final EntityFactory entityFactory;
 
   private SiteModel siteModel;
-  private Map<String, AtomicInteger> wordsCount;
+  private Map<String, Integer> wordsCount;
   private Collection<LemmaModel> existedLemmaModels;
 
   public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
-      SiteModel siteModel, Map<String, AtomicInteger> wordsCount) {
+      SiteModel siteModel, Map<String, Integer> wordsCount) {
 
     setSiteModel(siteModel);
     setWordsCount(wordsCount);
@@ -49,7 +48,7 @@ public class LemmaHandler {
     getWordsCount().entrySet().removeIf(this::isExistedLemma);
   }
 
-  private boolean isExistedLemma(Map.Entry<String, AtomicInteger> entry) {
+  private boolean isExistedLemma(Map.Entry<String, Integer> entry) {
     return getExistedLemmaModels().parallelStream()
         .map(LemmaModel::getLemma)
         .toList()
@@ -62,7 +61,7 @@ public class LemmaHandler {
         .collect(Collectors.toSet());
   }
 
-  private LemmaModel createLemmaModel(Map.Entry<String, AtomicInteger> entry) {
-    return entityFactory.createLemmaModel(getSiteModel(), entry.getKey(), entry.getValue().get());
+  private LemmaModel createLemmaModel(Map.Entry<String, Integer> entry) {
+    return entityFactory.createLemmaModel(getSiteModel(), entry.getKey(), entry.getValue());
   }
 }

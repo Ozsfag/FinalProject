@@ -1,10 +1,8 @@
 package searchengine.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-
 import java.util.Collection;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -29,13 +27,13 @@ public class CachingConfig implements CacheManager {
   public CacheManager cacheManager() {
     caffeineCacheManager = new CaffeineCacheManager();
     caffeineCacheManager.setCaffeine(
-        Caffeine.newBuilder().expireAfterWrite(2, TimeUnit.MINUTES).executor(forkJoinPool));
+        Caffeine.newBuilder().executor(forkJoinPool));
     return caffeineCacheManager;
   }
 
   @Override
   public Cache getCache(@NonNull String name) {
-    Cache value = caffeineCacheManager.getCache(name);
+//    Cache value = caffeineCacheManager.getCache(name);
       return null;
   }
 

@@ -1,7 +1,6 @@
 package searchengine.utils.entityHandler;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
@@ -45,7 +44,7 @@ public class EntityHandler {
   }
 
   private void processPage(PageModel page) {
-    Map<String, AtomicInteger> wordsCount = countWordFrequency(page);
+    Map<String, Integer> wordsCount = countWordFrequency(page);
     Collection<LemmaModel> lemmas = retrieveIndexedLemmaModels(page, wordsCount);
     saveEntities(lemmas);
 
@@ -53,12 +52,12 @@ public class EntityHandler {
     saveEntities(indexes);
   }
 
-  private Map<String, AtomicInteger> countWordFrequency(PageModel page) {
+  private Map<String, Integer> countWordFrequency(PageModel page) {
     return morphology.countWordFrequencyByLanguage(page.getContent());
   }
 
   private Collection<LemmaModel> retrieveIndexedLemmaModels(
-      PageModel page, Map<String, AtomicInteger> wordsCount) {
+      PageModel page, Map<String, Integer> wordsCount) {
     return lemmaHandler.getIndexedLemmaModelsFromCountedWords(page.getSite(), wordsCount);
   }
 

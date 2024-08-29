@@ -1,7 +1,6 @@
 package searchengine.utils.morphology.wordCounter;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public interface WordCounter {
@@ -11,7 +10,7 @@ public interface WordCounter {
    * @param content description of the content to count words from
    * @return a map of words and their frequencies
    */
-  Map<String, AtomicInteger> countWordsFromContent(String content);
+  Map<String, Integer> countWordsFromContent(String content);
 
   /**
    * Returns a stream of strings where the input content is converted to lowercase, non-alphabetic

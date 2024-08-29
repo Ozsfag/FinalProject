@@ -17,9 +17,7 @@ import searchengine.utils.entityFactory.EntityFactory;
 
 @Component
 @RequiredArgsConstructor
-@Setter
 @Getter
-@EqualsAndHashCode
 public class PageHandler {
   private final EntityFactory entityFactory;
   private Collection<String> urlsToParse;
@@ -28,8 +26,8 @@ public class PageHandler {
   public Collection<PageModel> getIndexedPageModelsFromUrls(
       Collection<String> urlsToParse, SiteModel siteModel) {
 
-    setUrlsToParse(urlsToParse);
-    setSiteModel(siteModel);
+    this.urlsToParse = urlsToParse;
+    this.siteModel = siteModel;
 
     return urlsToParse.stream()
         .map(this::getPageModelByUrl)
