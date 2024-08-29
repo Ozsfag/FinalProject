@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.*;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.model.SiteModel;

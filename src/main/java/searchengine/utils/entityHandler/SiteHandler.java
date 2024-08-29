@@ -15,8 +15,7 @@ public class SiteHandler {
   private final SiteRepository siteRepository;
   private final EntityFactory entityFactory;
 
-  public Collection<SiteModel> getIndexedSiteModelFromSites(
-      Collection<Site> sitesToParse) {
+  public Collection<SiteModel> getIndexedSiteModelFromSites(Collection<Site> sitesToParse) {
 
     return sitesToParse.parallelStream().map(this::getSiteIfExistOrCreate).toList();
   }

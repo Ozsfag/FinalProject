@@ -26,15 +26,14 @@ public class CachingConfig implements CacheManager {
   @Bean("customCacheManager")
   public CacheManager cacheManager() {
     caffeineCacheManager = new CaffeineCacheManager();
-    caffeineCacheManager.setCaffeine(
-        Caffeine.newBuilder().executor(forkJoinPool));
+    caffeineCacheManager.setCaffeine(Caffeine.newBuilder().executor(forkJoinPool));
     return caffeineCacheManager;
   }
 
   @Override
   public Cache getCache(@NonNull String name) {
-//    Cache value = caffeineCacheManager.getCache(name);
-      return null;
+    //    Cache value = caffeineCacheManager.getCache(name);
+    return null;
   }
 
   @Override

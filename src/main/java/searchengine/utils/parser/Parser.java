@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.entityHandler.EntityHandler;
