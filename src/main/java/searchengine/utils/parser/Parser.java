@@ -3,6 +3,8 @@ package searchengine.utils.parser;
 import java.util.*;
 import java.util.concurrent.RecursiveTask;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.entityHandler.EntityHandler;
@@ -27,7 +29,7 @@ public class Parser extends RecursiveTask<Boolean> {
   /** Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed. */
   @Override
   protected Boolean compute() {
-    setCheckingUrls();
+    urlsToParse = getCheckedUrls();
     if (checkedUrlsIsNotEmpty()) {
       indexingUrls();
       updateSiteStatus(href);
@@ -37,8 +39,9 @@ public class Parser extends RecursiveTask<Boolean> {
     return true;
   }
 
-  private void setCheckingUrls() {
-    urlsToParse = urlsChecker.getCheckedUrls(href, siteModel);
+  @Cacheable(cacheNames="checkingUrls", cacheManager="customCacheManager", unless = "#result == null", sync = true)
+  private Collection<String> getCheckedUrls() {
+    return urlsChecker.getCheckedUrls(href, siteModel);
   }
 
   private boolean checkedUrlsIsNotEmpty() {

@@ -81,6 +81,8 @@ public class IndexingImpl implements IndexingService {
     try {
       forkJoinPool.invoke(createSubtaskForSite(siteModel));
       updateSiteWhenSuccessful(siteModel);
+    } catch (RuntimeException forbiddenException){
+      updateSiteWhenFailed(siteModel, forbiddenException);
     } catch (Error re) {
       updateSiteWhenFailed(siteModel, re);
     }
