@@ -39,7 +39,8 @@ public class Parser extends RecursiveTask<Boolean> {
     return true;
   }
 
-  @Cacheable(cacheNames="checkingUrls", cacheManager="customCacheManager", unless = "#result == null", sync = true)
+
+  @Cacheable(cacheNames="checkingUrls", cacheManager="customCacheManager", sync = true)
   private Collection<String> getCheckedUrls() {
     return urlsChecker.getCheckedUrls(href, siteModel);
   }

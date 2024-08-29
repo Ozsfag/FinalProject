@@ -3,7 +3,6 @@ package searchengine.config;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
