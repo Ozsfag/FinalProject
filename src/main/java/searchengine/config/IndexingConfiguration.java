@@ -4,7 +4,6 @@ import java.util.concurrent.ForkJoinPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import searchengine.dto.indexing.ConnectionResponse;
 
 @Configuration
@@ -20,7 +19,7 @@ public class IndexingConfiguration {
   @Bean
   public ForkJoinPool forkJoinPool() {
     return new ForkJoinPool(
-        Runtime.getRuntime().availableProcessors() - 1,
+            (Runtime.getRuntime().availableProcessors() - 1) / sitesList.getSites().size(),
         ForkJoinPool.defaultForkJoinWorkerThreadFactory,
         null,
         true);

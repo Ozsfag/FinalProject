@@ -1,4 +1,4 @@
-package searchengine.utils.parser;
+package searchengine.utils.indexing.parser;
 
 import java.util.*;
 import java.util.concurrent.RecursiveTask;

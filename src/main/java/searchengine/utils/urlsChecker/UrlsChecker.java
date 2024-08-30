@@ -45,7 +45,8 @@ public class UrlsChecker {
     return connectionResponse.getUrls();
   }
 
-  private Stream<String> filterOutAlreadyParsedUrls(Collection<String> scrappedUrls, SiteModel siteModel) {
+  private Stream<String> filterOutAlreadyParsedUrls(
+      Collection<String> scrappedUrls, SiteModel siteModel) {
     Collection<String> alreadyParsedUrls = findAlreadyParsedUrls(scrappedUrls, siteModel.getId());
     return scrappedUrls.stream().filter(url -> !alreadyParsedUrls.contains(url));
   }

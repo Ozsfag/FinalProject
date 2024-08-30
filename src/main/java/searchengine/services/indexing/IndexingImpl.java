@@ -1,41 +1,30 @@
 package searchengine.services.indexing;
 
-import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import searchengine.config.SitesList;
 import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
 import searchengine.model.SiteModel;
-import searchengine.model.Status;
-import searchengine.repositories.SiteRepository;
 import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.entityHandler.SiteHandler;
-import searchengine.utils.entitySaver.EntitySaver;
-import searchengine.utils.parser.Parser;
-import searchengine.utils.urlsChecker.UrlsChecker;
+import searchengine.utils.indexing.executor.Executor;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class IndexingImpl implements IndexingService {
-  private final SitesList sitesList;
-  @Lazy private final SiteRepository siteRepository;
-  @Lazy private final ForkJoinPool forkJoinPool;
-  @Lazy private final EntityHandler entityHandler;
-  @Lazy private final EntitySaver entitySaver;
-  @Lazy private final UrlsChecker urlsChecker;
-  @Lazy private final DataTransformer dataTransformer;
-  @Lazy private final SiteHandler siteHandler;
-  @Lazy public static volatile boolean isIndexing = true;
+
+  public static volatile boolean isIndexing = true;
+  public final Executor executor;
+  private final DataTransformer dataTransformer;
+  private final EntityHandler entityHandler;
+  private final SiteHandler siteHandler;
 
   /**
    * Starts the indexing process for all sites in the sitesList asynchronously.
@@ -49,65 +38,12 @@ public class IndexingImpl implements IndexingService {
       return new Bad(false, "Индексация уже запущена");
     }
 
-    CompletableFuture.runAsync(this::executeIndexingProcess);
+    CompletableFuture.runAsync(executor::executeIndexingProcess);
     return new Successful(true);
   }
 
   private boolean isIndexingAlreadyRunning() {
     return !isIndexing;
-  }
-
-  private void executeIndexingProcess() {
-    Collection<CompletableFuture<Void>> futures = getFuturesForSiteModels();
-
-    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-  }
-
-  private Collection<CompletableFuture<Void>> getFuturesForSiteModels() {
-    Collection<SiteModel> siteModels = getSiteModels();
-    entitySaver.saveEntities(siteModels);
-
-    return siteModels.parallelStream().map(this::getFutureForSiteModel).toList();
-  }
-
-  private Collection<SiteModel> getSiteModels() {
-    return siteHandler.getIndexedSiteModelFromSites(sitesList.getSites());
-  }
-
-  private CompletableFuture<Void> getFutureForSiteModel(SiteModel siteModel) {
-    int poolSize = calculatePoolSize(); // метод для расчета размера пула
-    ForkJoinPool pool = new ForkJoinPool(poolSize);
-    return CompletableFuture.runAsync(() -> processSiteModel(siteModel, pool), forkJoinPool);
-  }
-
-  private int calculatePoolSize() {
-    // расчет размера пула на основе siteModel
-    // например, можно использовать количество ядер процессора
-    return (Runtime.getRuntime().availableProcessors() - 1) / sitesList.getSites().size();
-  }
-
-  private void processSiteModel(SiteModel siteModel, ForkJoinPool pool) {
-    try {
-      pool.invoke(createSubtaskForSite(siteModel));
-      updateSiteWhenSuccessful(siteModel);
-    } catch (RuntimeException | Error forbiddenException){
-      updateSiteWhenFailed(siteModel, forbiddenException);
-    } finally{
-      pool.shutdown();
-    }
-  }
-
-  private Parser createSubtaskForSite(SiteModel siteModel) {
-    return new Parser(urlsChecker, siteModel, siteModel.getUrl(), entityHandler, siteRepository);
-  }
-
-  private void updateSiteWhenSuccessful(SiteModel siteModel) {
-    siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteModel.getUrl());
-  }
-
-  private void updateSiteWhenFailed(SiteModel siteModel, Throwable re) {
-    siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(
-        Status.FAILED, new Date(), re.getLocalizedMessage(), siteModel.getUrl());
   }
 
   /**
