@@ -34,7 +34,7 @@ public class EntityHandler {
     pages.forEach(this::processPage);
   }
 
-  private synchronized Collection<PageModel> retrieveIndexedPageModels(
+  private Collection<PageModel> retrieveIndexedPageModels(
       Collection<String> urlsToParse, SiteModel siteModel) {
     return pageHandler.getIndexedPageModelsFromUrls(urlsToParse, siteModel);
   }

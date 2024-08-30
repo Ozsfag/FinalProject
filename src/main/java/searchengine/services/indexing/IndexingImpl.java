@@ -42,6 +42,7 @@ public class IndexingImpl implements IndexingService {
    *
    * @return a ResponseInterface indicating the success of the indexing process
    */
+
   @Override
   public ResponseInterface startIndexing() {
     if (isIndexingAlreadyRunning()) {
@@ -66,7 +67,7 @@ public class IndexingImpl implements IndexingService {
     Collection<SiteModel> siteModels = getSiteModels();
     entitySaver.saveEntities(siteModels);
 
-    return siteModels.stream().map(this::getFutureForSiteModel).toList();
+    return siteModels.parallelStream().map(this::getFutureForSiteModel).toList();
   }
 
   private Collection<SiteModel> getSiteModels() {
@@ -74,15 +75,25 @@ public class IndexingImpl implements IndexingService {
   }
 
   private CompletableFuture<Void> getFutureForSiteModel(SiteModel siteModel) {
-    return CompletableFuture.runAsync(() -> processSiteModel(siteModel));
+    int poolSize = calculatePoolSize(); // метод для расчета размера пула
+    ForkJoinPool pool = new ForkJoinPool(poolSize);
+    return CompletableFuture.runAsync(() -> processSiteModel(siteModel, pool), forkJoinPool);
   }
 
-  private void processSiteModel(SiteModel siteModel) {
+  private int calculatePoolSize() {
+    // расчет размера пула на основе siteModel
+    // например, можно использовать количество ядер процессора
+    return (Runtime.getRuntime().availableProcessors() - 1) / sitesList.getSites().size();
+  }
+
+  private void processSiteModel(SiteModel siteModel, ForkJoinPool pool) {
     try {
-      forkJoinPool.invoke(createSubtaskForSite(siteModel));
+      pool.invoke(createSubtaskForSite(siteModel));
       updateSiteWhenSuccessful(siteModel);
     } catch (RuntimeException | Error forbiddenException){
       updateSiteWhenFailed(siteModel, forbiddenException);
+    } finally{
+      pool.shutdown();
     }
   }
 

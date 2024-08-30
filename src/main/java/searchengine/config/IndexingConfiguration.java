@@ -4,6 +4,7 @@ import java.util.concurrent.ForkJoinPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import searchengine.dto.indexing.ConnectionResponse;
 
 @Configuration
