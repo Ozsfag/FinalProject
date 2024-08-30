@@ -31,7 +31,6 @@ public class IndexingImpl implements IndexingService {
    *
    * @return a ResponseInterface indicating the success of the indexing process
    */
-
   @Override
   public ResponseInterface startIndexing() {
     if (isIndexingAlreadyRunning()) {

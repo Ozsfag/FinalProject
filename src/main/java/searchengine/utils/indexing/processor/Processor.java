@@ -1,5 +1,7 @@
 package searchengine.utils.indexing.processor;
 
+import java.util.Date;
+import java.util.concurrent.ForkJoinPool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
@@ -8,9 +10,6 @@ import searchengine.repositories.SiteRepository;
 import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.indexing.parser.Parser;
 import searchengine.utils.urlsChecker.UrlsChecker;
-
-import java.util.Date;
-import java.util.concurrent.ForkJoinPool;
 
 @Component
 @RequiredArgsConstructor

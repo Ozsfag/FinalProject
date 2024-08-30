@@ -2,14 +2,13 @@ package searchengine.utils.indexing.executor;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.model.SiteModel;
-import searchengine.utils.indexing.processor.Processor;
 import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.entitySaver.EntitySaver;
+import searchengine.utils.indexing.processor.Processor;
 
 @Component
 @RequiredArgsConstructor
