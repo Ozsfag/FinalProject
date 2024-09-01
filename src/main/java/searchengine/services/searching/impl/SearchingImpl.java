@@ -1,4 +1,4 @@
-package searchengine.services.searching;
+package searchengine.services.searching.impl;
 
 import java.net.URISyntaxException;
 import java.util.*;
@@ -19,6 +19,7 @@ import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.PageRepository;
+import searchengine.services.searching.SearchingService;
 import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandler.SiteHandler;
 import searchengine.utils.morphology.Morphology;
@@ -38,15 +39,6 @@ public class SearchingImpl implements SearchingService {
   private final Validator validator;
   private final SiteHandler siteHandler;
 
-  /**
-   * A description of the entire Java function.
-   *
-   * @param query description of parameter
-   * @param url description of parameter
-   * @param offset description of parameter
-   * @param limit description of parameter
-   * @return description of return value
-   */
   @Override
   public ResponseInterface search(String query, String url, int offset, int limit) {
     SiteModel siteModel = getSiteModel(url);

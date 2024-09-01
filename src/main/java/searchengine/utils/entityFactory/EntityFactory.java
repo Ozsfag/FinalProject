@@ -1,33 +1,16 @@
 package searchengine.utils.entityFactory;
 
-import java.util.Date;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.dto.indexing.Site;
 import searchengine.model.*;
-import searchengine.utils.webScraper.WebScraper;
 
-@Component
-@RequiredArgsConstructor
-public class EntityFactory {
-  private final WebScraper webScraper;
-
+public interface EntityFactory {
   /**
    * Creates a new SiteModel object with the provided site information.
    *
    * @param site the Site object to create the SiteModel from
    * @return the newly created SiteModel object
    */
-  public SiteModel createSiteModel(Site site) {
-    return SiteModel.builder()
-        .status(Status.INDEXING)
-        .url(site.getUrl())
-        .statusTime(new Date())
-        .lastError("")
-        .name(site.getName())
-        .build();
-  }
+  SiteModel createSiteModel(Site site);
 
   /**
    * Creates a new PageModel object with the provided siteModel and path.
@@ -36,15 +19,7 @@ public class EntityFactory {
    * @param path the path of the page
    * @return the newly created PageModel object
    */
-  public PageModel createPageModel(SiteModel siteModel, String path) {
-    ConnectionResponse connectionResponse = webScraper.getConnectionResponse(path);
-    return PageModel.builder()
-        .site(siteModel)
-        .path(path)
-        .code(connectionResponse.getResponseCode())
-        .content(connectionResponse.getContent())
-        .build();
-  }
+  PageModel createPageModel(SiteModel siteModel, String path);
 
   /**
    * Creates a new LemmaModel object with the provided siteModel, lemma, and frequency.
@@ -54,9 +29,7 @@ public class EntityFactory {
    * @param frequency the frequency for the LemmaModel
    * @return the newly created LemmaModel object
    */
-  public LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency) {
-    return LemmaModel.builder().site(siteModel).lemma(lemma).frequency(frequency).build();
-  }
+  LemmaModel createLemmaModel(SiteModel siteModel, String lemma, int frequency);
 
   /**
    * Creates an IndexModel object with the given PageModel, LemmaModel, and ranking.
@@ -66,7 +39,5 @@ public class EntityFactory {
    * @param ranking the ranking value to associate with the IndexModel
    * @return the newly created IndexModel object
    */
-  public IndexModel createIndexModel(PageModel pageModel, LemmaModel lemmaModel, Float ranking) {
-    return IndexModel.builder().page(pageModel).lemma(lemmaModel).rank(ranking).build();
-  }
+  IndexModel createIndexModel(PageModel pageModel, LemmaModel lemmaModel, Float ranking);
 }

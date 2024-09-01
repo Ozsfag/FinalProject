@@ -1,4 +1,4 @@
-package searchengine.utils.urlsChecker;
+package searchengine.utils.urlsHandler.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,22 +10,18 @@ import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
+import searchengine.utils.urlsHandler.UrlsChecker;
+import searchengine.utils.urlsHandler.urlsValidator.UrlValidator;
 import searchengine.utils.webScraper.WebScraper;
 
 @Component
 @RequiredArgsConstructor
-public class UrlsChecker {
+public class UrlsCheckerImpl implements UrlsChecker {
   private final WebScraper webScraper;
   private final PageRepository pageRepository;
   private final UrlValidator urlValidator;
 
-  /**
-   * Returns a collection of URLs that have been checked for correctness and duplication.
-   *
-   * @param href the URL to be checked
-   * @param siteModel the site model associated with the URL
-   * @return a collection of checked URLs
-   */
+  @Override
   public Collection<String> getCheckedUrls(String href, SiteModel siteModel) {
 
     Collection<String> urlsToCheck = fetchUrlsToCheck(href);

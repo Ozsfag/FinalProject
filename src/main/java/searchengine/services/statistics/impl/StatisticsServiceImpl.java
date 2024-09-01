@@ -1,4 +1,4 @@
-package searchengine.services.statistics;
+package searchengine.services.statistics.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,7 +15,8 @@ import searchengine.model.SiteModel;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.services.indexing.IndexingImpl;
+import searchengine.services.indexing.impl.IndexingImpl;
+import searchengine.services.statistics.StatisticsService;
 
 @Service
 @Lazy

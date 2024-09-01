@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
-import searchengine.utils.validator.Validator;
 
 @RequiredArgsConstructor
 public class WordCounterImpl implements WordCounter {
@@ -15,7 +14,6 @@ public class WordCounterImpl implements WordCounter {
   private final String[] particles;
   private final String emptyString;
   private final String splitter;
-  private final Validator validator;
 
   @Override
   public Map<String, Integer> countWordsFromContent(String content) {
@@ -39,6 +37,9 @@ public class WordCounterImpl implements WordCounter {
   }
 
   private boolean wordIsNotParticle(String word) {
-    return validator.wordIsNotParticle(word, luceneMorphology, particles);
+    return word.length() > 2
+        && !word.isBlank()
+        && Arrays.stream(particles)
+            .noneMatch(part -> luceneMorphology.getMorphInfo(word).contains(part));
   }
 }

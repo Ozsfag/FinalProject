@@ -1,4 +1,4 @@
-package searchengine.services.indexing;
+package searchengine.services.indexing.impl;
 
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
@@ -10,9 +10,10 @@ import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
 import searchengine.model.SiteModel;
+import searchengine.services.indexing.IndexingService;
 import searchengine.utils.dataTransformer.DataTransformer;
-import searchengine.utils.entityHandler.EntityHandler;
 import searchengine.utils.entityHandler.SiteHandler;
+import searchengine.utils.indexing.IndexingStrategy;
 import searchengine.utils.indexing.executor.Executor;
 
 @Service
@@ -23,21 +24,16 @@ public class IndexingImpl implements IndexingService {
   public static volatile boolean isIndexing = true;
   public final Executor executor;
   private final DataTransformer dataTransformer;
-  private final EntityHandler entityHandler;
+  private final IndexingStrategy indexingStrategy;
   private final SiteHandler siteHandler;
 
-  /**
-   * Starts the indexing process for all sites in the sitesList asynchronously.
-   *
-   * @return a ResponseInterface indicating the success of the indexing process
-   */
   @Override
   public ResponseInterface startIndexing() {
     if (isIndexingAlreadyRunning()) {
       return new Bad(false, "Индексация уже запущена");
     }
 
-    CompletableFuture.runAsync(executor::executeIndexingProcess);
+    CompletableFuture.runAsync(executor::executeIndexing);
     return new Successful(true);
   }
 
@@ -45,11 +41,6 @@ public class IndexingImpl implements IndexingService {
     return !isIndexing;
   }
 
-  /**
-   * Stops the indexing process if it is currently running.
-   *
-   * @return an object representing the result of stopping the indexing process
-   */
   @Override
   public ResponseInterface stopIndexing() {
     if (!isIndexing) return new Stop(false, "Индексация не запущена");
@@ -57,17 +48,11 @@ public class IndexingImpl implements IndexingService {
     return new Stop(true, "Индексация остановлена пользователем");
   }
 
-  /**
-   * Indexes a single page.
-   *
-   * @param url the URL of the page to be indexed
-   * @return a ResponseInterface object indicating the success or failure of the indexing process
-   */
   @SneakyThrows
   @Override
   public ResponseInterface indexPage(String url) {
     SiteModel siteModel = getSiteModelByUrl(url);
-    entityHandler.processIndexing(dataTransformer.transformUrlToUrls(url), siteModel);
+    indexingStrategy.processIndexing(dataTransformer.transformUrlToUrls(url), siteModel);
     return new Successful(true);
   }
 

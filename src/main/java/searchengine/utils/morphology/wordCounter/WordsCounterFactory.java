@@ -5,7 +5,6 @@ import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
-import searchengine.utils.validator.Validator;
 
 @Component
 @RequiredArgsConstructor
@@ -13,7 +12,6 @@ public class WordsCounterFactory {
   private final RussianLuceneMorphology russianLuceneMorphology;
   private final EnglishLuceneMorphology englishLuceneMorphology;
   private final MorphologySettings morphologySettings;
-  private final Validator validator;
 
   private WordCounter russianWordCounter;
   private WordCounter englishWordCounter;
@@ -26,8 +24,7 @@ public class WordsCounterFactory {
               morphologySettings.getNotCyrillicLetters(),
               morphologySettings.getRussianParticleNames(),
               morphologySettings.getEmptyString(),
-              morphologySettings.getSplitter(),
-              validator);
+              morphologySettings.getSplitter());
     }
     return russianWordCounter;
   }
@@ -40,8 +37,7 @@ public class WordsCounterFactory {
               morphologySettings.getNotLatinLetters(),
               morphologySettings.getEnglishParticlesNames(),
               morphologySettings.getEmptyString(),
-              morphologySettings.getSplitter(),
-              validator);
+              morphologySettings.getSplitter());
     }
     return englishWordCounter;
   }

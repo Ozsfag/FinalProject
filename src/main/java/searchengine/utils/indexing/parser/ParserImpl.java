@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.entityHandler.EntityHandler;
-import searchengine.utils.urlsChecker.UrlsChecker;
+import searchengine.utils.indexing.IndexingStrategy;
+import searchengine.utils.urlsHandler.UrlsChecker;
 
 /**
  * Recursively index page and it`s subpage.
@@ -15,15 +15,15 @@ import searchengine.utils.urlsChecker.UrlsChecker;
  * @author Ozsfag
  */
 @RequiredArgsConstructor
-public class Parser extends RecursiveTask<Boolean> {
+public class ParserImpl extends RecursiveTask<Boolean> {
   private final UrlsChecker urlsChecker;
   private final SiteModel siteModel;
   private final String href;
-  private final EntityHandler entityHandler;
+  private final IndexingStrategy indexingStrategy;
   private final SiteRepository siteRepository;
 
   private Collection<String> urlsToParse;
-  private Collection<Parser> subtasks;
+  private Collection<ParserImpl> subtasks;
 
   /** Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed. */
   @Override
@@ -47,7 +47,7 @@ public class Parser extends RecursiveTask<Boolean> {
   }
 
   private void indexingUrls() {
-    entityHandler.processIndexing(urlsToParse, siteModel);
+    indexingStrategy.processIndexing(urlsToParse, siteModel);
   }
 
   private void updateSiteStatus(String href) {
@@ -58,7 +58,7 @@ public class Parser extends RecursiveTask<Boolean> {
     subtasks = urlsToParse.stream().map(this::createSubtask).collect(Collectors.toSet());
   }
 
-  private Parser createSubtask(String url) {
-    return new Parser(urlsChecker, siteModel, url, entityHandler, siteRepository);
+  private ParserImpl createSubtask(String url) {
+    return new ParserImpl(urlsChecker, siteModel, url, indexingStrategy, siteRepository);
   }
 }

@@ -17,6 +17,7 @@ public class QueryHandlerImpl implements QueryHandler {
   private final String splitter;
   private final Validator validator;
 
+  @Override
   public Stream<String> getLemmasFromQuery(String query) {
     return getLoweredReplacedAndSplittedQuery(query)
         .parallel()
@@ -29,7 +30,10 @@ public class QueryHandlerImpl implements QueryHandler {
   }
 
   private boolean wordIsNotParticle(String word) {
-    return validator.wordIsNotParticle(word, luceneMorphology1, particles);
+    return word.length() > 2
+        && !word.isBlank()
+        && Arrays.stream(particles)
+            .noneMatch(part -> luceneMorphology1.getMorphInfo(word).contains(part));
   }
 
   private Stream<String> getInfinitivesByLanguage(String queryWord) {

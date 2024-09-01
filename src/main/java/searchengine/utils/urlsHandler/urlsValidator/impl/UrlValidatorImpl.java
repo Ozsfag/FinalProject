@@ -1,23 +1,20 @@
-package searchengine.utils.urlsChecker;
+package searchengine.utils.urlsHandler.urlsValidator.impl;
 
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
+import searchengine.utils.urlsHandler.urlsValidator.UrlValidator;
 
 @Component
 @RequiredArgsConstructor
-public class UrlValidator {
+public class UrlValidatorImpl implements UrlValidator {
 
   private final MorphologySettings morphologySettings;
   private String url;
   private String urlFromConfiguration;
 
-  /**
-   * Checks if the given URL is valid according to the following rules:
-   *
-   * @return true if the URL is valid, false otherwise
-   */
+  @Override
   public boolean isValidUrl(String url, String urlFromConfiguration) {
 
     this.url = url;

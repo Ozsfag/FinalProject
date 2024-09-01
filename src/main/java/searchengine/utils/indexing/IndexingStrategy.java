@@ -1,10 +1,13 @@
-package searchengine.utils.entityHandler;
+package searchengine.utils.indexing;
 
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
-import searchengine.utils.entitySaver.EntitySaver;
+import searchengine.utils.entityHandler.IndexHandler;
+import searchengine.utils.entityHandler.LemmaHandler;
+import searchengine.utils.entityHandler.PageHandler;
+import searchengine.utils.entitySaver.EntitySaverStrategy;
 import searchengine.utils.morphology.Morphology;
 
 /**
@@ -14,9 +17,9 @@ import searchengine.utils.morphology.Morphology;
  */
 @Component
 @RequiredArgsConstructor
-public class EntityHandler {
+public class IndexingStrategy {
   private final PageHandler pageHandler;
-  private final EntitySaver entitySaver;
+  private final EntitySaverStrategy entitySaverStrategy;
   private final Morphology morphology;
   private final LemmaHandler lemmaHandler;
   private final IndexHandler indexHandler;
@@ -40,7 +43,7 @@ public class EntityHandler {
   }
 
   private void saveEntities(Collection<?> entities) {
-    entitySaver.saveEntities(entities);
+    entitySaverStrategy.saveEntities(entities);
   }
 
   private void processPage(PageModel page) {

@@ -1,64 +1,19 @@
 package searchengine.utils.entityHandler;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
-import searchengine.repositories.IndexRepository;
-import searchengine.utils.entityFactory.EntityFactory;
 
-@Component
-@RequiredArgsConstructor
-@Setter
-@Getter
-@EqualsAndHashCode
-public class IndexHandler {
-  private final IndexRepository indexRepository;
-  private final EntityFactory entityFactory;
-
-  private PageModel pageModel;
-  private Collection<LemmaModel> lemmas;
-  private Collection<IndexModel> existingIndexModels;
-
-  public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
-      PageModel pageModel, Collection<LemmaModel> lemmas) {
-    setPageModel(pageModel);
-    setLemmas(lemmas);
-
-    setExistingIndexes();
-    removeExistedIndexesFromNew();
-    getExistingIndexModels().addAll(getNewIndexes());
-
-    return getExistingIndexModels();
-  }
-
-  private void setExistingIndexes() {
-    existingIndexModels =
-        indexRepository.findByPage_IdAndLemmaIn(getPageModel().getId(), getLemmas());
-  }
-
-  private void removeExistedIndexesFromNew() {
-    getLemmas().removeIf(this::isExistedLemma);
-  }
-
-  private boolean isExistedLemma(LemmaModel lemmaModel) {
-    return getExistingIndexModels().parallelStream()
-        .map(IndexModel::getLemma)
-        .toList()
-        .contains(lemmaModel.getLemma());
-  }
-
-  private Collection<IndexModel> getNewIndexes() {
-    return getLemmas().parallelStream().map(this::createIndexModel).collect(Collectors.toSet());
-  }
-
-  private IndexModel createIndexModel(LemmaModel lemma) {
-    return entityFactory.createIndexModel(getPageModel(), lemma, (float) lemma.getFrequency());
-  }
+public interface IndexHandler {
+  /**
+   * Retrieves a collection of {@link IndexModel} objects, each one associated with a lemma from the
+   * given collection, and their frequency in the given page.
+   *
+   * @param pageModel the page to get the frequency from
+   * @param lemmas the lemmas to get the frequency for
+   * @return a collection of IndexModel objects, each one associated with a lemma and its frequency
+   */
+  Collection<IndexModel> getIndexedIndexModelFromCountedWords(
+      PageModel pageModel, Collection<LemmaModel> lemmas);
 }
