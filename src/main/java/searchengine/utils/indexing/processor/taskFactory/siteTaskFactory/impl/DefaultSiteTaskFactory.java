@@ -13,13 +13,13 @@ import searchengine.utils.urlsHandler.UrlsChecker;
 @RequiredArgsConstructor
 public class DefaultSiteTaskFactory implements SiteTaskFactory {
 
-    private final UrlsChecker urlsChecker;
-    private final IndexingStrategy indexingStrategy;
-    private final SiteRepository siteRepository;
+  private final UrlsChecker urlsChecker;
+  private final IndexingStrategy indexingStrategy;
+  private final SiteRepository siteRepository;
 
-    @Override
-    public ParserImpl createTaskForSite(SiteModel siteModel) {
-        return new ParserImpl(
-                urlsChecker, siteModel, siteModel.getUrl(), indexingStrategy, siteRepository);
-    }
+  @Override
+  public ParserImpl createTaskForSite(SiteModel siteModel) {
+    return new ParserImpl(
+        urlsChecker, siteModel, siteModel.getUrl(), indexingStrategy, siteRepository);
+  }
 }

@@ -2,6 +2,8 @@ package searchengine.repositories;
 
 import java.util.Collection;
 import java.util.Set;
+
+import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,11 +31,11 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
   Set<IndexModel> findByPage_IdAndLemmaIn(
       @Param("id") Integer id, @Param("lemmas") Collection<LemmaModel> lemmas);
 
-  @Transactional()
+  @Transactional(timeout = 0)
   @Modifying
   @Query(
       "UPDATE IndexModel i SET i.rank = CASE WHEN (i.rank >= :rank) THEN (i.rank) ELSE (:rank) END WHERE i.lemma = :lemma AND i.page.id = :pageId")
-  void merge(@Param("lemma") String lemma, @Param("pageId") Integer id, @Param("rank") Float rank);
+  void merge(@Param("lemma") String lemma, @Param("pageId")  @NonNull Integer id, @Param("rank") Float rank);
 
   @Transactional
   @Query("select (count(i) > 0) from IndexModel i where i.page.id = ?1 and i.lemma.id = ?2")

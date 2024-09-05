@@ -11,7 +11,7 @@ import org.hibernate.annotations.Cascade;
     name = "pages",
     schema = "search_engine",
     indexes = {
-      @Index(name = "path_index", columnList = "path"),
+      @Index(name = "path_index", columnList = "path", unique = true),
       @Index(name = "idx_site_id_path", columnList = "site_id, path")
     })
 @Getter

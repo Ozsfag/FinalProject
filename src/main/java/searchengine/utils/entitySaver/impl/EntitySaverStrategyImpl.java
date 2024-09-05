@@ -50,11 +50,7 @@ public class EntitySaverStrategyImpl extends EntitySaverStrategy {
   public void saveEntity(Object entity) {
     Class<?> entityType = entity.getClass();
     EntitySaverStrategy entitySaver = entitySavers.get(entityType);
-    if (entitySaver != null) {
-      entitySaver.saveEntity(entity);
-    } else {
-      throw new UnsupportedOperationException("Unsupported entity type");
-    }
+    entitySaver.saveEntity(entity);
   }
 
   @PostConstruct

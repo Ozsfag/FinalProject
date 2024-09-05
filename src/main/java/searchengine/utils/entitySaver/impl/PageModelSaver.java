@@ -26,12 +26,15 @@ public class PageModelSaver extends EntitySaverStrategy {
   @Override
   public void saveEntity(Object entity) {
     PageModel pageModel = (PageModel) entity;
-    if (pageRepository.existsByPath(pageModel.getPath())) return;
-    pageRepository.merge(
-        pageModel.getId(),
-        pageModel.getCode(),
-        pageModel.getSite().getId(),
-        pageModel.getContent(),
-        pageModel.getPath());
+    if (!pageRepository.existsByPath(pageModel.getPath())) {
+      pageRepository.saveAndFlush(pageModel);
+    }else {
+      pageRepository.merge(
+              pageModel.getId(),
+              pageModel.getCode(),
+              pageModel.getSite().getId(),
+              pageModel.getContent(),
+              pageModel.getPath());
+    }
   }
 }
