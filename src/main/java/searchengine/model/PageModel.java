@@ -12,7 +12,7 @@ import org.hibernate.annotations.Cascade;
     schema = "search_engine",
     indexes = {
       @Index(name = "path_index", columnList = "path", unique = true),
-      @Index(name = "idx_site_id_path", columnList = "site_id, path")
+      @Index(name = "idx_site_id_path", columnList = "site_id, path", unique = true)
     })
 @Getter
 @Setter
@@ -32,7 +32,7 @@ public class PageModel implements Serializable, EntityInterface {
   @ToString.Exclude
   private SiteModel site;
 
-  @Column(name = "path", nullable = false, columnDefinition = "TEXT")
+  @Column(name = "path", nullable = false, columnDefinition = "TEXT", unique = true)
   private String path;
 
   @Column(nullable = false, columnDefinition = "INT")

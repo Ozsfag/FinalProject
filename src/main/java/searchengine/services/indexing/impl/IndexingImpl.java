@@ -12,7 +12,7 @@ import searchengine.dto.indexing.responseImpl.Successful;
 import searchengine.model.SiteModel;
 import searchengine.services.indexing.IndexingService;
 import searchengine.utils.dataTransformer.DataTransformer;
-import searchengine.utils.entityHandler.SiteHandler;
+import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.indexing.IndexingStrategy;
 import searchengine.utils.indexing.executor.Executor;
 

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.model.SiteModel;
-import searchengine.utils.entityHandler.SiteHandler;
+import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.entitySaver.EntitySaverStrategy;
 import searchengine.utils.indexing.executor.Executor;
 import searchengine.utils.indexing.processor.Processor;
@@ -22,7 +22,6 @@ public class ExecutorImpl implements Executor {
   @Override
   public void executeIndexing() {
     Collection<CompletableFuture<Void>> futures = getFuturesForSiteModels();
-
     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
   }
 

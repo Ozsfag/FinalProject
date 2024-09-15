@@ -1,4 +1,4 @@
-package searchengine.utils.entitySaver.repositorySelector.impl;
+package searchengine.utils.entitySaver.selectors.repositorySelector.impl;
 
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.entitySaver.repositorySelector.RepositorySelector;
+import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 
 @Component
 @RequiredArgsConstructor

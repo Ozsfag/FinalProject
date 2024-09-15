@@ -1,4 +1,4 @@
-package searchengine.utils.entitySaver.repositorySelector;
+package searchengine.utils.entitySaver.selectors.repositorySelector;
 
 import java.util.Collection;
 import org.springframework.data.jpa.repository.JpaRepository;

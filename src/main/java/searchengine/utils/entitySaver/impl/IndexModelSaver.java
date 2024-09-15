@@ -1,26 +1,19 @@
 package searchengine.utils.entitySaver.impl;
 
-import java.util.Collection;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
 import searchengine.repositories.IndexRepository;
 import searchengine.utils.entitySaver.EntitySaverStrategy;
-import searchengine.utils.entitySaver.repositorySelector.RepositorySelector;
+import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
+import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
 
 @Component
-@RequiredArgsConstructor
 public class IndexModelSaver extends EntitySaverStrategy {
-  private final RepositorySelector repositorySelector;
   private final IndexRepository indexRepository;
 
-  @Override
-  public void saveEntities(Collection<?> entities) {
-    JpaRepository repository = repositorySelector.getRepository(entities);
-    if (repository != null) {
-      repository.saveAllAndFlush(entities);
-    }
+  public IndexModelSaver(RepositorySelector repositorySelector, SaverSelector saverSelector, IndexRepository indexRepository) {
+    super(repositorySelector, saverSelector);
+      this.indexRepository = indexRepository;
   }
 
   @Override

@@ -1,4 +1,4 @@
-package searchengine.utils.entityHandler.impl;
+package searchengine.utils.entityHandlers.impl;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -8,7 +8,7 @@ import searchengine.dto.indexing.Site;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.entityFactory.EntityFactory;
-import searchengine.utils.entityHandler.SiteHandler;
+import searchengine.utils.entityHandlers.SiteHandler;
 
 @Component
 @RequiredArgsConstructor

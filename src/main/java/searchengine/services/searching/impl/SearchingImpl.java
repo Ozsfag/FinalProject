@@ -21,7 +21,7 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.services.searching.SearchingService;
 import searchengine.utils.dataTransformer.DataTransformer;
-import searchengine.utils.entityHandler.SiteHandler;
+import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.validator.Validator;
 import searchengine.utils.webScraper.WebScraper;

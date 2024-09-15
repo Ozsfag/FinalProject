@@ -1,4 +1,4 @@
-package searchengine.utils.entityHandler.impl;
+package searchengine.utils.entityHandlers.impl;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -12,7 +12,7 @@ import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.repositories.IndexRepository;
 import searchengine.utils.entityFactory.EntityFactory;
-import searchengine.utils.entityHandler.IndexHandler;
+import searchengine.utils.entityHandlers.IndexHandler;
 
 @Component
 @RequiredArgsConstructor

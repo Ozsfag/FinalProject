@@ -26,11 +26,7 @@ public class UrlsCheckerImpl implements UrlsChecker {
 
     Collection<String> urlsToCheck = fetchUrlsToCheck(href);
 
-    if (urlsToCheck == null) {
-      return Collections.EMPTY_LIST;
-    }
-
-    Stream<String> filteredUrls = filterOutAlreadyParsedUrls(urlsToCheck, siteModel);
+    Stream<String> filteredUrls = filterOutAlreadyParsedUrls(urlsToCheck, siteModel, href);
     return filteredUrls
         .filter(url -> urlValidator.isValidUrl(url, siteModel.getUrl()))
         .collect(Collectors.toSet());
@@ -42,12 +38,17 @@ public class UrlsCheckerImpl implements UrlsChecker {
   }
 
   private Stream<String> filterOutAlreadyParsedUrls(
-      Collection<String> scrappedUrls, SiteModel siteModel) {
+      Collection<String> scrappedUrls, SiteModel siteModel, String href) {
     Collection<String> alreadyParsedUrls = findAlreadyParsedUrls(scrappedUrls, siteModel.getId());
-    return scrappedUrls.stream().filter(url -> !alreadyParsedUrls.contains(url));
+    return scrappedUrls.parallelStream()
+        .filter(url -> !alreadyParsedUrls.contains(url))
+        .filter(url -> !siteModel.getUrl().equals(url))
+        .filter(url -> !href.equals(url));
   }
 
   private Collection<String> findAlreadyParsedUrls(Collection<String> urls, int id) {
-    return pageRepository.findAllPathsBySiteAndPathIn(id, new ArrayList<>(urls));
+    return urls.isEmpty()
+        ? Collections.emptyList()
+        : pageRepository.findAllPathsBySiteAndPathIn(id, new ArrayList<>(urls));
   }
 }

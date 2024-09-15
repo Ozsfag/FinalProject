@@ -1,4 +1,4 @@
-package searchengine.utils.entityHandler.impl;
+package searchengine.utils.entityHandlers.impl;
 
 import java.util.Collection;
 import java.util.Map;
@@ -12,7 +12,7 @@ import searchengine.model.LemmaModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.LemmaRepository;
 import searchengine.utils.entityFactory.EntityFactory;
-import searchengine.utils.entityHandler.LemmaHandler;
+import searchengine.utils.entityHandlers.LemmaHandler;
 
 @Component
 @RequiredArgsConstructor

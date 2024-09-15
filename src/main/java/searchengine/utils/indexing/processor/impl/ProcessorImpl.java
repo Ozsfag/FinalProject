@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
 import searchengine.utils.indexing.processor.Processor;
-import searchengine.utils.indexing.processor.taskFactory.siteTaskFactory.SiteTaskFactory;
+import searchengine.utils.indexing.processor.taskFactory.TaskFactory;
 import searchengine.utils.indexing.processor.updater.siteUpdater.SiteUpdater;
 
 @Component
@@ -13,13 +13,13 @@ import searchengine.utils.indexing.processor.updater.siteUpdater.SiteUpdater;
 public class ProcessorImpl implements Processor {
 
   private final ForkJoinPool forkJoinPool;
-  private final SiteTaskFactory siteTaskFactory;
+  private final TaskFactory taskFactory;
   private final SiteUpdater siteUpdater;
 
   @Override
   public void processSiteIndexing(SiteModel siteModel) {
     try {
-      forkJoinPool.invoke(siteTaskFactory.createTaskForSite(siteModel));
+      forkJoinPool.invoke(taskFactory.initTask(siteModel, siteModel.getUrl()));
       siteUpdater.updateSiteWhenSuccessful(siteModel);
     } catch (Error re) {
       siteUpdater.updateSiteWhenFailed(siteModel, re);

@@ -1,4 +1,4 @@
-package searchengine.utils.entityHandler.impl;
+package searchengine.utils.entityHandlers.impl;
 
 import static searchengine.services.indexing.impl.IndexingImpl.isIndexing;
 
@@ -12,7 +12,7 @@ import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityFactory.EntityFactory;
-import searchengine.utils.entityHandler.PageHandler;
+import searchengine.utils.entityHandlers.PageHandler;
 
 @Component
 @RequiredArgsConstructor

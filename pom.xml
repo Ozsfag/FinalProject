@@ -17,7 +17,7 @@
 
         <!-- Define properties for other dependencies -->
         <lucene.version>1.5</lucene.version>
-        <hibernate.version>5.4.21.Final</hibernate.version>
+        <hibernate.version>5.5.7.Final</hibernate.version>
         <spring-retry.version>2.0.3</spring-retry.version>
         <postgresql.version>42.7.3</postgresql.version>
         <junit.version>4.13</junit.version>
@@ -42,6 +42,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

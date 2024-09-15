@@ -1,4 +1,4 @@
-package searchengine.utils.entityHandler;
+package searchengine.utils.entityHandlers;
 
 import java.util.Collection;
 import searchengine.dto.indexing.Site;

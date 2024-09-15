@@ -4,9 +4,9 @@ import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
-import searchengine.utils.entityHandler.IndexHandler;
-import searchengine.utils.entityHandler.LemmaHandler;
-import searchengine.utils.entityHandler.PageHandler;
+import searchengine.utils.entityHandlers.IndexHandler;
+import searchengine.utils.entityHandlers.LemmaHandler;
+import searchengine.utils.entityHandlers.PageHandler;
 import searchengine.utils.entitySaver.EntitySaverStrategy;
 import searchengine.utils.morphology.Morphology;
 

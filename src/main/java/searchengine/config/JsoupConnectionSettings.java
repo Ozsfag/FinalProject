@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor(force = true)
 @Component
 @ConfigurationProperties(prefix = "connection-settings")
-public class ConnectionSettings {
+public class JsoupConnectionSettings {
   public String userAgent;
   public String referrer;
   public int timeout;
