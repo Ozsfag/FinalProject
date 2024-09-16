@@ -1,6 +1,8 @@
 package searchengine.repositories;
 
+import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -18,7 +20,7 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
   @Query("SELECT p.path FROM PageModel p WHERE p.site.id = :siteId AND p.path IN :paths")
   Set<String> findAllPathsBySiteAndPathIn(
       @Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);
-
+  https://habr.com/ru/articles/567368/
   @Transactional
   @Modifying
   @Query(
