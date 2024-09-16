@@ -7,7 +7,7 @@ import searchengine.model.*;
 import searchengine.utils.entityHandlers.IndexHandler;
 import searchengine.utils.entityHandlers.LemmaHandler;
 import searchengine.utils.entityHandlers.PageHandler;
-import searchengine.utils.entitySaver.EntitySaverStrategy;
+import searchengine.utils.entitySaver.strategy.EntitySaverStrategy;
 import searchengine.utils.morphology.Morphology;
 
 /**

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityHandlers.SiteHandler;
-import searchengine.utils.entitySaver.EntitySaverStrategy;
+import searchengine.utils.entitySaver.strategy.EntitySaverStrategy;
 import searchengine.utils.indexing.executor.Executor;
 import searchengine.utils.indexing.processor.Processor;
 

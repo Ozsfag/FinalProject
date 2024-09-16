@@ -6,7 +6,7 @@ import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
-import searchengine.utils.entitySaver.EntitySaverStrategy;
+import searchengine.utils.entitySaver.strategy.EntitySaverStrategy;
 import searchengine.utils.entitySaver.impl.IndexModelSaver;
 import searchengine.utils.entitySaver.impl.LemmaModelSaver;
 import searchengine.utils.entitySaver.impl.PageModelSaver;
