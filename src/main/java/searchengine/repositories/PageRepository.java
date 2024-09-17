@@ -20,7 +20,10 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
   @Query("SELECT p.path FROM PageModel p WHERE p.site.id = :siteId AND p.path IN :paths")
   Set<String> findAllPathsBySiteAndPathIn(
       @Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);
-  https://habr.com/ru/articles/567368/
+
+//  https://habr.com/ru/articles/567368/
+
+
   @Transactional
   @Modifying
   @Query(

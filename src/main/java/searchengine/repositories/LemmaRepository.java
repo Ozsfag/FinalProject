@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.LemmaModel;
@@ -19,7 +20,7 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
   @Transactional
   @Query("SELECT l FROM LemmaModel l WHERE l.site.id = :siteId AND l.lemma IN :lemma")
   Set<LemmaModel> findByLemmaInAndSite_Id(
-      @Param("lemma") Collection<String> lemma, @Param("siteId") Integer siteId);
+          @Param("lemma") @NonNull Collection<String> lemma, @Param("siteId") Integer siteId);
 
   @Transactional()
   @Modifying

@@ -1,6 +1,7 @@
 package searchengine.utils.entityHandlers.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -41,8 +42,9 @@ public class IndexHandlerImpl implements IndexHandler {
   }
 
   private void setExistingIndexes() {
-    existingIndexModels =
-        indexRepository.findByPage_IdAndLemmaIn(getPageModel().getId(), getLemmas());
+    existingIndexModels = getLemmas().isEmpty() ?
+            Collections.emptySet() :
+            indexRepository.findByPage_IdAndLemmaIn(getPageModel().getId(), getLemmas());
   }
 
   private void removeExistedIndexesFromNew() {

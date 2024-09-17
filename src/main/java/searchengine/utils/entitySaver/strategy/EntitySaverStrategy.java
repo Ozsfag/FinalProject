@@ -1,10 +1,11 @@
 package searchengine.utils.entitySaver.strategy;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
 
@@ -24,11 +25,11 @@ public class EntitySaverStrategy {
 //    repository.saveAllAndFlush(entities);
   }
 
-  protected void beforeSaveEntities(JpaRepository repository, Collection<?> entities) {
+  private void beforeSaveEntities(JpaRepository repository, Collection<?> entities) {
     // Hook method, can be overridden by subclasses
   }
 
-  protected void doSaveEntities(JpaRepository repository, Collection<?> entities) {
+  private void doSaveEntities(JpaRepository repository, Collection<?> entities) {
     try {
       saveAllAndFlush(entities, repository);
     } catch (Exception e) {

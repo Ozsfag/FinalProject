@@ -1,13 +1,10 @@
 package searchengine.utils.entityHandlers.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 import searchengine.model.LemmaModel;
 import searchengine.model.SiteModel;
@@ -17,7 +14,6 @@ import searchengine.utils.entityHandlers.LemmaHandler;
 
 @Component
 @RequiredArgsConstructor
-@Setter
 @Getter
 @EqualsAndHashCode
 public class LemmaHandlerImpl implements LemmaHandler {
@@ -32,8 +28,8 @@ public class LemmaHandlerImpl implements LemmaHandler {
   public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
       SiteModel siteModel, Map<String, Integer> wordsCount) {
 
-    setSiteModel(siteModel);
-    setWordsCount(wordsCount);
+    this.siteModel = siteModel;
+    this.wordsCount = wordsCount;
 
     setExistingLemmas();
     removeExistedLemmasFromNew();
@@ -43,8 +39,9 @@ public class LemmaHandlerImpl implements LemmaHandler {
   }
 
   private void setExistingLemmas() {
-    existedLemmaModels =
-        lemmaRepository.findByLemmaInAndSite_Id(getWordsCount().keySet(), getSiteModel().getId());
+    existedLemmaModels = wordsCount.keySet().isEmpty() ?
+            Collections.emptySet() :
+            lemmaRepository.findByLemmaInAndSite_Id(wordsCount.keySet(), getSiteModel().getId());
   }
 
   private void removeExistedLemmasFromNew() {
