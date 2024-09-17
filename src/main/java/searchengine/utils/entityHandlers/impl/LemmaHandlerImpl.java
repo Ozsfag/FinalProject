@@ -39,7 +39,7 @@ public class LemmaHandlerImpl implements LemmaHandler {
   }
 
   private void setExistingLemmas() {
-    existedLemmaModels = wordsCount.keySet().isEmpty() ?
+    this.existedLemmaModels = wordsCount.keySet().isEmpty() ?
             Collections.emptySet() :
             lemmaRepository.findByLemmaInAndSite_Id(wordsCount.keySet(), getSiteModel().getId());
   }

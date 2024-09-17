@@ -17,7 +17,6 @@ import searchengine.utils.entityHandlers.IndexHandler;
 
 @Component
 @RequiredArgsConstructor
-@Setter
 @Getter
 @EqualsAndHashCode
 public class IndexHandlerImpl implements IndexHandler {
@@ -31,8 +30,9 @@ public class IndexHandlerImpl implements IndexHandler {
   @Override
   public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
       PageModel pageModel, Collection<LemmaModel> lemmas) {
-    setPageModel(pageModel);
-    setLemmas(lemmas);
+
+    this.pageModel = pageModel;
+    this.lemmas = lemmas;
 
     setExistingIndexes();
     removeExistedIndexesFromNew();
@@ -42,7 +42,7 @@ public class IndexHandlerImpl implements IndexHandler {
   }
 
   private void setExistingIndexes() {
-    existingIndexModels = getLemmas().isEmpty() ?
+    this.existingIndexModels = getLemmas().isEmpty() ?
             Collections.emptySet() :
             indexRepository.findByPage_IdAndLemmaIn(getPageModel().getId(), getLemmas());
   }
