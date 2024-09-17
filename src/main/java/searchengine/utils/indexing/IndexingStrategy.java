@@ -7,7 +7,7 @@ import searchengine.model.*;
 import searchengine.utils.entityHandlers.IndexHandler;
 import searchengine.utils.entityHandlers.LemmaHandler;
 import searchengine.utils.entityHandlers.PageHandler;
-import searchengine.utils.entitySaver.strategy.EntitySaverStrategy;
+import searchengine.utils.entitySaver.strategy.EntitySaverTemplate;
 import searchengine.utils.morphology.Morphology;
 
 /**
@@ -19,7 +19,7 @@ import searchengine.utils.morphology.Morphology;
 @RequiredArgsConstructor
 public class IndexingStrategy {
   private final PageHandler pageHandler;
-  private final EntitySaverStrategy entitySaverStrategy;
+  private final EntitySaverTemplate entitySaverTemplate;
   private final Morphology morphology;
   private final LemmaHandler lemmaHandler;
   private final IndexHandler indexHandler;
@@ -43,7 +43,7 @@ public class IndexingStrategy {
   }
 
   private void saveEntities(Collection<?> entities) {
-    entitySaverStrategy.saveEntities(entities);
+    entitySaverTemplate.saveEntities(entities);
   }
 
   private void processPage(PageModel page) {

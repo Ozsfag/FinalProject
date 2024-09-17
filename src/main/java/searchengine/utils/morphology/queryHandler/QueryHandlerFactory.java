@@ -1,19 +1,19 @@
 package searchengine.utils.morphology.queryHandler;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
 import searchengine.utils.validator.Validator;
 
 @Component
-@RequiredArgsConstructor
 public class QueryHandlerFactory {
-  private final RussianLuceneMorphology russianLuceneMorphology;
-  private final EnglishLuceneMorphology englishLuceneMorphology;
-  private final MorphologySettings morphologySettings;
-  private final Validator validator;
+  @Autowired @Lazy  private RussianLuceneMorphology russianLuceneMorphology;
+  @Autowired @Lazy private EnglishLuceneMorphology englishLuceneMorphology;
+  @Autowired @Lazy private MorphologySettings morphologySettings;
+  @Autowired @Lazy private Validator validator;
 
   private QueryHandler russianQueryHandler;
   private QueryHandler englishQueryHandler;

@@ -20,7 +20,7 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
   @Transactional
   @Query("SELECT l FROM LemmaModel l WHERE l.site.id = :siteId AND l.lemma IN :lemma")
   Set<LemmaModel> findByLemmaInAndSite_Id(
-          @Param("lemma") @NonNull Collection<String> lemma, @Param("siteId") Integer siteId);
+      @Param("lemma") @NonNull Collection<String> lemma, @Param("siteId") Integer siteId);
 
   @Transactional()
   @Modifying

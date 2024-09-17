@@ -1,4 +1,4 @@
-package searchengine.utils.entitySaver.impl;
+package searchengine.utils.entitySaver;
 
 import java.util.Collection;
 

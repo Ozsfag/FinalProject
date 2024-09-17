@@ -2,15 +2,14 @@ package searchengine.utils.validator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
 
 @Component
-@Data
 public class Validator {
-  @Autowired private final MorphologySettings morphologySettings;
+  @Autowired @Lazy private MorphologySettings morphologySettings;
 
   /**
    * split transmitted link into scheme and host, and path

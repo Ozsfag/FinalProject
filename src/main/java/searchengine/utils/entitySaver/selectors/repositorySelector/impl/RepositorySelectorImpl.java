@@ -3,8 +3,8 @@ package searchengine.utils.entitySaver.selectors.repositorySelector.impl;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import lombok.RequiredArgsConstructor;
+import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
@@ -17,15 +17,12 @@ import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 
-import javax.annotation.PostConstruct;
-
 @Component
-@RequiredArgsConstructor
 public class RepositorySelectorImpl implements RepositorySelector {
-  private final SiteRepository siteRepository;
-  private final PageRepository pageRepository;
-  private final LemmaRepository lemmaRepository;
-  private final IndexRepository indexRepository;
+  @Autowired private SiteRepository siteRepository;
+  @Autowired private PageRepository pageRepository;
+  @Autowired private LemmaRepository lemmaRepository;
+  @Autowired private IndexRepository indexRepository;
   private Map<Class<?>, JpaRepository> entityRepositories;
 
   @Override
@@ -39,11 +36,11 @@ public class RepositorySelectorImpl implements RepositorySelector {
     return entityRepositories.get(entityType);
   }
 
-  @Override
-  public JpaRepository getRepository(Object entity) {
-    Class<?> entityType = entity.getClass();
-    return entityRepositories.get(entityType);
-  }
+  //  @Override
+  //  public JpaRepository getRepository(Object entity) {
+  //    Class<?> entityType = entity.getClass();
+  //    return entityRepositories.get(entityType);
+  //  }
   @PostConstruct
   public void init() {
     entityRepositories = new HashMap<>();

@@ -4,7 +4,8 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
@@ -13,10 +14,9 @@ import searchengine.utils.validator.Validator;
 
 @Component
 @Data
-@RequiredArgsConstructor
 public class DataTransformerImpl implements DataTransformer {
-  private final SitesList sitesList;
-  private final Validator validator;
+  @Autowired @Lazy private SitesList sitesList;
+  @Autowired @Lazy private final Validator validator;
 
   @Override
   public Collection<String> transformUrlToUrls(String url) {

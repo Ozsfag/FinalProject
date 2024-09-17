@@ -3,7 +3,7 @@ package searchengine.utils.entitySaver.selectors.saverSelector.impl;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -11,20 +11,20 @@ import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.utils.entitySaver.impl.*;
 import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
+import searchengine.utils.entitySaver.strategy.EntitySaverTemplate;
 
 @Component
-@RequiredArgsConstructor
 public class SaverSelectorImpl implements SaverSelector {
-  private final SiteModelSaver siteModelSaver;
-  private final PageModelSaver pageModelSaver;
-  private final LemmaModelSaver lemmaModelSaver;
-  private final IndexModelSaver indexModelSaver;
-  private Map<Class<?>, EntityIndividualSaver> entitySavers;
+  @Autowired private SiteModelSaver siteModelSaver;
+  @Autowired private PageModelSaver pageModelSaver;
+  @Autowired private LemmaModelSaver lemmaModelSaver;
+  @Autowired private IndexModelSaver indexModelSaver;
+  private Map<Class<?>, EntitySaverTemplate> entitySavers;
 
   @Override
-  public EntityIndividualSaver getSaver(Object entity) {
+  public EntitySaverTemplate getSaver(Object entity) {
     Class<?> entityType = entity.getClass();
-    EntityIndividualSaver entitySaver = entitySavers.get(entityType);
+    EntitySaverTemplate entitySaver = entitySavers.get(entityType);
     return entitySaver;
   }
 

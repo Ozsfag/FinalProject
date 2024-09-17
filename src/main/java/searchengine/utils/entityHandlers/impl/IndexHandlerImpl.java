@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;

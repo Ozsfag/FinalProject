@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.config.MorphologySettings;
@@ -28,16 +28,15 @@ import searchengine.utils.webScraper.WebScraper;
 
 @Service
 @Lazy
-@RequiredArgsConstructor
 public class SearchingImpl implements SearchingService {
-  private final Morphology morphology;
-  private final PageRepository pageRepository;
-  private final IndexRepository indexRepository;
-  private final WebScraper webScraper;
-  private final MorphologySettings morphologySettings;
-  private final DataTransformer dataTransformer;
-  private final Validator validator;
-  private final SiteHandler siteHandler;
+  @Autowired private Morphology morphology;
+  @Autowired private PageRepository pageRepository;
+  @Autowired private IndexRepository indexRepository;
+  @Autowired private WebScraper webScraper;
+  @Autowired private MorphologySettings morphologySettings;
+  @Autowired private DataTransformer dataTransformer;
+  @Autowired private Validator validator;
+  @Autowired private SiteHandler siteHandler;
 
   @Override
   public ResponseInterface search(String query, String url, int offset, int limit) {

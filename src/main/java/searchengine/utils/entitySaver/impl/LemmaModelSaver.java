@@ -1,25 +1,26 @@
 package searchengine.utils.entitySaver.impl;
 
 import java.util.Collection;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.model.LemmaModel;
-import searchengine.repositories.LemmaRepository;
+import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
+import searchengine.utils.entitySaver.strategy.EntitySaverTemplate;
 
 @Component
-@RequiredArgsConstructor
-public class LemmaModelSaver implements EntityIndividualSaver {
-  private final LemmaRepository lemmaRepository;
+public class LemmaModelSaver extends EntitySaverTemplate {
 
+  public LemmaModelSaver(RepositorySelector repositorySelector) {
+    super(repositorySelector);
+  }
 
   @Override
   public void saveIndividuallyAndFlush(Collection<?> entities) {
-    entities.forEach(entity -> {
-      LemmaModel lemmaModel = (LemmaModel) entity;
-      //    if (lemmaRepository.existsByLemma(lemmaModel.getLemma())) return;
-      //    lemmaRepository.merge(
-      //        lemmaModel.getLemma(), lemmaModel.getSite().getId(), lemmaModel.getFrequency());
-      lemmaRepository.saveAndFlush(lemmaModel);
-    });
+    JpaRepository repository = super.getRepository(entities);
+    entities.forEach(
+        entity -> {
+          LemmaModel lemmaModel = (LemmaModel) entity;
+          repository.saveAndFlush(lemmaModel);
+        });
   }
 }

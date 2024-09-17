@@ -7,14 +7,14 @@ import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityHandlers.SiteHandler;
-import searchengine.utils.entitySaver.strategy.EntitySaverStrategy;
+import searchengine.utils.entitySaver.strategy.EntitySaverTemplate;
 import searchengine.utils.indexing.executor.Executor;
 import searchengine.utils.indexing.processor.Processor;
 
 @Component
 @RequiredArgsConstructor
 public class ExecutorImpl implements Executor {
-  private final EntitySaverStrategy entitySaverStrategy;
+  private final EntitySaverTemplate entitySaverTemplate;
   private final SiteHandler siteHandler;
   private final Processor processor;
   private final SitesList sitesList;
@@ -27,7 +27,7 @@ public class ExecutorImpl implements Executor {
 
   private Collection<CompletableFuture<Void>> getFuturesForSiteModels() {
     Collection<SiteModel> siteModels = getSiteModels();
-    entitySaverStrategy.saveEntities(siteModels);
+    entitySaverTemplate.saveEntities(siteModels);
 
     return siteModels.stream().map(this::getFutureProcess).toList();
   }

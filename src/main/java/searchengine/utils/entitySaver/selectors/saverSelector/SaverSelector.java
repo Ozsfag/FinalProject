@@ -1,7 +1,7 @@
 package searchengine.utils.entitySaver.selectors.saverSelector;
 
-import searchengine.utils.entitySaver.impl.EntityIndividualSaver;
+import searchengine.utils.entitySaver.strategy.EntitySaverTemplate;
 
 public interface SaverSelector {
-  EntityIndividualSaver getSaver(Object entity);
+  EntitySaverTemplate getSaver(Object entity);
 }
