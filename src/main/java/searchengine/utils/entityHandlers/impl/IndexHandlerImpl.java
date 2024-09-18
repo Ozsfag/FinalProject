@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -15,23 +18,21 @@ import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.entityHandlers.IndexHandler;
 
 @Component
-@RequiredArgsConstructor
 @Getter
 @EqualsAndHashCode
 public class IndexHandlerImpl implements IndexHandler {
-  private final IndexRepository indexRepository;
-  private final EntityFactory entityFactory;
+  @Autowired @Lazy private IndexRepository indexRepository;
+  @Autowired @Lazy private EntityFactory entityFactory;
 
-  private PageModel pageModel;
-  private Collection<LemmaModel> lemmas;
+  @Setter private PageModel pageModel;
+  @Setter private Collection<LemmaModel> lemmas;
   private Collection<IndexModel> existingIndexModels;
 
   @Override
   public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
-      PageModel pageModel, Collection<LemmaModel> lemmas) {
-
-    this.pageModel = pageModel;
-    this.lemmas = lemmas;
+    PageModel pageModel, Collection<LemmaModel> lemmas) {
+    setPageModel(pageModel);
+    setLemmas(lemmas);
 
     setExistingIndexes();
     removeExistedIndexesFromNew();

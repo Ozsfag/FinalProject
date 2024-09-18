@@ -16,11 +16,8 @@ import searchengine.model.PageModel;
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
 
   @Transactional()
-  @Query("SELECT p.path FROM PageModel p WHERE p.site.id = :siteId AND p.path IN :paths")
-  Set<String> findAllPathsBySiteAndPathIn(
-      @Param("siteId") int siteId, @Param("paths") @NonNull Collection<String> paths);
-
-  //  https://habr.com/ru/articles/567368/
+  @Query("SELECT p.path FROM PageModel p WHERE p.path IN :paths")
+  Set<String> findAllPathsByPathIn(@Param("paths") @NonNull Collection<String> paths);
 
   @Transactional
   @Modifying

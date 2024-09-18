@@ -7,13 +7,24 @@ import searchengine.model.*;
 import searchengine.utils.entityHandlers.IndexHandler;
 import searchengine.utils.entityHandlers.LemmaHandler;
 import searchengine.utils.entityHandlers.PageHandler;
-import searchengine.utils.entitySaver.strategy.EntitySaverTemplate;
+import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.morphology.Morphology;
 
 /**
- * Util that handle and process kind of entities
+ * Utility class that handles and processes various entities for indexing.
+ * This class is responsible for indexing pages, lemmas, and indexes.
  *
- * @author Ozsfag
+ * <p>It uses the following handlers and utilities:
+ * <ul>
+ *   <li>{@link PageHandler} for handling page-related operations</li>
+ *   <li>{@link EntitySaverTemplate} for saving entities</li>
+ *   <li>{@link Morphology} for word frequency analysis</li>
+ *   <li>{@link LemmaHandler} for handling lemma-related operations</li>
+ *   <li>{@link IndexHandler} for handling index-related operations</li>
+ * </ul>
+ * </p>
+ *
+ * @Ozsfag
  */
 @Component
 @RequiredArgsConstructor
@@ -27,12 +38,12 @@ public class IndexingStrategy {
   /**
    * Indexes the lemmas and indexes for a list of pages.
    *
-   * @param urlsToParse the list of pages to index
-   * @param siteModel
+   * @param urlsToParse the list of URLs to index
+   * @param siteModel the site model providing context for the URLs
    */
   public void processIndexing(Collection<String> urlsToParse, SiteModel siteModel) {
     Collection<PageModel> pages = retrieveIndexedPageModels(urlsToParse, siteModel);
-    saveEntities(pages);
+    pages = entitySaverTemplate.saveEntities(pages);
 
     pages.forEach(this::processPage);
   }
@@ -42,17 +53,13 @@ public class IndexingStrategy {
     return pageHandler.getIndexedPageModelsFromUrls(urlsToParse, siteModel);
   }
 
-  private void saveEntities(Collection<?> entities) {
-    entitySaverTemplate.saveEntities(entities);
-  }
-
   private void processPage(PageModel page) {
     Map<String, Integer> wordsCount = countWordFrequency(page);
     Collection<LemmaModel> lemmas = retrieveIndexedLemmaModels(page, wordsCount);
-    saveEntities(lemmas);
+    lemmas = entitySaverTemplate.saveEntities(lemmas);
 
     Collection<IndexModel> indexes = retrieveIndexedIndexModels(page, lemmas);
-    saveEntities(indexes);
+    entitySaverTemplate.saveEntities(indexes);
   }
 
   private Map<String, Integer> countWordFrequency(PageModel page) {

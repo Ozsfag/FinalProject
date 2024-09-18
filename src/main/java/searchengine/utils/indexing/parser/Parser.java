@@ -5,6 +5,8 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
@@ -13,7 +15,11 @@ import searchengine.utils.indexing.processor.taskFactory.TaskFactory;
 import searchengine.utils.urlsHandler.UrlsChecker;
 
 /**
- * Recursively index page and it`s subpage.
+ * Recursively indexes a page and its subpages.
+ *
+ * <p>This class uses a ForkJoin framework to parallelize the indexing process.
+ * It checks URLs, processes indexing, updates site status, and creates subtasks for further indexing.
+ * </p>
  *
  * @author Ozsfag
  */
@@ -30,12 +36,22 @@ public class Parser extends RecursiveTask<Boolean> {
   private Collection<String> urlsToParse;
   private Collection<ForkJoinTask<?>> subtasks;
 
+  /**
+   * Initializes the parser with the given site model and URL.
+   *
+   * @param siteModel the site model to be indexed
+   * @param href the URL to start indexing from
+   */
   public void init(SiteModel siteModel, String href) {
     this.siteModel = siteModel;
     this.href = href;
   }
 
-  /** Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed. */
+  /**
+   * Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed.
+   *
+   * @return true if the computation was successful, false otherwise
+   */
   @Override
   protected Boolean compute() {
     setCheckingUrls();

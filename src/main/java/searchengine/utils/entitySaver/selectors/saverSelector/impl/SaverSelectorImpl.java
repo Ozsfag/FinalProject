@@ -11,7 +11,7 @@ import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.utils.entitySaver.impl.*;
 import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
-import searchengine.utils.entitySaver.strategy.EntitySaverTemplate;
+import searchengine.utils.entitySaver.EntitySaverTemplate;
 
 @Component
 public class SaverSelectorImpl implements SaverSelector {
