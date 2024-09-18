@@ -2,16 +2,13 @@
 
  import org.junit.jupiter.api.Nested;
  import org.junit.jupiter.api.Test;
- import org.mockito.Mockito;
  import searchengine.dto.indexing.ConnectionResponse;
  import searchengine.dto.indexing.Site;
  import searchengine.model.*;
  import searchengine.utils.entityFactory.impl.EntityFactoryImpl;
  import searchengine.utils.webScraper.WebScraper;
- import searchengine.utils.webScraper.impl.WebScraperImpl;
 
  import java.util.Collections;
- import java.util.Date;
 
  import static org.junit.jupiter.api.Assertions.*;
  import static org.mockito.Mockito.*;
@@ -19,82 +16,6 @@
  @Nested
  class EntityFactoryTest {
   private EntityFactory factory;
-
-     // Successfully creates a SiteModel with default status INDEXING
-     @Test
-     public void test_create_site_model_with_default_status() {
-         Site site = Site.builder().url("http://example.com").name("Example").build();
-
-         SiteModel siteModel = factory.createSiteModel(site);
-
-         assertNotNull(siteModel);
-         assertEquals(Status.INDEXING, siteModel.getStatus());
-         assertEquals("http://example.com", siteModel.getUrl());
-         assertEquals("Example", siteModel.getName());
-         assertNotNull(siteModel.getStatusTime());
-         assertEquals("", siteModel.getLastError());
-     }
-
-     // Correctly maps the URL from Site to SiteModel
-     @Test
-     public void test_create_site_model_correctly_maps_url() {
-         Site site = Site.builder()
-                 .url("http://example.com")
-                 .name("Example")
-                 .build();
-
-
-         SiteModel siteModel = factory.createSiteModel(site);
-
-         assertNotNull(siteModel);
-         assertEquals(Status.INDEXING, siteModel.getStatus());
-         assertEquals("http://example.com", siteModel.getUrl());
-         assertEquals("Example", siteModel.getName());
-         assertNotNull(siteModel.getStatusTime());
-         assertEquals("", siteModel.getLastError());
-     }
-
-     // Correctly maps the name from Site to SiteModel
-
-     @Test
-     public void test_correctly_maps_name() {
-         Site site = Site.builder().url("http://testsite.com").name("Test Site").build();
-         SiteModel siteModel = factory.createSiteModel(site);
-
-         assertNotNull(siteModel);
-         assertEquals(Status.INDEXING, siteModel.getStatus());
-         assertEquals("http://testsite.com", siteModel.getUrl());
-         assertEquals("Test Site", siteModel.getName());
-         assertNotNull(siteModel.getStatusTime());
-         assertEquals("", siteModel.getLastError());
-     }
-     // Sets the statusTime to the current date and time
-     @Test
-     public void test_create_site_model_sets_status_time_to_current_date() {
-         Site site = Site.builder().url("http://example.com").name("Example").build();
-         SiteModel siteModel = factory.createSiteModel(site);
-
-         assertNotNull(siteModel);
-         assertEquals(Status.INDEXING, siteModel.getStatus());
-         assertEquals("http://example.com", siteModel.getUrl());
-         assertEquals("Example", siteModel.getName());
-         assertNotNull(siteModel.getStatusTime());
-         assertEquals("", siteModel.getLastError());
-     }
-
-     // Sets the lastError to an empty string
-     @Test
-     public void test_create_site_model_sets_last_error_to_empty_string() {
-         Site site = Site.builder().url("http://example.com").name("Example").build();
-         SiteModel siteModel = factory.createSiteModel(site);
-
-         assertNotNull(siteModel);
-         assertEquals(Status.INDEXING, siteModel.getStatus());
-         assertEquals("http://example.com", siteModel.getUrl());
-         assertEquals("Example", siteModel.getName());
-         assertNotNull(siteModel.getStatusTime());
-         assertEquals("", siteModel.getLastError());
-     }
 
      @Test
      public void test_createSiteModel_returns_correct_SiteModel() {
@@ -111,6 +32,11 @@
          assertNotNull(siteModel.getStatusTime());
          assertEquals("", siteModel.getLastError());
          assertEquals("Example Site", siteModel.getName());
+     }
+     @Test
+     public void test_createSiteModel_handles_null_Site_input() {
+         EntityFactoryImpl entityFactory = new EntityFactoryImpl(null);
+         assertThrows(NullPointerException.class, () -> entityFactory.createSiteModel(null));
      }
 
      @Test
@@ -147,35 +73,14 @@
 
 
 
-     @Test
-     public void test_createSiteModel_handles_null_Site_input() {
-         EntityFactoryImpl entityFactory = new EntityFactoryImpl(null);
-         assertThrows(NullPointerException.class, () -> {
-             entityFactory.createSiteModel(null);
-         });
-     }
 
 
 
 
 
 
-     @Test
-     public void test_create_site_model_with_null_site_input() {
-         // Setup
-         EntityFactoryImpl entityFactory = new EntityFactoryImpl(null);
 
-         // Execution
-         SiteModel siteModel = entityFactory.createSiteModel(null);
 
-         // Verification
-         assertNotNull(siteModel);
-         assertEquals(Status.INDEXING, siteModel.getStatus());
-         assertNull(siteModel.getUrl());
-         assertNotNull(siteModel.getStatusTime());
-         assertEquals("", siteModel.getLastError());
-         assertNull(siteModel.getName());
-     }
      @Test
      public void test_create_lemma_model_with_null_site_model() {
          // Prepare
@@ -205,5 +110,67 @@
          assertNull(indexModel.getPage());
          assertSame(lemmaModel, indexModel.getLemma());
          assertEquals(ranking, indexModel.getRank());
+     }
+
+
+
+
+
+
+
+
+
+     // Handling WebScraper returning null ConnectionResponse
+     @Test
+     public void test_handling_web_scraper_returning_null_connection_response() {
+         // Prepare
+         Site site = Site.builder()
+                 .url("http://example.com")
+                 .name("Example Site")
+                 .build();
+         WebScraper webScraper = mock(WebScraper.class);
+         when(webScraper.getConnectionResponse(anyString())).thenReturn(null);
+
+         EntityFactoryImpl entityFactory = new EntityFactoryImpl(webScraper);
+
+         // Verify
+         assertThrows(NullPointerException.class, () -> entityFactory.createPageModel(entityFactory.createSiteModel(site), "http://example.com/page"));
+     }
+     // Verifying SiteModel creation when Site has empty fields
+     @Test
+     public void test_create_site_model_with_empty_fields() {
+         Site site = Site.builder().build();
+
+         WebScraper webScraper = mock(WebScraper.class);
+         when(webScraper.getConnectionResponse(anyString())).thenReturn(new ConnectionResponse());
+
+         EntityFactoryImpl entityFactory = new EntityFactoryImpl(webScraper);
+         SiteModel siteModel = entityFactory.createSiteModel(site);
+
+         assertNotNull(siteModel);
+         assertNull(siteModel.getUrl());
+         assertNull(siteModel.getName());
+         assertEquals(Status.INDEXING, siteModel.getStatus());
+         assertNotNull(siteModel.getStatusTime());
+         assertEquals("", siteModel.getLastError());
+     }
+     // Verifying LemmaModel creation with zero frequency
+     @Test
+     public void test_create_lemma_model_with_zero_frequency() {
+         // Prepare
+         SiteModel site = SiteModel.builder()
+                 .url("http://example.com")
+                 .name("Example Site")
+                 .build();
+         EntityFactoryImpl entityFactory = new EntityFactoryImpl(null);
+
+         // Test
+         LemmaModel lemmaModel = entityFactory.createLemmaModel(site, "test_lemma", 0);
+
+         // Verify
+         assertNotNull(lemmaModel);
+         assertEquals(site, lemmaModel.getSite());
+         assertEquals("test_lemma", lemmaModel.getLemma());
+         assertEquals(0, lemmaModel.getFrequency());
      }
  }
