@@ -2,6 +2,7 @@ package searchengine.utils.entityHandlers.impl;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.Site;
@@ -18,7 +19,9 @@ public class SiteHandlerImpl implements SiteHandler {
 
   @Override
   public Collection<SiteModel> getIndexedSiteModelFromSites(Collection<Site> sitesToParse) {
-    return sitesToParse.parallelStream().map(this::getSiteIfExistOrCreate).toList();
+    return sitesToParse.parallelStream()
+        .map(this::getSiteIfExistOrCreate)
+        .collect(Collectors.toSet());
   }
 
   private SiteModel getSiteIfExistOrCreate(Site site) {

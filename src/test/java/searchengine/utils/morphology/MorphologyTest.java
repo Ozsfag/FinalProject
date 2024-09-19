@@ -1,331 +1,224 @@
- package searchengine.utils.morphology;
+package searchengine.utils.morphology;
 
- import static org.junit.jupiter.api.Assertions.*;
- import static org.mockito.Mockito.mock;
- import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
- import java.io.IOException;
- import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
+import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import searchengine.config.MorphologySettings;
+import searchengine.utils.morphology.impl.MorphologyImpl;
+import searchengine.utils.morphology.queryHandler.QueryHandlerFactory;
+import searchengine.utils.morphology.wordCounter.WordCounter;
+import searchengine.utils.morphology.wordCounter.WordsCounterFactory;
+import searchengine.utils.validator.Validator;
 
- import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
- import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
- import org.junit.jupiter.api.Test;
- import org.junit.jupiter.api.extension.ExtendWith;
- import org.mockito.junit.jupiter.MockitoExtension;
- import searchengine.config.MorphologySettings;
- import searchengine.utils.morphology.impl.MorphologyImpl;
- import searchengine.utils.morphology.queryHandler.QueryHandlerFactory;
- import searchengine.utils.morphology.wordCounter.WordCounter;
- import searchengine.utils.morphology.wordCounter.WordsCounterFactory;
- import searchengine.utils.validator.Validator;
+@ExtendWith(MockitoExtension.class)
+public class MorphologyTest {
 
- @ExtendWith(MockitoExtension.class)
- public class MorphologyTest {
+  private EnglishLuceneMorphology englishLuceneMorphology;
+  private RussianLuceneMorphology russianLuceneMorphology;
+  private MorphologySettings morphologySettings;
+  private Validator validator;
+  private WordsCounterFactory wordsCounterFactory;
+  private QueryHandlerFactory queryHandlerFactory;
+  private WordCounter englishWordCounter;
+  private WordCounter russianWordCounter;
+  private MorphologyImpl morphologyImpl;
 
-     @Test
-     public void test_count_word_frequency_by_language() {
-         // Arrange
-         String content = "Hello world привет мир";
-         Map<String, Integer> expectedFrequency = new HashMap<>();
-         expectedFrequency.put("hello", 1);
-         expectedFrequency.put("world", 1);
-         expectedFrequency.put("привет", 1);
-         expectedFrequency.put("мир", 1);
+  @BeforeEach
+  public void setUp() {
+    englishLuceneMorphology = mock(EnglishLuceneMorphology.class);
+    russianLuceneMorphology = mock(RussianLuceneMorphology.class);
+    morphologySettings = mock(MorphologySettings.class);
+    validator = mock(Validator.class);
+    wordsCounterFactory = mock(WordsCounterFactory.class);
+    queryHandlerFactory = mock(QueryHandlerFactory.class);
+    englishWordCounter = mock(WordCounter.class);
+    russianWordCounter = mock(WordCounter.class);
 
-         EnglishLuceneMorphology englishLuceneMorphology = mock(EnglishLuceneMorphology.class);
-         RussianLuceneMorphology russianLuceneMorphology = mock(RussianLuceneMorphology.class);
-         MorphologySettings morphologySettings = mock(MorphologySettings.class);
-         Validator validator = mock(Validator.class);
-         WordsCounterFactory wordsCounterFactory = mock(WordsCounterFactory.class);
-         QueryHandlerFactory queryHandlerFactory = mock(QueryHandlerFactory.class);
+    when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
+    when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
 
-         WordCounter englishWordCounter = mock(WordCounter.class);
-         WordCounter russianWordCounter = mock(WordCounter.class);
+    morphologyImpl =
+        new MorphologyImpl(
+            russianLuceneMorphology,
+            englishLuceneMorphology,
+            morphologySettings,
+            validator,
+            wordsCounterFactory,
+            queryHandlerFactory);
+  }
 
-         when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
-         when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
-         when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of("hello", 1, "world", 1));
-         when(russianWordCounter.countWordsFromContent(content)).thenReturn(Map.of("привет", 1, "мир", 1));
+  @Test
+  public void testCountWordFrequencyByLanguage() {
+    // Arrange
+    String content = "Hello world привет мир";
+    Map<String, Integer> expectedFrequency =
+        Map.of(
+            "hello", 1,
+            "world", 1,
+            "привет", 1,
+            "мир", 1);
 
-         MorphologyImpl morphologyImpl = new MorphologyImpl(
-                 russianLuceneMorphology,
-                 englishLuceneMorphology,
-                 morphologySettings,
-                 validator,
-                 wordsCounterFactory,
-                 queryHandlerFactory
-         );
+    when(englishWordCounter.countWordsFromContent(content))
+        .thenReturn(Map.of("hello", 1, "world", 1));
+    when(russianWordCounter.countWordsFromContent(content))
+        .thenReturn(Map.of("привет", 1, "мир", 1));
 
-         // Act
-         Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
+    // Act
+    Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
 
-         // Assert
-         assertEquals(expectedFrequency, actualFrequency);
-     }
+    // Assert
+    assertEquals(expectedFrequency, actualFrequency);
+  }
 
-     @Test
-     public void test_count_word_frequency_by_language_empty_content() {
-         // Arrange
-         String content = "";
-         Map<String, Integer> expectedFrequency = new HashMap<>();
+  @Test
+  public void testCountWordFrequencyByLanguageEmptyContent() {
+    // Arrange
+    String content = "";
+    Map<String, Integer> expectedFrequency = new HashMap<>();
 
-         EnglishLuceneMorphology englishLuceneMorphology = mock(EnglishLuceneMorphology.class);
-         RussianLuceneMorphology russianLuceneMorphology = mock(RussianLuceneMorphology.class);
-         MorphologySettings morphologySettings = mock(MorphologySettings.class);
-         Validator validator = mock(Validator.class);
-         WordsCounterFactory wordsCounterFactory = mock(WordsCounterFactory.class);
-         QueryHandlerFactory queryHandlerFactory = mock(QueryHandlerFactory.class);
+    // Act
+    Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
 
-         MorphologyImpl morphologyImpl = new MorphologyImpl(
-                 russianLuceneMorphology,
-                 englishLuceneMorphology,
-                 morphologySettings,
-                 validator,
-                 wordsCounterFactory,
-                 queryHandlerFactory
-         );
+    // Assert
+    assertEquals(expectedFrequency, actualFrequency);
+  }
 
-         WordCounter englishWordCounter = mock(WordCounter.class);
-         WordCounter russianWordCounter = mock(WordCounter.class);
+  @Test
+  public void testCountWordFrequencyByLanguageSpecialCharacters() {
+    // Arrange
+    String content = "Hello, world! #special привет, мир!";
+    Map<String, Integer> expectedFrequency =
+        Map.of(
+            "hello", 1,
+            "world", 1,
+            "special", 1,
+            "привет", 1,
+            "мир", 1);
 
-         when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
-         when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
+    when(englishWordCounter.countWordsFromContent(content))
+        .thenReturn(Map.of("hello", 1, "world", 1, "special", 1));
+    when(russianWordCounter.countWordsFromContent(content))
+        .thenReturn(Map.of("привет", 1, "мир", 1));
 
-         // Act
-         Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
+    // Act
+    Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
 
-         // Assert
-         assertEquals(expectedFrequency, actualFrequency);
-     }
+    // Assert
+    assertEquals(expectedFrequency, actualFrequency);
+  }
 
-     // Validates that content with special characters is handled correctly in word frequency count
-     @Test
-     public void test_count_word_frequency_by_language_special_characters() {
-         // Arrange
-         String content = "Hello, world! #special привет, мир!";
-         Map<String, Integer> expectedFrequency = new HashMap<>();
-         expectedFrequency.put("hello", 1);
-         expectedFrequency.put("world", 1);
-         expectedFrequency.put("special", 1);
-         expectedFrequency.put("привет", 1);
-         expectedFrequency.put("мир", 1);
+  @Test
+  public void testCountWordFrequencyDuplicateWords() {
+    // Arrange
+    String content = "Hello world hello world";
+    Map<String, Integer> expectedFrequency =
+        Map.of(
+            "hello", 2,
+            "world", 2);
 
-         EnglishLuceneMorphology englishLuceneMorphology = mock(EnglishLuceneMorphology.class);
-         RussianLuceneMorphology russianLuceneMorphology = mock(RussianLuceneMorphology.class);
-         MorphologySettings morphologySettings = mock(MorphologySettings.class);
-         Validator validator = mock(Validator.class);
-         WordsCounterFactory wordsCounterFactory = mock(WordsCounterFactory.class);
-         QueryHandlerFactory queryHandlerFactory = mock(QueryHandlerFactory.class);
+    when(englishWordCounter.countWordsFromContent(content))
+        .thenReturn(Map.of("hello", 2, "world", 2));
 
-         WordCounter englishWordCounter = mock(WordCounter.class);
-         WordCounter russianWordCounter = mock(WordCounter.class);
+    // Act
+    Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
 
-         when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
-         when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
-         when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of("hello", 1, "world", 1, "special", 1));
-         when(russianWordCounter.countWordsFromContent(content)).thenReturn(Map.of("привет", 1, "мир", 1));
+    // Assert
+    assertEquals(expectedFrequency, actualFrequency);
+  }
 
-         MorphologyImpl morphologyImpl = new MorphologyImpl(
-                 russianLuceneMorphology,
-                 englishLuceneMorphology,
-                 morphologySettings,
-                 validator,
-                 wordsCounterFactory,
-                 queryHandlerFactory
-         );
+  @Test
+  public void testCountWordFrequencyMixedCase() {
+    // Arrange
+    String content = "Hello HELLO HeLLo";
+    Map<String, Integer> expectedFrequency = Map.of("hello", 3);
 
-         // Act
-         Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
+    when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of("hello", 3));
 
-         // Assert
-         assertEquals(expectedFrequency, actualFrequency);
-     }
+    // Act
+    Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
 
-     // Test counting word frequency with duplicate words in content
-     @Test
-     public void test_count_word_frequency_duplicate_words() {
-         // Arrange
-         String content = "Hello world hello world";
-         Map<String, Integer> expectedFrequency = new HashMap<>();
-         expectedFrequency.put("hello", 2);
-         expectedFrequency.put("world", 2);
+    // Assert
+    assertEquals(expectedFrequency, actualFrequency);
+  }
 
-         EnglishLuceneMorphology englishLuceneMorphology = mock(EnglishLuceneMorphology.class);
-         RussianLuceneMorphology russianLuceneMorphology = mock(RussianLuceneMorphology.class);
-         MorphologySettings morphologySettings = mock(MorphologySettings.class);
-         Validator validator = mock(Validator.class);
-         WordsCounterFactory wordsCounterFactory = mock(WordsCounterFactory.class);
-         QueryHandlerFactory queryHandlerFactory = mock(QueryHandlerFactory.class);
+  @Test
+  public void testCombineWordFrequenciesCorrectly() {
+    // Arrange
+    String content = "Hello world привет мир";
+    Map<String, Integer> expectedFrequency =
+        Map.of(
+            "hello", 1,
+            "world", 1,
+            "привет", 1,
+            "мир", 1);
 
-         WordCounter englishWordCounter = mock(WordCounter.class);
-         WordCounter russianWordCounter = mock(WordCounter.class);
+    when(englishWordCounter.countWordsFromContent(content))
+        .thenReturn(Map.of("hello", 1, "world", 1));
+    when(russianWordCounter.countWordsFromContent(content))
+        .thenReturn(Map.of("привет", 1, "мир", 1));
 
-         when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
-         when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
-         when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of("hello", 2, "world", 2));
+    // Act
+    Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
 
-         MorphologyImpl morphologyImpl = new MorphologyImpl(
-                 russianLuceneMorphology,
-                 englishLuceneMorphology,
-                 morphologySettings,
-                 validator,
-                 wordsCounterFactory,
-                 queryHandlerFactory
-         );
+    // Assert
+    assertEquals(expectedFrequency, actualFrequency);
+  }
 
-         // Act
-         Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
+  @Test
+  public void testMissingOrIncompleteMorphologySettings() {
+    // Arrange
+    String content = "Sample content for testing";
+    Map<String, Integer> expectedFrequency = new HashMap<>();
 
-         // Assert
-         assertEquals(expectedFrequency, actualFrequency);
-     }
+    when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of());
+    when(russianWordCounter.countWordsFromContent(content)).thenReturn(Map.of());
 
-     // Test counting word frequency with mixed case content
-     @Test
-     public void test_count_word_frequency_mixed_case() {
-         // Arrange
-         String content = "Hello HELLO HeLLo";
-         Map<String, Integer> expectedFrequency = new HashMap<>();
-         expectedFrequency.put("hello", 3);
+    MorphologyImpl morphologyImplWithNullSettings =
+        new MorphologyImpl(
+            russianLuceneMorphology,
+            englishLuceneMorphology,
+            null,
+            validator,
+            wordsCounterFactory,
+            queryHandlerFactory);
 
-         EnglishLuceneMorphology englishLuceneMorphology = mock(EnglishLuceneMorphology.class);
-         RussianLuceneMorphology russianLuceneMorphology = mock(RussianLuceneMorphology.class);
-         MorphologySettings morphologySettings = mock(MorphologySettings.class);
-         Validator validator = mock(Validator.class);
-         WordsCounterFactory wordsCounterFactory = mock(WordsCounterFactory.class);
-         QueryHandlerFactory queryHandlerFactory = mock(QueryHandlerFactory.class);
+    // Act
+    Map<String, Integer> actualFrequency =
+        morphologyImplWithNullSettings.countWordFrequencyByLanguage(content);
 
-         WordCounter englishWordCounter = mock(WordCounter.class);
-         WordCounter russianWordCounter = mock(WordCounter.class);
+    // Assert
+    assertEquals(expectedFrequency, actualFrequency);
+  }
 
-         when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
-         when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
-         when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of("hello", 3));
+  @Test
+  public void testIntegrationWithMorphologySettings() {
+    // Arrange
+    String content = "Hello world привет мир";
+    Map<String, Integer> expectedFrequency =
+        Map.of(
+            "hello", 1,
+            "world", 1,
+            "привет", 1,
+            "мир", 1);
 
-         MorphologyImpl morphologyImpl = new MorphologyImpl(
-                 russianLuceneMorphology,
-                 englishLuceneMorphology,
-                 morphologySettings,
-                 validator,
-                 wordsCounterFactory,
-                 queryHandlerFactory
-         );
+    when(englishWordCounter.countWordsFromContent(content))
+        .thenReturn(Map.of("hello", 1, "world", 1));
+    when(russianWordCounter.countWordsFromContent(content))
+        .thenReturn(Map.of("привет", 1, "мир", 1));
 
-         // Act
-         Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
+    // Act
+    Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
 
-         // Assert
-         assertEquals(expectedFrequency, actualFrequency);
-     }
-
-     // Combine word frequencies from both languages correctly
-     @Test
-     public void combine_word_frequencies_correctly() throws IOException {
-         // Arrange
-         String content = "Hello world привет мир";
-         Map<String, Integer> expectedFrequency = new HashMap<>();
-         expectedFrequency.put("hello", 1);
-         expectedFrequency.put("world", 1);
-         expectedFrequency.put("привет", 1);
-         expectedFrequency.put("мир", 1);
-
-         WordCounter englishWordCounter = mock(WordCounter.class);
-         WordCounter russianWordCounter = mock(WordCounter.class);
-         WordsCounterFactory wordsCounterFactory = mock(WordsCounterFactory.class);
-         when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
-         when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
-         when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of("hello", 1, "world", 1));
-         when(russianWordCounter.countWordsFromContent(content)).thenReturn(Map.of("привет", 1, "мир", 1));
-
-         MorphologySettings morphologySettings = mock(MorphologySettings.class);
-         Validator validator = mock(Validator.class);
-         QueryHandlerFactory queryHandlerFactory = mock(QueryHandlerFactory.class);
-
-         MorphologyImpl morphologyImpl = new MorphologyImpl(
-                 new RussianLuceneMorphology(),
-                 new EnglishLuceneMorphology(),
-                 morphologySettings,
-                 validator,
-                 wordsCounterFactory,
-                 queryHandlerFactory
-         );
-
-         // Act
-         Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
-
-         // Assert
-         assertEquals(expectedFrequency, actualFrequency);
-     }
-
-     // Validate the behavior when MorphologySettings are missing or incomplete
-     @Test
-     public void test_missing_or_incomplete_morphology_settings() throws IOException {
-         // Arrange
-         String content = "Sample content for testing";
-         Map<String, Integer> expectedFrequency = new HashMap<>();
-
-         WordCounter englishWordCounter = mock(WordCounter.class);
-         WordCounter russianWordCounter = mock(WordCounter.class);
-         WordsCounterFactory wordsCounterFactory = mock(WordsCounterFactory.class);
-         when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
-         when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
-         when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of());
-         when(russianWordCounter.countWordsFromContent(content)).thenReturn(Map.of());
-
-         Validator validator = mock(Validator.class);
-         QueryHandlerFactory queryHandlerFactory = mock(QueryHandlerFactory.class);
-
-         MorphologyImpl morphologyImpl = new MorphologyImpl(
-                 new RussianLuceneMorphology(),
-                 new EnglishLuceneMorphology(),
-                 null,
-                 validator,
-                 wordsCounterFactory,
-                 queryHandlerFactory
-         );
-
-         // Act
-         Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
-
-         // Assert
-         assertEquals(expectedFrequency, actualFrequency);
-     }
-     // Validate the integration with MorphologySettings
-     @Test
-     public void test_integration_with_morphology_settings() throws IOException {
-         // Arrange
-         String content = "Hello world привет мир";
-         Map<String, Integer> expectedFrequency = new HashMap<>();
-         expectedFrequency.put("hello", 1);
-         expectedFrequency.put("world", 1);
-         expectedFrequency.put("привет", 1);
-         expectedFrequency.put("мир", 1);
-
-         WordCounter englishWordCounter = mock(WordCounter.class);
-         WordCounter russianWordCounter = mock(WordCounter.class);
-         WordsCounterFactory wordsCounterFactory = mock(WordsCounterFactory.class);
-         when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
-         when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
-         when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of("hello", 1, "world", 1));
-         when(russianWordCounter.countWordsFromContent(content)).thenReturn(Map.of("привет", 1, "мир", 1));
-
-         MorphologySettings morphologySettings = mock(MorphologySettings.class);
-         Validator validator = mock(Validator.class);
-         QueryHandlerFactory queryHandlerFactory = mock(QueryHandlerFactory.class);
-
-         MorphologyImpl morphologyImpl = new MorphologyImpl(
-                 new RussianLuceneMorphology(),
-                 new EnglishLuceneMorphology(),
-                 morphologySettings,
-                 validator,
-                 wordsCounterFactory,
-                 queryHandlerFactory
-         );
-
-         // Act
-         Map<String, Integer> actualFrequency = morphologyImpl.countWordFrequencyByLanguage(content);
-
-         // Assert
-         assertEquals(expectedFrequency, actualFrequency);
-     }
- }
+    // Assert
+    assertEquals(expectedFrequency, actualFrequency);
+  }
+}

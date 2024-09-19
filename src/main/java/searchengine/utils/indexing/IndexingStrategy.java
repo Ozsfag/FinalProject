@@ -11,18 +11,18 @@ import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.morphology.Morphology;
 
 /**
- * Utility class that handles and processes various entities for indexing.
- * This class is responsible for indexing pages, lemmas, and indexes.
+ * Utility class that handles and processes various entities for indexing. This class is responsible
+ * for indexing pages, lemmas, and indexes.
  *
  * <p>It uses the following handlers and utilities:
+ *
  * <ul>
- *   <li>{@link PageHandler} for handling page-related operations</li>
- *   <li>{@link EntitySaverTemplate} for saving entities</li>
- *   <li>{@link Morphology} for word frequency analysis</li>
- *   <li>{@link LemmaHandler} for handling lemma-related operations</li>
- *   <li>{@link IndexHandler} for handling index-related operations</li>
+ *   <li>{@link PageHandler} for handling page-related operations
+ *   <li>{@link EntitySaverTemplate} for saving entities
+ *   <li>{@link Morphology} for word frequency analysis
+ *   <li>{@link LemmaHandler} for handling lemma-related operations
+ *   <li>{@link IndexHandler} for handling index-related operations
  * </ul>
- * </p>
  *
  * @Ozsfag
  */

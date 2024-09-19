@@ -5,8 +5,6 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
@@ -17,9 +15,8 @@ import searchengine.utils.urlsHandler.UrlsChecker;
 /**
  * Recursively indexes a page and its subpages.
  *
- * <p>This class uses a ForkJoin framework to parallelize the indexing process.
- * It checks URLs, processes indexing, updates site status, and creates subtasks for further indexing.
- * </p>
+ * <p>This class uses a ForkJoin framework to parallelize the indexing process. It checks URLs,
+ * processes indexing, updates site status, and creates subtasks for further indexing.
  *
  * @author Ozsfag
  */

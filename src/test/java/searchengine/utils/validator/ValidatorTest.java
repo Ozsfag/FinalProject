@@ -1,192 +1,183 @@
- package searchengine.utils.validator;
+package searchengine.utils.validator;
 
- import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
- import java.net.URISyntaxException;
+import java.net.URISyntaxException;
+import org.junit.jupiter.api.Test;
+import searchengine.config.MorphologySettings;
 
- import org.junit.jupiter.api.Test;
- import searchengine.config.MorphologySettings;
-
- public class ValidatorTest {
+public class ValidatorTest {
 
   private Validator validator;
 
-     // Valid URL with scheme, host, and path returns correct components
-     @Test
-     public void test_valid_url_returns_correct_components() throws URISyntaxException {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+  // Valid URL with scheme, host, and path returns correct components
+  @Test
+  public void test_valid_url_returns_correct_components() throws URISyntaxException {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
+    String url = "http://example.com/path";
+    String[] expectedComponents = {"http://example.com/", "/path", "example"};
 
-         String url = "http://example.com/path";
-         String[] expectedComponents = {"http://example.com/", "/path", "example"};
+    String[] actualComponents = validator.getValidUrlComponents(url);
 
-         String[] actualComponents = validator.getValidUrlComponents(url);
+    assertArrayEquals(expectedComponents, actualComponents);
+  }
 
-         assertArrayEquals(expectedComponents, actualComponents);
-     }
+  // URL with valid scheme and host but empty path returns correct components
+  @Test
+  public void url_with_valid_scheme_and_host_but_empty_path_returns_correct_components()
+      throws URISyntaxException {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
-     // URL with valid scheme and host but empty path returns correct components
-     @Test
-     public void url_with_valid_scheme_and_host_but_empty_path_returns_correct_components() throws URISyntaxException {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+    String url = "http://example.com";
+    String[] expectedComponents = {"http://example.com/", "", "example"};
 
-         String url = "http://example.com";
-         String[] expectedComponents = {"http://example.com/", "", "example"};
+    String[] actualComponents = validator.getValidUrlComponents(url);
 
-         String[] actualComponents = validator.getValidUrlComponents(url);
+    assertArrayEquals(expectedComponents, actualComponents);
+  }
 
-         assertArrayEquals(expectedComponents, actualComponents);
-     }
+  // URL with valid scheme, host, and path returns scheme and host correctly
+  @Test
+  public void test_valid_url_components_extraction() throws URISyntaxException {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
-     // URL with valid scheme, host, and path returns scheme and host correctly
-     @Test
-     public void test_valid_url_components_extraction() throws URISyntaxException {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+    String url = "http://example.com/path";
+    String[] expectedComponents = {"http://example.com/", "/path", "example"};
 
-         String url = "http://example.com/path";
-         String[] expectedComponents = {"http://example.com/", "/path", "example"};
+    String[] actualComponents = validator.getValidUrlComponents(url);
 
-         String[] actualComponents = validator.getValidUrlComponents(url);
+    assertArrayEquals(expectedComponents, actualComponents);
+  }
 
-         assertArrayEquals(expectedComponents, actualComponents);
-     }
+  // URL with missing scheme throws URISyntaxException
+  @Test
+  public void test_url_missing_scheme_throws_exception() {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
+    String url = "://example.com/path";
 
+    assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(url));
+  }
 
+  // URL with missing host throws URISyntaxException
+  @Test
+  public void url_with_missing_host_throws_uri_syntax_exception() {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
+    String url = "httzxczxcz";
 
+    assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(url));
+  }
 
-     // URL with missing scheme throws URISyntaxException
-     @Test
-     public void test_url_missing_scheme_throws_exception() {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+  // URL with missing path throws URISyntaxException
+  @Test
+  public void url_with_missing_path_throws_uri_syntax_exception() {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
-         String url = "://example.com/path";
+    String url = "htzxczxc";
 
-         assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(url));
-     }
+    assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(url));
+  }
 
-     // URL with missing host throws URISyntaxException
-     @Test
-     public void url_with_missing_host_throws_uri_syntax_exception() {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+  // URL with invalid format throws URISyntaxException
+  @Test
+  public void url_with_invalid_format_throws_uri_syntax_exception() {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
-         String url = "httzxczxcz";
+    String invalidUrl = "invalid_url";
 
-         assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(url));
-     }
+    assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(invalidUrl));
+  }
 
-     // URL with missing path throws URISyntaxException
-     @Test
-     public void url_with_missing_path_throws_uri_syntax_exception() {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+  // URL with special characters in path returns correct components
+  @Test
+  public void url_with_special_characters_returns_correct_components() throws URISyntaxException {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
-         String url = "htzxczxc";
+    String url = "http://example.com/path?query=1";
+    String[] expectedComponents = {"http://example.com/", "/path", "example"};
 
-         assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(url));
-     }
+    String[] actualComponents = validator.getValidUrlComponents(url);
 
-     // URL with invalid format throws URISyntaxException
-     @Test
-     public void url_with_invalid_format_throws_uri_syntax_exception() {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+    assertArrayEquals(expectedComponents, actualComponents);
+  }
 
-         String invalidUrl = "invalid_url";
+  // URL with subdomains returns correct host component
+  @Test
+  public void url_with_subdomains_returns_correct_host_component() throws URISyntaxException {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
-         assertThrows(URISyntaxException.class, () -> validator.getValidUrlComponents(invalidUrl));
-     }
+    String url = "http://sub.example.com/path";
+    String[] expectedComponents = {"http://sub.example.com/", "/path", "sub"};
 
-     // URL with special characters in path returns correct components
-     @Test
-     public void url_with_special_characters_returns_correct_components() throws URISyntaxException {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+    String[] actualComponents = validator.getValidUrlComponents(url);
 
-         String url = "http://example.com/path?query=1";
-         String[] expectedComponents = {"http://example.com/", "/path", "example"};
+    assertArrayEquals(expectedComponents, actualComponents);
+  }
 
-         String[] actualComponents = validator.getValidUrlComponents(url);
+  // URL with port number returns correct components
+  @Test
+  public void url_with_port_returns_correct_components() throws URISyntaxException {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
-         assertArrayEquals(expectedComponents, actualComponents);
-     }
+    String url = "http://example.com:8080/path";
+    String[] expectedComponents = {"http://example.com/", "/path", "example"};
 
+    String[] actualComponents = validator.getValidUrlComponents(url);
 
+    assertArrayEquals(expectedComponents, actualComponents);
+  }
 
+  // URL with query parameters returns correct components
+  @Test
+  public void url_with_query_parameters_returns_correct_components() throws URISyntaxException {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
+    String url = "http://example.com/path?query=parameters";
+    String[] expectedComponents = {"http://example.com/", "/path", "example"};
 
+    String[] actualComponents = validator.getValidUrlComponents(url);
 
-     // URL with subdomains returns correct host component
-     @Test
-     public void url_with_subdomains_returns_correct_host_component() throws URISyntaxException {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+    assertArrayEquals(expectedComponents, actualComponents);
+  }
 
-         String url = "http://sub.example.com/path";
-         String[] expectedComponents = {"http://sub.example.com/", "/path", "sub"};
+  // URL with fragment returns correct components
+  @Test
+  public void url_with_fragment_returns_correct_components() throws URISyntaxException {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
-         String[] actualComponents = validator.getValidUrlComponents(url);
+    String url = "http://example.com/path#fragment";
+    String[] expectedComponents = {"http://example.com/", "/path", "example"};
 
-         assertArrayEquals(expectedComponents, actualComponents);
-     }
-     // URL with port number returns correct components
-     @Test
-     public void url_with_port_returns_correct_components() throws URISyntaxException {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+    String[] actualComponents = validator.getValidUrlComponents(url);
 
-         String url = "http://example.com:8080/path";
-         String[] expectedComponents = {"http://example.com/", "/path", "example"};
+    assertArrayEquals(expectedComponents, actualComponents);
+  }
 
-         String[] actualComponents = validator.getValidUrlComponents(url);
+  // URL with IP address as host returns correct components
+  @Test
+  public void url_with_ip_address_returns_correct_components() throws URISyntaxException {
+    Validator validator = new Validator();
+    MorphologySettings morphologySettings = new MorphologySettings();
 
-         assertArrayEquals(expectedComponents, actualComponents);
-     }
+    String url = "http://192.168.0.1/path";
+    String[] expectedComponents = {"http://192.168.0.1/", "/path", "192"};
 
-     // URL with query parameters returns correct components
-     @Test
-     public void url_with_query_parameters_returns_correct_components() throws URISyntaxException {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
+    String[] actualComponents = validator.getValidUrlComponents(url);
 
-         String url = "http://example.com/path?query=parameters";
-         String[] expectedComponents = {"http://example.com/", "/path", "example"};
-
-         String[] actualComponents = validator.getValidUrlComponents(url);
-
-         assertArrayEquals(expectedComponents, actualComponents);
-     }
-
-     // URL with fragment returns correct components
-     @Test
-     public void url_with_fragment_returns_correct_components() throws URISyntaxException {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
-
-         String url = "http://example.com/path#fragment";
-         String[] expectedComponents = {"http://example.com/", "/path", "example"};
-
-         String[] actualComponents = validator.getValidUrlComponents(url);
-
-         assertArrayEquals(expectedComponents, actualComponents);
-     }
-     // URL with IP address as host returns correct components
-     @Test
-     public void url_with_ip_address_returns_correct_components() throws URISyntaxException {
-         Validator validator = new Validator();
-         MorphologySettings morphologySettings = new MorphologySettings();
-
-         String url = "http://192.168.0.1/path";
-         String[] expectedComponents = {"http://192.168.0.1/", "/path", "192"};
-
-         String[] actualComponents = validator.getValidUrlComponents(url);
-
-         assertArrayEquals(expectedComponents, actualComponents);
-     }
- }
+    assertArrayEquals(expectedComponents, actualComponents);
+  }
+}

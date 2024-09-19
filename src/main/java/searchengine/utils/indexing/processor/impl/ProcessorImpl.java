@@ -2,7 +2,6 @@ package searchengine.utils.indexing.processor.impl;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;

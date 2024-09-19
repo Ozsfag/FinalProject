@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.model.PageModel;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
+import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 
 @Component
 public class PageModelSaver extends EntitySaverTemplate<PageModel> {
@@ -20,13 +20,14 @@ public class PageModelSaver extends EntitySaverTemplate<PageModel> {
   }
 
   @Override
-  protected Collection<PageModel> getValidatedEntitiesBeforeSaving(Collection<PageModel> entitiesToValidate) {
-    Set<String> existingPaths = pageRepository.findAllPathsByPathIn(
-            entitiesToValidate.stream().map(PageModel::getPath).collect(Collectors.toSet())
-    );
+  protected Collection<PageModel> getValidatedEntitiesBeforeSaving(
+      Collection<PageModel> entitiesToValidate) {
+    Set<String> existingPaths =
+        pageRepository.findAllPathsByPathIn(
+            entitiesToValidate.stream().map(PageModel::getPath).collect(Collectors.toSet()));
     return entitiesToValidate.stream()
-            .filter(entity -> !existingPaths.contains(entity.getPath()))
-            .collect(Collectors.toSet());
+        .filter(entity -> !existingPaths.contains(entity.getPath()))
+        .collect(Collectors.toSet());
   }
 
   @Override

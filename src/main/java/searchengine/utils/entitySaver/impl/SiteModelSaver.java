@@ -1,13 +1,12 @@
 package searchengine.utils.entitySaver.impl;
 
 import java.util.Collection;
-
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
-import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
+import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 
 @Component
 @Primary
@@ -18,7 +17,8 @@ public class SiteModelSaver extends EntitySaverTemplate<SiteModel> {
   }
 
   @Override
-  protected Collection<SiteModel> getValidatedEntitiesBeforeSaving(Collection<SiteModel> entitiesToValidate) {
+  protected Collection<SiteModel> getValidatedEntitiesBeforeSaving(
+      Collection<SiteModel> entitiesToValidate) {
     return entitiesToValidate;
   }
 

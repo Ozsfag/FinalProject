@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.LemmaModel;
-import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
+import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 
 @Component
 public class LemmaModelSaver extends EntitySaverTemplate<LemmaModel> {
@@ -16,8 +16,9 @@ public class LemmaModelSaver extends EntitySaverTemplate<LemmaModel> {
   }
 
   @Override
-  protected Collection<LemmaModel> getValidatedEntitiesBeforeSaving(Collection<LemmaModel> entitiesToValidate) {
-      return entitiesToValidate;
+  protected Collection<LemmaModel> getValidatedEntitiesBeforeSaving(
+      Collection<LemmaModel> entitiesToValidate) {
+    return entitiesToValidate;
   }
 
   @Override

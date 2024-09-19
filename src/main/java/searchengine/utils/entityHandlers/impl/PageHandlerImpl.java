@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.PageModel;
@@ -19,15 +20,15 @@ import searchengine.utils.entityHandlers.PageHandler;
 @Getter
 public class PageHandlerImpl implements PageHandler {
   private final EntityFactory entityFactory;
-  private Collection<String> urlsToParse;
-  private SiteModel siteModel;
+  @Setter private Collection<String> urlsToParse;
+  @Setter private SiteModel siteModel;
 
   @Override
   public Collection<PageModel> getIndexedPageModelsFromUrls(
       Collection<String> urlsToParse, SiteModel siteModel) {
 
-    this.urlsToParse = urlsToParse;
-    this.siteModel = siteModel;
+    setUrlsToParse(urlsToParse);
+    setSiteModel(siteModel);
 
     return urlsToParse.stream()
         .map(this::getPageModelByUrl)

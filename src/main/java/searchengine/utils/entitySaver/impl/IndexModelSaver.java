@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.IndexModel;
-import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
+import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 
 @Component
 public class IndexModelSaver extends EntitySaverTemplate<IndexModel> {
@@ -16,9 +16,11 @@ public class IndexModelSaver extends EntitySaverTemplate<IndexModel> {
   }
 
   @Override
-  protected Collection<IndexModel> getValidatedEntitiesBeforeSaving(Collection<IndexModel> entitiesToValidate) {
-      return entitiesToValidate;
+  protected Collection<IndexModel> getValidatedEntitiesBeforeSaving(
+      Collection<IndexModel> entitiesToValidate) {
+    return entitiesToValidate;
   }
+
   @Override
   @Transactional
   public Collection<IndexModel> saveIndividuallyAndFlush(Collection<IndexModel> entities) {

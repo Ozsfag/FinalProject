@@ -9,9 +9,9 @@ import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
+import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.entitySaver.impl.*;
 import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
-import searchengine.utils.entitySaver.EntitySaverTemplate;
 
 @Component
 public class SaverSelectorImpl implements SaverSelector {
@@ -24,8 +24,7 @@ public class SaverSelectorImpl implements SaverSelector {
   @Override
   public EntitySaverTemplate getSaver(Object entity) {
     Class<?> entityType = entity.getClass();
-    EntitySaverTemplate entitySaver = entitySavers.get(entityType);
-    return entitySaver;
+      return entitySavers.get(entityType);
   }
 
   @PostConstruct

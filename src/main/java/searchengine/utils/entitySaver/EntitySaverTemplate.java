@@ -54,8 +54,7 @@ public abstract class EntitySaverTemplate<T> {
   }
 
   @Transactional
-  private List<T> saveAllEntities(Collection<T> entities)
-      throws DataIntegrityViolationException {
+  private List<T> saveAllEntities(Collection<T> entities) throws DataIntegrityViolationException {
     JpaRepository<T, ?> repository = getRepository(entities);
     List<T> result = repository.saveAll(entities);
     repository.flush();

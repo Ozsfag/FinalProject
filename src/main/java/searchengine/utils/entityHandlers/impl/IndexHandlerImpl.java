@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -30,7 +29,7 @@ public class IndexHandlerImpl implements IndexHandler {
 
   @Override
   public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
-    PageModel pageModel, Collection<LemmaModel> lemmas) {
+      PageModel pageModel, Collection<LemmaModel> lemmas) {
     setPageModel(pageModel);
     setLemmas(lemmas);
 
@@ -42,9 +41,10 @@ public class IndexHandlerImpl implements IndexHandler {
   }
 
   private void setExistingIndexes() {
-    this.existingIndexModels = getLemmas().isEmpty() ?
-            Collections.emptySet() :
-            indexRepository.findByPage_IdAndLemmaIn(getPageModel().getId(), getLemmas());
+    this.existingIndexModels =
+        getLemmas().isEmpty()
+            ? Collections.emptySet()
+            : indexRepository.findByPage_IdAndLemmaIn(getPageModel().getId(), getLemmas());
   }
 
   private void removeExistedIndexesFromNew() {
