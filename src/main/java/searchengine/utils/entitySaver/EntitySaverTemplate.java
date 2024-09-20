@@ -2,6 +2,9 @@ package searchengine.utils.entitySaver;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ public abstract class EntitySaverTemplate<T> {
   @Autowired @Lazy private SaverSelector saverSelector;
   public final RepositorySelector repositorySelector;
   @Setter private Collection<T> entities;
+  private final Lock lock = new ReentrantLock();
 
   /**
    * Saves a collection of entities.
@@ -55,10 +59,15 @@ public abstract class EntitySaverTemplate<T> {
 
   @Transactional
   private List<T> saveAllEntities(Collection<T> entities) throws DataIntegrityViolationException {
-    JpaRepository<T, ?> repository = getRepository(entities);
-    List<T> result = repository.saveAll(entities);
-    repository.flush();
-    return result;
+    lock.lock();
+    try {
+      JpaRepository<T, ?> repository = getRepository(entities);
+      List<T> result = repository.saveAll(entities);
+      repository.flush();
+      return result;
+    } finally {
+      lock.unlock();
+    }
   }
 
   /**

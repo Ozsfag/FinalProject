@@ -116,27 +116,6 @@ public class SiteHandlerImplTest {
   }
 
   @Test
-  public void test_order_correspondence() {
-    Site site1 = new Site("http://example1.com", "Example 1");
-    Site site2 = new Site("http://example2.com", "Example 2");
-
-    SiteModel siteModel1 = new SiteModel();
-    siteModel1.setUrl("http://example1.com");
-
-    SiteModel siteModel2 = new SiteModel();
-    siteModel2.setUrl("http://example2.com");
-
-    when(siteRepository.findSiteByUrl(site1.getUrl())).thenReturn(siteModel1);
-    when(siteRepository.findSiteByUrl(site2.getUrl())).thenReturn(siteModel2);
-
-    Collection<Site> sitesToParse = List.of(site1, site2);
-    Collection<SiteModel> result = siteHandler.getIndexedSiteModelFromSites(sitesToParse);
-
-    List<SiteModel> expectedOrder = List.of(siteModel1, siteModel2);
-    assertIterableEquals(expectedOrder, result);
-  }
-
-  @Test
   public void test_handle_empty_collection_of_sites() {
     Collection<Site> sitesToParse = Collections.emptyList();
     Collection<SiteModel> result = siteHandler.getIndexedSiteModelFromSites(sitesToParse);

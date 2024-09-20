@@ -24,7 +24,7 @@ public class SaverSelectorImpl implements SaverSelector {
   @Override
   public EntitySaverTemplate getSaver(Object entity) {
     Class<?> entityType = entity.getClass();
-      return entitySavers.get(entityType);
+    return entitySavers.get(entityType);
   }
 
   @PostConstruct

@@ -1,4 +1,4 @@
-package searchengine.utils.urlsHandler;
+package searchengine.utils.urlsChecker;
 
 import java.util.Collection;
 import searchengine.model.SiteModel;

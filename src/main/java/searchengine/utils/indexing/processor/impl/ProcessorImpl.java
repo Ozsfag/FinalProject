@@ -21,7 +21,8 @@ public class ProcessorImpl implements Processor {
   public void processSiteIndexing(SiteModel siteModel) {
     try {
       ForkJoinTask<?> task = taskFactory.initTask(siteModel, siteModel.getUrl());
-      forkJoinPool.invoke(task);
+      task.fork();
+      task.join();
 
       siteUpdater.updateSiteWhenSuccessful(siteModel);
     } catch (Error re) {

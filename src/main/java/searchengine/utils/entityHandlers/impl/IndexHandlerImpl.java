@@ -30,6 +30,7 @@ public class IndexHandlerImpl implements IndexHandler {
   @Override
   public Collection<IndexModel> getIndexedIndexModelFromCountedWords(
       PageModel pageModel, Collection<LemmaModel> lemmas) {
+
     setPageModel(pageModel);
     setLemmas(lemmas);
 

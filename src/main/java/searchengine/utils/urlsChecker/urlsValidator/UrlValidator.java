@@ -1,4 +1,4 @@
-package searchengine.utils.urlsHandler.urlsValidator;
+package searchengine.utils.urlsChecker.urlsValidator;
 
 public interface UrlValidator {
   /**

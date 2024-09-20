@@ -4,13 +4,15 @@ import java.util.*;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.IndexingStrategy;
 import searchengine.utils.indexing.processor.taskFactory.TaskFactory;
-import searchengine.utils.urlsHandler.UrlsChecker;
+import searchengine.utils.urlsChecker.UrlsChecker;
 
 /**
  * Recursively indexes a page and its subpages.
@@ -22,6 +24,8 @@ import searchengine.utils.urlsHandler.UrlsChecker;
  */
 @Component
 @RequiredArgsConstructor
+@Getter
+@Setter
 public class Parser extends RecursiveTask<Boolean> {
   private final UrlsChecker urlsChecker;
   private final IndexingStrategy indexingStrategy;

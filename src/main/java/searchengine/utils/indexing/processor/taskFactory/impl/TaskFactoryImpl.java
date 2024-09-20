@@ -8,7 +8,7 @@ import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.IndexingStrategy;
 import searchengine.utils.indexing.parser.Parser;
 import searchengine.utils.indexing.processor.taskFactory.TaskFactory;
-import searchengine.utils.urlsHandler.UrlsChecker;
+import searchengine.utils.urlsChecker.UrlsChecker;
 
 @Component
 @RequiredArgsConstructor

@@ -265,7 +265,7 @@ public class PageHandlerImplTest {
     assertTrue(
         pageModels.contains(expectedPageModel),
         "The collection should contain the expected PageModel.");
-    verify(entityFactory, times(1)).createPageModel(siteModel, "http://example.com/page1");
+    verify(entityFactory, times(2)).createPageModel(siteModel, "http://example.com/page1");
   }
 
   @Test

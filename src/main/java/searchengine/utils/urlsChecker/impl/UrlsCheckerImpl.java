@@ -1,4 +1,4 @@
-package searchengine.utils.urlsHandler.impl;
+package searchengine.utils.urlsChecker.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.urlsHandler.UrlsChecker;
-import searchengine.utils.urlsHandler.urlsValidator.UrlValidator;
+import searchengine.utils.urlsChecker.UrlsChecker;
+import searchengine.utils.urlsChecker.urlsValidator.UrlValidator;
 import searchengine.utils.webScraper.WebScraper;
 
 @Component

@@ -1,10 +1,10 @@
-package searchengine.utils.urlsHandler.urlsValidator.impl;
+package searchengine.utils.urlsChecker.urlsValidator.impl;
 
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
-import searchengine.utils.urlsHandler.urlsValidator.UrlValidator;
+import searchengine.utils.urlsChecker.urlsValidator.UrlValidator;
 
 @Component
 @RequiredArgsConstructor
