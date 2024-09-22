@@ -31,8 +31,8 @@ public abstract class EntitySaverTemplate<T> {
    * @return the saved entities
    */
   public Collection<T> saveEntities(Collection<T> entities) {
-    setEntities(entities);
     validateEntities();
+    setEntities(entities);
     return performSaveEntities();
   }
 
