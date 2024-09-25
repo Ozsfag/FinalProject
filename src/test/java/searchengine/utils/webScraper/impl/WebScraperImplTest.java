@@ -2,7 +2,6 @@ package searchengine.utils.webScraper.impl;
 
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -84,7 +83,7 @@ public class WebScraperImplTest {
 
     when(jsoupConnectionBuilder.createJsoupConnection(url)).thenReturn(mockConnection);
     when(mockConnection.execute()).thenThrow(exception);
-    when(connectionResponseBuilder.buildConnectionResponseWithException(url, exception))
+    when(connectionResponseBuilder.buildConnectionResponseWithException(url, 0, null))
         .thenReturn(expectedResponse);
 
     ConnectionResponse actualResponse = webScraper.getConnectionResponse(url);
@@ -94,23 +93,29 @@ public class WebScraperImplTest {
 
   @Test
   public void testHandlesEmptyUrlInput() {
-    String url = "";
-    String expectedErrorMessage = "URL cannot be empty";
-    ConnectionResponse expectedResponse =
-        ConnectionResponse.builder().errorMessage(expectedErrorMessage).build();
+    final String EMPTY_URL = "";
+    final String EXPECTED_ERROR_MESSAGE = "URL cannot be empty";
+    final int DEFAULT_STATUS_CODE = 0;
+    final String DEFAULT_STATUS_MESSAGE = null;
+    // Arrange
+    ConnectionResponse expectedResponse = ConnectionResponse.builder()
+            .errorMessage(EXPECTED_ERROR_MESSAGE)
+            .build();
 
-    when(jsoupConnectionBuilder.createJsoupConnection(url))
-        .thenThrow(new IllegalArgumentException(expectedErrorMessage));
+    when(jsoupConnectionBuilder.createJsoupConnection(EMPTY_URL))
+            .thenThrow(new IllegalArgumentException(EXPECTED_ERROR_MESSAGE));
     when(connectionResponseBuilder.buildConnectionResponseWithException(
-            eq(url), any(IllegalArgumentException.class)))
-        .thenReturn(expectedResponse);
+            eq(EMPTY_URL), eq(DEFAULT_STATUS_CODE), eq(DEFAULT_STATUS_MESSAGE)))
+            .thenReturn(expectedResponse);
 
-    ConnectionResponse actualResponse = webScraper.getConnectionResponse(url);
+    // Act
+    ConnectionResponse actualResponse = webScraper.getConnectionResponse(EMPTY_URL);
 
+    // Assert
     assertEquals(expectedResponse, actualResponse);
-    verify(jsoupConnectionBuilder, times(1)).createJsoupConnection(url);
+    verify(jsoupConnectionBuilder, times(1)).createJsoupConnection(EMPTY_URL);
     verify(connectionResponseBuilder, times(1))
-        .buildConnectionResponseWithException(eq(url), any(IllegalArgumentException.class));
+            .buildConnectionResponseWithException(eq(EMPTY_URL), eq(DEFAULT_STATUS_CODE), eq(DEFAULT_STATUS_MESSAGE));
   }
 
   @Test
@@ -122,7 +127,7 @@ public class WebScraperImplTest {
 
     when(jsoupConnectionBuilder.createJsoupConnection(url)).thenReturn(mockConnection);
     when(mockConnection.execute()).thenThrow(exception);
-    when(connectionResponseBuilder.buildConnectionResponseWithException(url, exception))
+    when(connectionResponseBuilder.buildConnectionResponseWithException(url, 0, null))
         .thenReturn(expectedResponse);
 
     ConnectionResponse actualResponse = webScraper.getConnectionResponse(url);
@@ -139,7 +144,7 @@ public class WebScraperImplTest {
 
     when(jsoupConnectionBuilder.createJsoupConnection(url)).thenReturn(mockConnection);
     when(mockConnection.execute()).thenThrow(exception);
-    when(connectionResponseBuilder.buildConnectionResponseWithException(url, exception))
+    when(connectionResponseBuilder.buildConnectionResponseWithException(url, 0, null))
         .thenReturn(expectedResponse);
 
     ConnectionResponse actualResponse = webScraper.getConnectionResponse(url);

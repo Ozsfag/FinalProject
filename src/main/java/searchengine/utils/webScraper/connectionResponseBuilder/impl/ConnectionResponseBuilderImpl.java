@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.utils.webScraper.connectionResponseBuilder.ConnectionResponseBuilder;
@@ -47,8 +46,8 @@ public class ConnectionResponseBuilderImpl implements ConnectionResponseBuilder 
   }
 
   @Override
-  public ConnectionResponse buildConnectionResponseWithException(String url, Exception e) {
+  public ConnectionResponse buildConnectionResponseWithException(String url, int statusCode, String statusMessage) {
     return new ConnectionResponse(
-        url, HttpStatus.NOT_FOUND.value(), "", null, HttpStatus.NOT_FOUND.getReasonPhrase(), "");
+        url, statusCode, "", null, statusMessage, "");
   }
 }

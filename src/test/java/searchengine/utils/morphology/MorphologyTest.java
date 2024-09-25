@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import searchengine.config.MorphologySettings;
 import searchengine.utils.morphology.impl.MorphologyImpl;
-import searchengine.utils.morphology.queryHandler.QueryHandlerFactory;
+import searchengine.utils.morphology.queryHandler.QueryResolverFactory;
 import searchengine.utils.morphology.wordCounter.WordCounter;
 import searchengine.utils.morphology.wordCounter.WordsCounterFactory;
 import searchengine.utils.validator.Validator;
@@ -27,7 +27,7 @@ public class MorphologyTest {
   private MorphologySettings morphologySettings;
   private Validator validator;
   private WordsCounterFactory wordsCounterFactory;
-  private QueryHandlerFactory queryHandlerFactory;
+  private QueryResolverFactory queryResolverFactory;
   private WordCounter englishWordCounter;
   private WordCounter russianWordCounter;
   private MorphologyImpl morphologyImpl;
@@ -39,7 +39,7 @@ public class MorphologyTest {
     morphologySettings = mock(MorphologySettings.class);
     validator = mock(Validator.class);
     wordsCounterFactory = mock(WordsCounterFactory.class);
-    queryHandlerFactory = mock(QueryHandlerFactory.class);
+    queryResolverFactory = mock(QueryResolverFactory.class);
     englishWordCounter = mock(WordCounter.class);
     russianWordCounter = mock(WordCounter.class);
 
@@ -53,7 +53,7 @@ public class MorphologyTest {
             morphologySettings,
             validator,
             wordsCounterFactory,
-            queryHandlerFactory);
+            queryResolverFactory);
   }
 
   @Test
@@ -189,7 +189,7 @@ public class MorphologyTest {
             null,
             validator,
             wordsCounterFactory,
-            queryHandlerFactory);
+            queryResolverFactory);
 
     // Act
     Map<String, Integer> actualFrequency =

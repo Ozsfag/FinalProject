@@ -17,17 +17,21 @@ import searchengine.model.LemmaModel;
 public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
 
   @Transactional(timeout = 2, propagation = Propagation.REQUIRES_NEW)
-  @Query("select i from IndexModel i where i.lemma.lemma = ?1 and i.lemma.frequency < ?2")
-  Set<IndexModel> findIndexBy2Params(String lemma, int frequency);
+  @Query(
+      "SELECT i FROM IndexModel i WHERE i.lemma.lemma = :lemma AND i.lemma.frequency < :frequency")
+  Set<IndexModel> findByLemmaAndFrequencyLessThan(
+      @Param("lemma") String lemma, @Param("frequency") int frequency);
 
   @Transactional(timeout = 2, propagation = Propagation.REQUIRES_NEW)
   @Query(
-      "select i from IndexModel i where i.lemma.lemma = ?1 and i.lemma.frequency < ?2 and i.lemma.site.id = ?3")
-  Set<IndexModel> findIndexBy3Params(String lemma, int frequency, Integer siteId);
+      "SELECT i FROM IndexModel i WHERE i.lemma.lemma = :lemma AND i.lemma.frequency < :frequency AND i.lemma.site.id = :siteId")
+  Set<IndexModel> findByLemmaAndFrequencyLessThanAndSiteId(
+      @Param("lemma") String lemma,
+      @Param("frequency") int frequency,
+      @Param("siteId") Integer siteId);
 
-  @Transactional
-  @Query("SELECT i FROM IndexModel i  WHERE i.page.id = :id AND i.lemma IN :lemmas")
-  Set<IndexModel> findByPage_IdAndLemmaIn(
+  @Query("SELECT i FROM IndexModel i WHERE i.page.id = :id AND i.lemma IN :lemmas")
+  Set<IndexModel> findByPageIdAndLemmaIn(
       @Param("id") Integer id, @Param("lemmas") @NonNull Collection<LemmaModel> lemmas);
 
   @Transactional(timeout = 0)
@@ -39,7 +43,8 @@ public interface IndexRepository extends JpaRepository<IndexModel, Integer> {
       @Param("pageId") @NonNull Integer id,
       @Param("rank") Float rank);
 
-  @Transactional
-  @Query("select (count(i) > 0) from IndexModel i where i.page.id = ?1 and i.lemma.id = ?2")
-  boolean existsByPage_IdAndLemma_Id(Integer id, Integer id1);
+  @Query(
+      "SELECT (count(i) > 0) FROM IndexModel i WHERE i.page.id = :pageId AND i.lemma.id = :lemmaId")
+  boolean existsByPageIdAndLemmaId(
+      @Param("pageId") Integer pageId, @Param("lemmaId") Integer lemmaId);
 }

@@ -10,20 +10,20 @@ import searchengine.config.MorphologySettings;
 import searchengine.utils.validator.Validator;
 
 @Component
-public class QueryHandlerFactory {
+public class QueryResolverFactory {
   @Autowired @Lazy private RussianLuceneMorphology russianLuceneMorphology;
   @Autowired @Lazy private EnglishLuceneMorphology englishLuceneMorphology;
   @Autowired @Lazy private MorphologySettings morphologySettings;
   @Autowired @Lazy private Validator validator;
 
-  private volatile QueryHandler russianQueryHandler;
-  private volatile QueryHandler englishQueryHandler;
+  private volatile QueryResolver russianQueryResolver;
+  private volatile QueryResolver englishQueryResolver;
 
-  public QueryHandler createRussianQueryHandler() {
-    if (russianQueryHandler == null) {
+  public QueryResolver createRussianQueryHandler() {
+    if (russianQueryResolver == null) {
       synchronized (this) {
-        if (russianQueryHandler == null) {
-          russianQueryHandler =
+        if (russianQueryResolver == null) {
+          russianQueryResolver =
               createQueryHandler(
                   morphologySettings.getNotCyrillicLetters(),
                   russianLuceneMorphology,
@@ -33,14 +33,14 @@ public class QueryHandlerFactory {
         }
       }
     }
-    return russianQueryHandler;
+    return russianQueryResolver;
   }
 
-  public QueryHandler createEnglishQueryHandler() {
-    if (englishQueryHandler == null) {
+  public QueryResolver createEnglishQueryHandler() {
+    if (englishQueryResolver == null) {
       synchronized (this) {
-        if (englishQueryHandler == null) {
-          englishQueryHandler =
+        if (englishQueryResolver == null) {
+          englishQueryResolver =
               createQueryHandler(
                   morphologySettings.getNotLatinLetters(),
                   englishLuceneMorphology,
@@ -50,16 +50,16 @@ public class QueryHandlerFactory {
         }
       }
     }
-    return englishQueryHandler;
+    return englishQueryResolver;
   }
 
-  private QueryHandler createQueryHandler(
+  private QueryResolver createQueryHandler(
       String nonLetters,
       LuceneMorphology primaryMorphology,
       LuceneMorphology secondaryMorphology,
       String[] particles,
       String onlyLetters) {
-    return new QueryHandlerImpl(
+    return new QueryResolverImpl(
         nonLetters,
         primaryMorphology,
         secondaryMorphology,

@@ -1,7 +1,7 @@
 package searchengine.utils.webScraper.impl;
 
 import java.io.IOException;
-import lombok.Data;
+
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Connection;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,6 @@ import searchengine.utils.webScraper.jsoupConnectionBuilder.JsoupConnectionBuild
  * @author Ozsfag
  */
 @Component
-@Data
 @RequiredArgsConstructor
 public class WebScraperImpl implements WebScraper {
   private final JsoupConnectionBuilder jsoupConnectionBuilder;
@@ -25,19 +24,19 @@ public class WebScraperImpl implements WebScraper {
   @Override
   public ConnectionResponse getConnectionResponse(String url) {
     try {
-      return createConnectionResponse(url);
-    } catch (Exception e) {
-      return connectionResponseBuilder.buildConnectionResponseWithException(url, e);
+      return buildConnectionResponse(url);
+    } catch (IOException e) {
+      return buildConnectionResponseWithException(url, e);
     }
   }
 
-  private ConnectionResponse createConnectionResponse(String url) throws IOException {
+  private ConnectionResponse buildConnectionResponse(String url) throws IOException {
     Connection connection = jsoupConnectionBuilder.createJsoupConnection(url);
-    Connection.Response response = executeConnection(connection);
+    Connection.Response response = connection.execute();
     return connectionResponseBuilder.buildConnectionResponse(url, response, connection);
   }
 
-  private Connection.Response executeConnection(Connection connection) throws IOException {
-    return connection.execute();
+  private ConnectionResponse buildConnectionResponseWithException(String url, IOException e) {
+    return connectionResponseBuilder.buildConnectionResponseWithException(url, e.hashCode(), e.getMessage());
   }
 }

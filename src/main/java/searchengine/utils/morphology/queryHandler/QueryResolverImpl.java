@@ -7,7 +7,7 @@ import org.apache.lucene.morphology.LuceneMorphology;
 import searchengine.utils.validator.Validator;
 
 @RequiredArgsConstructor
-public class QueryHandlerImpl implements QueryHandler {
+public class QueryResolverImpl implements QueryResolver {
   private final String nonLetters;
   private final LuceneMorphology luceneMorphology1;
   private final LuceneMorphology luceneMorphology2;

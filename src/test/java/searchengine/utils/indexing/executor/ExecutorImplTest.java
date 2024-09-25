@@ -1,5 +1,14 @@
 package searchengine.utils.indexing.executor;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,16 +22,6 @@ import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.indexing.executor.impl.ExecutorImpl;
 import searchengine.utils.indexing.processor.Processor;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 public class ExecutorImplTest {
 

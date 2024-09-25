@@ -1,6 +1,7 @@
 package searchengine.utils.indexing.processor.updater.siteUpdater.impl;
 
 import java.util.Date;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
@@ -13,15 +14,26 @@ import searchengine.utils.indexing.processor.updater.siteUpdater.SiteUpdater;
 public class DefaultSiteUpdater implements SiteUpdater {
 
   private final SiteRepository siteRepository;
+  private final ReentrantReadWriteLock lock;
 
   @Override
   public void updateSiteWhenSuccessful(SiteModel siteModel) {
-    siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteModel.getUrl());
+    try {
+      lock.writeLock().lock();
+      siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteModel.getUrl());
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 
   @Override
   public void updateSiteWhenFailed(SiteModel siteModel, Throwable re) {
-    siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(
-        Status.FAILED, new Date(), re.getLocalizedMessage(), siteModel.getUrl());
+    try {
+      lock.writeLock().lock();
+      siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(
+          Status.FAILED, new Date(), re.getLocalizedMessage(), siteModel.getUrl());
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 }

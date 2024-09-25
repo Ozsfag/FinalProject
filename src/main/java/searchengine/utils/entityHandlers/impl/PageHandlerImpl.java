@@ -30,7 +30,7 @@ public class PageHandlerImpl implements PageHandler {
     setUrlsToParse(urlsToParse);
     setSiteModel(siteModel);
 
-    return urlsToParse.stream()
+    return urlsToParse.parallelStream()
         .map(this::getPageModelByUrl)
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());

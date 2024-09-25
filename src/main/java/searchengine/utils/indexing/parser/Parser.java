@@ -58,9 +58,9 @@ public class Parser extends RecursiveTask<Boolean> {
     setCheckingUrls();
     if (checkedUrlsIsNotEmpty()) {
       indexingUrls();
-      updateSiteStatus(href);
+      updateSiteStatus();
       setSubtasks();
-      invokeAll(subtasks);
+      invokeAll();
     }
     return true;
   }
@@ -77,7 +77,7 @@ public class Parser extends RecursiveTask<Boolean> {
     indexingStrategy.processIndexing(urlsToParse, siteModel);
   }
 
-  private void updateSiteStatus(String href) {
+  private void updateSiteStatus() {
     siteRepository.updateStatusTimeByUrl(new Date(), href);
   }
 

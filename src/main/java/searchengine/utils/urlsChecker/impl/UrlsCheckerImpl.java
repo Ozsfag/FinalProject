@@ -1,8 +1,8 @@
 package searchengine.utils.urlsChecker.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.*;
@@ -20,6 +20,7 @@ public class UrlsCheckerImpl implements UrlsChecker {
   private final WebScraper webScraper;
   private final PageRepository pageRepository;
   private final UrlValidator urlValidator;
+  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
   /**
    * Returns a collection of URLs that have been checked for correctness and duplication.
@@ -53,8 +54,11 @@ public class UrlsCheckerImpl implements UrlsChecker {
   }
 
   private Collection<String> findAlreadyParsedUrls(Collection<String> urls) {
-    return urls.isEmpty()
-        ? Collections.emptyList()
-        : pageRepository.findAllPathsByPathIn(new ArrayList<>(urls));
+    try {
+      lock.readLock().lock();
+      return urls.isEmpty() ? Collections.emptyList() : pageRepository.findAllPathsByPathIn(urls);
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 }

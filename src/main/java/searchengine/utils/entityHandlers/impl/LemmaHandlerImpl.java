@@ -1,6 +1,7 @@
 package searchengine.utils.entityHandlers.impl;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import searchengine.utils.entityHandlers.LemmaHandler;
 @Getter
 @EqualsAndHashCode
 public class LemmaHandlerImpl implements LemmaHandler {
+  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
   private final LemmaRepository lemmaRepository;
   private final EntityFactory entityFactory;
 
@@ -39,10 +41,15 @@ public class LemmaHandlerImpl implements LemmaHandler {
   }
 
   private void setExistingLemmas() {
-    this.existedLemmaModels =
-        wordsCount.keySet().isEmpty()
-            ? Collections.emptySet()
-            : lemmaRepository.findByLemmaInAndSite_Id(wordsCount.keySet(), getSiteModel().getId());
+    try {
+      lock.readLock().lock();
+      this.existedLemmaModels =
+          wordsCount.keySet().isEmpty()
+              ? Collections.emptySet()
+              : lemmaRepository.findByLemmaInAndSiteId(wordsCount.keySet(), getSiteModel().getId());
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   private void removeExistedLemmasFromNew() {

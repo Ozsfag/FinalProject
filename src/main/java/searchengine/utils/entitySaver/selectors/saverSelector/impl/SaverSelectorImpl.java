@@ -19,7 +19,7 @@ public class SaverSelectorImpl implements SaverSelector {
   @Autowired private PageModelSaver pageModelSaver;
   @Autowired private LemmaModelSaver lemmaModelSaver;
   @Autowired private IndexModelSaver indexModelSaver;
-  private Map<Class<?>, EntitySaverTemplate> entitySavers;
+  private volatile Map<Class<?>, EntitySaverTemplate> entitySavers;
 
   @Override
   public EntitySaverTemplate getSaver(Object entity) {

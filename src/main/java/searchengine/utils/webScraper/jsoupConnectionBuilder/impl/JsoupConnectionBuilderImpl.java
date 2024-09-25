@@ -17,7 +17,7 @@ public class JsoupConnectionBuilderImpl implements JsoupConnectionBuilder {
     return Jsoup.connect(url)
         .userAgent(getUserAgent())
         .referrer(getReferrer())
-        .ignoreHttpErrors(true);
+        .ignoreHttpErrors(false);
   }
 
   private String getUserAgent() {

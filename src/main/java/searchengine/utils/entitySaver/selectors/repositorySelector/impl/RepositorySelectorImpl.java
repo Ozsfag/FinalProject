@@ -23,7 +23,7 @@ public class RepositorySelectorImpl implements RepositorySelector {
   @Autowired private PageRepository pageRepository;
   @Autowired private LemmaRepository lemmaRepository;
   @Autowired private IndexRepository indexRepository;
-  private Map<Class<?>, JpaRepository> entityRepositories;
+  private volatile Map<Class<?>, JpaRepository> entityRepositories;
 
   @Override
   public JpaRepository getRepository(Collection<?> entities) {
@@ -36,11 +36,6 @@ public class RepositorySelectorImpl implements RepositorySelector {
     return entityRepositories.get(entityType);
   }
 
-  //  @Override
-  //  public JpaRepository getRepository(Object entity) {
-  //    Class<?> entityType = entity.getClass();
-  //    return entityRepositories.get(entityType);
-  //  }
   @PostConstruct
   public void init() {
     entityRepositories = new HashMap<>();

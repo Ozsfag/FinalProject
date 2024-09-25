@@ -2,7 +2,7 @@ package searchengine.utils.morphology.queryHandler;
 
 import java.util.stream.Stream;
 
-public interface QueryHandler {
+public interface QueryResolver {
   /**
    * Returns a stream of strings representing the lemmas extracted from the given query.
    *

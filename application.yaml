@@ -16,10 +16,10 @@ spring:
     hikari:
       minimum-idle: 2
       idle-timeout: 6000000
-      maximum-pool-size: 10
+      maximum-pool-size: 200
       auto-commit: true
       pool-name: HikariCorePool
-      max-lifetime: 0
+      max-lifetime: 1800000
       connection-timeout: 300000
 
   jpa:
@@ -42,18 +42,18 @@ indexing-settings:
 #      name: Skillbox
 #    - url: http://www.playback.ru/
 #      name: PlayBack.Ru
-    - url: https://domrebenka.belzdrav.ru/
-      name: Дом Ребенка
-#    - url: https://sendel.ru/
-#      name: sendel
 #    - url: http://kremlin.ru/
 #      name: Кремль
-#    - url: https://www.baeldung.com/
-#      name: Baeldung
+#    - url: https://amurkino.ru/
+#      name: Kino
+#    - url: https://domrebenka.belzdrav.ru/
+#      name: Дом Ребенка
+    - url: https://sendel.ru/
+      name: sendel
 
 
 connection-settings:
-  user-agent: EmelianSearchBot
+  user-agent: EmelianIndexingBot
   referrer: https://www.google.com
 
 morphology-settings:

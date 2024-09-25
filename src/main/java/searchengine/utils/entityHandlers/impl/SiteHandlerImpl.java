@@ -2,6 +2,7 @@ package searchengine.utils.entityHandlers.impl;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import searchengine.utils.entityHandlers.SiteHandler;
 @Component
 @RequiredArgsConstructor
 public class SiteHandlerImpl implements SiteHandler {
+  private final ReentrantReadWriteLock lock;
   private final SiteRepository siteRepository;
   private final EntityFactory entityFactory;
 
@@ -29,7 +31,12 @@ public class SiteHandlerImpl implements SiteHandler {
   }
 
   private SiteModel getExistedSiteModel(Site site) {
-    return siteRepository.findSiteByUrl(site.getUrl());
+    try {
+      lock.readLock().lock();
+      return siteRepository.findSiteByUrl(site.getUrl());
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   private SiteModel createSiteModel(Site site) {

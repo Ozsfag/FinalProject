@@ -15,88 +15,88 @@ import searchengine.utils.indexing.processor.updater.siteUpdater.SiteUpdater;
 
 public class ProcessorImplTest {
 
-    private ForkJoinPool forkJoinPool;
-    private TaskFactory taskFactory;
-    private SiteUpdater siteUpdater;
-    private SiteModel siteModel;
-    private ProcessorImpl processor;
-    private ForkJoinTask task;
+  private ForkJoinPool forkJoinPool;
+  private TaskFactory taskFactory;
+  private SiteUpdater siteUpdater;
+  private SiteModel siteModel;
+  private ProcessorImpl processor;
+  private ForkJoinTask task;
 
-    @BeforeEach
-    public void setUp() {
-        forkJoinPool = mock(ForkJoinPool.class);
-        taskFactory = mock(TaskFactory.class);
-        siteUpdater = mock(SiteUpdater.class);
-        siteModel = new SiteModel();
-        siteModel.setUrl("http://example.com");
-        processor = new ProcessorImpl(forkJoinPool, taskFactory, siteUpdater);
-        task = mock(ForkJoinTask.class);
-        when(taskFactory.initTask(siteModel, siteModel.getUrl())).thenReturn(task);
-    }
+  @BeforeEach
+  public void setUp() {
+    forkJoinPool = mock(ForkJoinPool.class);
+    taskFactory = mock(TaskFactory.class);
+    siteUpdater = mock(SiteUpdater.class);
+    siteModel = new SiteModel();
+    siteModel.setUrl("http://example.com");
+    processor = new ProcessorImpl(forkJoinPool, taskFactory, siteUpdater);
+    task = mock(ForkJoinTask.class);
+    when(taskFactory.initTask(siteModel, siteModel.getUrl())).thenReturn(task);
+  }
 
-    @Test
-    public void testSuccessfulSiteIndexing() {
-        // Act
-        processor.processSiteIndexing(siteModel);
+  @Test
+  public void testSuccessfulSiteIndexing() {
+    // Act
+    processor.processSiteIndexing(siteModel);
 
-        // Assert
-        verify(task).fork();
-        verify(task).join();
-        verify(siteUpdater).updateSiteWhenSuccessful(siteModel);
-    }
+    // Assert
+    verify(task).fork();
+    verify(task).join();
+    verify(siteUpdater).updateSiteWhenSuccessful(siteModel);
+  }
 
-    @Test
-    public void testHandleTaskExecutionException() {
-        // Arrange
-        doThrow(new Error("Task execution failed")).when(task).join();
+  @Test
+  public void testHandleTaskExecutionException() {
+    // Arrange
+    doThrow(new Error("Task execution failed")).when(task).join();
 
-        // Act
-        processor.processSiteIndexing(siteModel);
+    // Act
+    processor.processSiteIndexing(siteModel);
 
-        // Assert
-        verify(task).fork();
-        verify(task).join();
-        verify(siteUpdater).updateSiteWhenFailed(eq(siteModel), any(Error.class));
-    }
+    // Assert
+    verify(task).fork();
+    verify(task).join();
+    verify(siteUpdater).updateSiteWhenFailed(eq(siteModel), any(Error.class));
+  }
 
-    @Test
-    public void testProcessSiteWithNullUrl() {
-        // Arrange
-        siteModel.setUrl(null);
-        when(taskFactory.initTask(siteModel, null)).thenReturn(task);
+  @Test
+  public void testProcessSiteWithNullUrl() {
+    // Arrange
+    siteModel.setUrl(null);
+    when(taskFactory.initTask(siteModel, null)).thenReturn(task);
 
-        // Act
-        processor.processSiteIndexing(siteModel);
+    // Act
+    processor.processSiteIndexing(siteModel);
 
-        // Assert
-        verify(task).fork();
-        verify(task).join();
-        verify(siteUpdater).updateSiteWhenSuccessful(siteModel);
-        assertNull(siteModel.getUrl(), "The URL of the site model should remain null");
-    }
+    // Assert
+    verify(task).fork();
+    verify(task).join();
+    verify(siteUpdater).updateSiteWhenSuccessful(siteModel);
+    assertNull(siteModel.getUrl(), "The URL of the site model should remain null");
+  }
 
-    @Test
-    public void testTaskJoinCalledAfterForking() {
-        // Act
-        processor.processSiteIndexing(siteModel);
+  @Test
+  public void testTaskJoinCalledAfterForking() {
+    // Act
+    processor.processSiteIndexing(siteModel);
 
-        // Assert
-        verify(task).fork();
-        verify(task).join();
-    }
+    // Assert
+    verify(task).fork();
+    verify(task).join();
+  }
 
-    @Test
-    public void testTaskNotNullAfterInitialization() {
-        // Assert
-        assertNotNull(task);
-    }
+  @Test
+  public void testTaskNotNullAfterInitialization() {
+    // Assert
+    assertNotNull(task);
+  }
 
-    @Test
-    public void testUrlMatchingInitTask() {
-        // Act
-        processor.processSiteIndexing(siteModel);
+  @Test
+  public void testUrlMatchingInitTask() {
+    // Act
+    processor.processSiteIndexing(siteModel);
 
-        // Assert
-        verify(taskFactory).initTask(siteModel, siteModel.getUrl());
-    }
+    // Assert
+    verify(taskFactory).initTask(siteModel, siteModel.getUrl());
+  }
 }

@@ -13,26 +13,31 @@ import searchengine.model.Status;
 @Repository
 public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
 
-  @Transactional
-  @Query("select s from SiteModel s where s.url = ?1")
-  SiteModel findSiteByUrl(String path);
+  @Query("SELECT s FROM SiteModel s WHERE s.url = :url")
+  SiteModel findSiteByUrl(@Param("url") String url);
 
-  @Transactional
   @Modifying
-  @Query("update SiteModel s set s.statusTime = ?1 where s.url = ?2")
-  void updateStatusTimeByUrl(Date statusTime, String url);
+  @Transactional
+  @Query("UPDATE SiteModel s SET s.statusTime = :statusTime WHERE s.url = :url")
+  void updateStatusTimeByUrl(@Param("statusTime") Date statusTime, @Param("url") String url);
 
-  @Transactional
   @Modifying
+  @Transactional
   @Query(
-      "update SiteModel s set s.status = ?1, s.statusTime = ?2, s.lastError = ?3 where s.url = ?4")
+      "UPDATE SiteModel s SET s.status = :status, s.statusTime = :statusTime, s.lastError = :lastError WHERE s.url = :url")
   void updateStatusAndStatusTimeAndLastErrorByUrl(
-      Status status, Date statusTime, String lastError, String url);
+      @Param("status") Status status,
+      @Param("statusTime") Date statusTime,
+      @Param("lastError") String lastError,
+      @Param("url") String url);
 
-  @Transactional
   @Modifying
-  @Query("update SiteModel s set s.status = ?1, s.statusTime = ?2 where s.url = ?3")
-  void updateStatusAndStatusTimeByUrl(Status status, Date statusTime, String url);
+  @Transactional
+  @Query("UPDATE SiteModel s SET s.status = :status, s.statusTime = :statusTime WHERE s.url = :url")
+  void updateStatusAndStatusTimeByUrl(
+      @Param("status") Status status,
+      @Param("statusTime") Date statusTime,
+      @Param("url") String url);
 
   @Modifying
   @Transactional
@@ -46,7 +51,6 @@ public interface SiteRepository extends JpaRepository<SiteModel, Integer> {
       @Param("url") String url,
       @Param("name") String name);
 
-  @Transactional
-  @Query("select (count(s) > 0) from SiteModel s where s.url = ?1")
-  boolean existsByUrl(String url);
+  @Query("SELECT (COUNT(s) > 0) FROM SiteModel s WHERE s.url = :url")
+  boolean existsByUrl(@Param("url") String url);
 }

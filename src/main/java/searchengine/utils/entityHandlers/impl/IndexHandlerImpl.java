@@ -2,6 +2,7 @@ package searchengine.utils.entityHandlers.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -20,6 +21,7 @@ import searchengine.utils.entityHandlers.IndexHandler;
 @Getter
 @EqualsAndHashCode
 public class IndexHandlerImpl implements IndexHandler {
+  @Autowired private ReentrantReadWriteLock lock;
   @Autowired @Lazy private IndexRepository indexRepository;
   @Autowired @Lazy private EntityFactory entityFactory;
 
@@ -42,10 +44,15 @@ public class IndexHandlerImpl implements IndexHandler {
   }
 
   private void setExistingIndexes() {
-    this.existingIndexModels =
-        getLemmas().isEmpty()
-            ? Collections.emptySet()
-            : indexRepository.findByPage_IdAndLemmaIn(getPageModel().getId(), getLemmas());
+    try {
+      lock.readLock().lock();
+      this.existingIndexModels =
+          getLemmas().isEmpty()
+              ? Collections.emptySet()
+              : indexRepository.findByPageIdAndLemmaIn(getPageModel().getId(), getLemmas());
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   private void removeExistedIndexesFromNew() {

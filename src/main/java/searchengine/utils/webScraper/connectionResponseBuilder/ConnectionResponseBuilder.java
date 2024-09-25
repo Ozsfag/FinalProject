@@ -9,5 +9,5 @@ public interface ConnectionResponseBuilder {
   ConnectionResponse buildConnectionResponse(
       String url, Connection.Response response, Connection connection) throws IOException;
 
-  ConnectionResponse buildConnectionResponseWithException(String url, Exception e);
+  ConnectionResponse buildConnectionResponseWithException(String url, int statusCode, String statusMessage);
 }

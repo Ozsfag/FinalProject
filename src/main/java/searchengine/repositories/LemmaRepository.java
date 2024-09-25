@@ -13,14 +13,12 @@ import searchengine.model.LemmaModel;
 @Repository
 public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
 
-  @Transactional
   @Query("SELECT count(l) FROM LemmaModel l WHERE l.site.url = :url")
-  int countBySite_Url(String url);
+  long countBySiteUrl(@Param("url") String url);
 
-  @Transactional
-  @Query("SELECT l FROM LemmaModel l WHERE l.site.id = :siteId AND l.lemma IN :lemma")
-  Set<LemmaModel> findByLemmaInAndSite_Id(
-      @Param("lemma") @NonNull Collection<String> lemma, @Param("siteId") Integer siteId);
+  @Query("SELECT l FROM LemmaModel l WHERE l.site.id = :siteId AND l.lemma IN :lemmas")
+  Set<LemmaModel> findByLemmaInAndSiteId(
+      @Param("lemmas") @NonNull Collection<String> lemmas, @Param("siteId") Integer siteId);
 
   @Transactional()
   @Modifying
@@ -31,7 +29,6 @@ public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {
       @Param("siteId") Integer siteId,
       @Param("frequency") Integer frequency);
 
-  @Transactional
-  @Query("select (count(l) > 0) from LemmaModel l where l.lemma = ?1")
-  boolean existsByLemma(String lemma);
+  @Query("SELECT (count(l) > 0) FROM LemmaModel l WHERE l.lemma = :lemma")
+  boolean existsByLemma(@Param("lemma") String lemma);
 }

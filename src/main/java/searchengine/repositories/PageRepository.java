@@ -14,7 +14,7 @@ import searchengine.model.PageModel;
 @Repository
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
 
-  @Transactional()
+  @Transactional(readOnly = true)
   @Query("SELECT p.path FROM PageModel p WHERE p.path IN :paths")
   Set<String> findAllPathsByPathIn(@Param("paths") @NonNull Collection<String> paths);
 
@@ -29,7 +29,8 @@ public interface PageRepository extends JpaRepository<PageModel, Integer> {
       @Param("content") String content,
       @Param("path") String path);
 
-  @Transactional
-  @Query("select (count(p) > 0) from PageModel p where p.path = ?1")
-  boolean existsByPath(String path);
+  @Transactional(readOnly = true)
+  @Query(
+      "SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM PageModel p WHERE p.path = :path")
+  boolean existsByPath(@Param("path") String path);
 }

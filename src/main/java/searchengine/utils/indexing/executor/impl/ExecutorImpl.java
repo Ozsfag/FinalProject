@@ -31,7 +31,7 @@ public class ExecutorImpl implements Executor {
     Collection<SiteModel> siteModels = getSiteModels();
     siteModels = entitySaverTemplate.saveEntities(siteModels);
 
-    return siteModels.stream().map(this::getFutureProcess).toList();
+    return siteModels.parallelStream().map(this::getFutureProcess).toList();
   }
 
   public Collection<SiteModel> getSiteModels() {

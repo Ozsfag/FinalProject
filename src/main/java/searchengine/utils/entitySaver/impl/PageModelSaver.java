@@ -2,8 +2,9 @@ package searchengine.utils.entitySaver.impl;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.model.PageModel;
 import searchengine.repositories.PageRepository;
@@ -12,7 +13,8 @@ import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySel
 
 @Component
 public class PageModelSaver extends EntitySaverTemplate<PageModel> {
-   private PageRepository pageRepository ;
+  @Autowired private ReentrantReadWriteLock lock;
+  private PageRepository pageRepository;
 
   public PageModelSaver(RepositorySelector repositorySelector) {
     super(repositorySelector);
@@ -24,9 +26,15 @@ public class PageModelSaver extends EntitySaverTemplate<PageModel> {
 
     pageRepository = (PageRepository) getRepository(entitiesToValidate);
 
-    Set<String> existingPaths =
-        pageRepository.findAllPathsByPathIn(
-            entitiesToValidate.stream().map(PageModel::getPath).collect(Collectors.toSet()));
+    Set<String> existingPaths;
+    try {
+      lock.readLock().lock();
+      existingPaths =
+          pageRepository.findAllPathsByPathIn(
+              entitiesToValidate.stream().map(PageModel::getPath).collect(Collectors.toSet()));
+    } finally {
+      lock.readLock().unlock();
+    }
 
     return entitiesToValidate.stream()
         .filter(entity -> !existingPaths.contains(entity.getPath()))
