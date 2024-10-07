@@ -45,7 +45,7 @@ public class IndexingStrategy {
     Collection<PageModel> pages = retrieveIndexedPageModels(urlsToParse, siteModel);
     pages = entitySaverTemplate.saveEntities(pages);
 
-    pages.forEach(this::processPage);
+    pages.parallelStream().forEach(this::processPage);
   }
 
   private Collection<PageModel> retrieveIndexedPageModels(
@@ -73,6 +73,6 @@ public class IndexingStrategy {
 
   private Collection<IndexModel> retrieveIndexedIndexModels(
       PageModel page, Collection<LemmaModel> lemmas) {
-    return indexHandler.getIndexedIndexModelFromCountedWords(page, lemmas);
+    return indexHandler.getIndexedIndexModelsFromCountedWords(page, lemmas);
   }
 }

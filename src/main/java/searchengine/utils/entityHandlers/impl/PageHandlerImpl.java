@@ -6,22 +6,22 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.entityHandlers.PageHandler;
+import searchengine.utils.lockWrapper.LockWrapper;
 
 @Component
-@RequiredArgsConstructor
 @Getter
 public class PageHandlerImpl implements PageHandler {
-  private final EntityFactory entityFactory;
-  @Setter private Collection<String> urlsToParse;
-  @Setter private SiteModel siteModel;
+  @Autowired private EntityFactory entityFactory;
+  @Autowired private LockWrapper lockWrapper;
+  private Collection<String> urlsToParse;
+  private SiteModel siteModel;
 
   @Override
   public Collection<PageModel> getIndexedPageModelsFromUrls(
@@ -30,10 +30,19 @@ public class PageHandlerImpl implements PageHandler {
     setUrlsToParse(urlsToParse);
     setSiteModel(siteModel);
 
-    return urlsToParse.parallelStream()
+    return getUrlsToParse().parallelStream()
         .map(this::getPageModelByUrl)
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
+  }
+  private void setUrlsToParse(Collection<String> urlsToParse){
+    lockWrapper.writeLock(() -> this.urlsToParse = urlsToParse);
+  }
+  private void setSiteModel(SiteModel siteModel){
+    lockWrapper.writeLock(() -> this.siteModel = siteModel);
+  }
+  private Collection<String> getUrlsToParse(){
+    return lockWrapper.readLock(() -> this.urlsToParse);
   }
 
   private PageModel getPageModelByUrl(String url) {

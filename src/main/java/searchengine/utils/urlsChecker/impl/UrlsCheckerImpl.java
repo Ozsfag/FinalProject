@@ -2,25 +2,26 @@ package searchengine.utils.urlsChecker.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
+import searchengine.utils.lockWrapper.LockWrapper;
 import searchengine.utils.urlsChecker.UrlsChecker;
 import searchengine.utils.urlsChecker.urlsValidator.UrlValidator;
 import searchengine.utils.webScraper.WebScraper;
 
 @Component
-@RequiredArgsConstructor
 public class UrlsCheckerImpl implements UrlsChecker {
-  private final WebScraper webScraper;
-  private final PageRepository pageRepository;
-  private final UrlValidator urlValidator;
-  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+  @Autowired private WebScraper webScraper;
+  @Autowired private PageRepository pageRepository;
+  @Autowired private LockWrapper lockWrapper;
+  @Autowired private UrlValidator urlValidator;
+
+  //  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
   /**
    * Returns a collection of URLs that have been checked for correctness and duplication.
@@ -34,7 +35,7 @@ public class UrlsCheckerImpl implements UrlsChecker {
     Collection<String> urlsToCheck = fetchUrlsToCheck(href);
 
     Stream<String> filteredUrls = filterOutAlreadyParsedUrls(urlsToCheck, siteModel.getUrl(), href);
-    return filteredUrls
+    return filteredUrls.parallel()
         .filter(url -> urlValidator.isValidUrl(url, siteModel.getUrl()))
         .collect(Collectors.toSet());
   }
@@ -54,11 +55,9 @@ public class UrlsCheckerImpl implements UrlsChecker {
   }
 
   private Collection<String> findAlreadyParsedUrls(Collection<String> urls) {
-    try {
-      lock.readLock().lock();
-      return urls.isEmpty() ? Collections.emptyList() : pageRepository.findAllPathsByPathIn(urls);
-    } finally {
-      lock.readLock().unlock();
-    }
+    return lockWrapper.readLock(()-> urls.isEmpty() ? Collections.emptyList() : getPageRepository().findAllPathsByPathIn(urls));
+  }
+  private PageRepository getPageRepository() {
+    return lockWrapper.readLock(() -> this.pageRepository);
   }
 }

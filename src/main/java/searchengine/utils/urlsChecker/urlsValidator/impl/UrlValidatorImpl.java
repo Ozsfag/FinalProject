@@ -1,38 +1,41 @@
 package searchengine.utils.urlsChecker.urlsValidator.impl;
 
 import java.util.Arrays;
-import lombok.RequiredArgsConstructor;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
 import searchengine.utils.urlsChecker.urlsValidator.UrlValidator;
 
 @Component
-@RequiredArgsConstructor
+@Getter
 public class UrlValidatorImpl implements UrlValidator {
 
-  private final MorphologySettings morphologySettings;
-  private String url;
-  private String urlFromConfiguration;
+  @Autowired private MorphologySettings morphologySettings;
+  @Setter private String url;
+  @Setter private String urlFromConfiguration;
 
   @Override
   public boolean isValidUrl(String url, String urlFromConfiguration) {
 
-    this.url = url;
-    this.urlFromConfiguration = urlFromConfiguration;
+    setUrl(url);
+    setUrlFromConfiguration(urlFromConfiguration);
 
     return isValidUrlFormat() && isValidUrlEnding() && hasNoRepeatedUrlComponents();
   }
 
   private boolean isValidUrlFormat() {
-    return url.startsWith(urlFromConfiguration);
+    return getUrl().startsWith(getUrlFromConfiguration());
   }
 
   private boolean isValidUrlEnding() {
-    return Arrays.stream(morphologySettings.getFormats()).noneMatch(url::contains);
+    return Arrays.stream(getMorphologySettings().getFormats()).noneMatch(getUrl()::contains);
   }
 
   private boolean hasNoRepeatedUrlComponents() {
-    String[] urlSplit = url.split("/");
+    String[] urlSplit = getUrl().split("/");
     return Arrays.stream(urlSplit).distinct().count() == urlSplit.length;
   }
 }

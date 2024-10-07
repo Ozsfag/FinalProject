@@ -1,11 +1,10 @@
 package searchengine.utils.searching.snippetTransmitter.contentMatcher.impl;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.utils.searching.snippetTransmitter.contentMatcher.ContentMatcher;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 @Lazy
@@ -17,7 +16,7 @@ public class ContentMatcherImpl implements ContentMatcher {
     while (matcher.find()) {
       int start = Math.max(matcher.start() - 100, 0);
       int end = Math.min(matcher.end() + 100, content.length());
-//      word = matcher.group();
+      //      word = matcher.group();
       matchingSentence = content.substring(start, end);
     }
     return matchingSentence;

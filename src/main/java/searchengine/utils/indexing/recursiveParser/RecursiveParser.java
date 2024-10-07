@@ -1,4 +1,4 @@
-package searchengine.utils.indexing.parser;
+package searchengine.utils.indexing.recursiveParser;
 
 import java.util.*;
 import java.util.concurrent.ForkJoinTask;
@@ -25,15 +25,14 @@ import searchengine.utils.urlsChecker.UrlsChecker;
 @Component
 @RequiredArgsConstructor
 @Getter
-@Setter
-public class Parser extends RecursiveTask<Boolean> {
+public class RecursiveParser extends RecursiveTask<Boolean> {
   private final UrlsChecker urlsChecker;
   private final IndexingStrategy indexingStrategy;
   private final SiteRepository siteRepository;
   private final TaskFactory taskFactory;
 
-  private SiteModel siteModel;
-  private String href;
+  @Setter private SiteModel siteModel;
+  @Setter private String href;
   private Collection<String> urlsToParse;
   private Collection<ForkJoinTask<?>> subtasks;
 
@@ -44,8 +43,8 @@ public class Parser extends RecursiveTask<Boolean> {
    * @param href the URL to start indexing from
    */
   public void init(SiteModel siteModel, String href) {
-    this.siteModel = siteModel;
-    this.href = href;
+    setSiteModel(siteModel);
+    setHref(href);
   }
 
   /**
@@ -60,7 +59,7 @@ public class Parser extends RecursiveTask<Boolean> {
       indexingUrls();
       updateSiteStatus();
       setSubtasks();
-      invokeAll();
+      invokeSubtask();
     }
     return true;
   }
@@ -86,5 +85,10 @@ public class Parser extends RecursiveTask<Boolean> {
         urlsToParse.stream()
             .map(url -> taskFactory.initTask(siteModel, url))
             .collect(Collectors.toSet());
+  }
+
+  private void invokeSubtask() {
+    subtasks.forEach(ForkJoinTask::fork);
+    subtasks.forEach(ForkJoinTask::join);
   }
 }

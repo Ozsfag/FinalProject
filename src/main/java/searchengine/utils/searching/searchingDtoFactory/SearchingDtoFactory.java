@@ -6,6 +6,6 @@ import searchengine.dto.searching.responseImpl.DetailedSearchResponse;
 import searchengine.model.IndexModel;
 
 public interface SearchingDtoFactory {
-    DetailedSearchResponse getDetailedSearchResponse(
-            Map.Entry<Integer, Float> entry, Collection<IndexModel> uniqueSet);
+  DetailedSearchResponse getDetailedSearchResponse(
+      Map.Entry<Integer, Float> entry, Collection<IndexModel> uniqueSet);
 }

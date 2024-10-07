@@ -1,5 +1,9 @@
 package searchengine.utils.searching.searchingDtoFactory.impl;
 
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -11,11 +15,6 @@ import searchengine.utils.searching.searchingDtoFactory.SearchingDtoFactory;
 import searchengine.utils.searching.snippetTransmitter.SnippetTransmitter;
 import searchengine.utils.validator.Validator;
 import searchengine.utils.webScraper.WebScraper;
-
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Component
 @Lazy

@@ -14,6 +14,6 @@ public interface IndexHandler {
    * @param lemmas the lemmas to get the frequency for
    * @return a collection of IndexModel objects, each one associated with a lemma and its frequency
    */
-  Collection<IndexModel> getIndexedIndexModelFromCountedWords(
+  Collection<IndexModel> getIndexedIndexModelsFromCountedWords(
       PageModel pageModel, Collection<LemmaModel> lemmas);
 }

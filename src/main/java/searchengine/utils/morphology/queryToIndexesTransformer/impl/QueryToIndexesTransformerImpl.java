@@ -18,41 +18,32 @@ import searchengine.utils.morphology.queryToIndexesTransformer.QueryToIndexesTra
 @Component
 @Lazy
 public class QueryToIndexesTransformerImpl implements QueryToIndexesTransformer {
-    @Autowired private Morphology morphology;
-    @Autowired private ReentrantReadWriteLock lock;
-    @Autowired private IndexRepository indexRepository;
-    @Autowired private MorphologySettings morphologySettings;
+  @Autowired private Morphology morphology;
+  @Autowired private ReentrantReadWriteLock lock;
+  @Autowired private IndexRepository indexRepository;
+  @Autowired private MorphologySettings morphologySettings;
 
+  @Override
+  public Collection<IndexModel> transformQueryToIndexModels(String query, SiteModel siteModel) {
+    return morphology.getUniqueLemmasFromSearchQuery(query).stream()
+        .flatMap(queryWord -> findIndexes(queryWord, siteModel))
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+  }
 
-    @Override
-    public Collection<IndexModel> transformQueryToIndexModels(String query, SiteModel siteModel) {
-        return morphology.getUniqueLemmasFromSearchQuery(query).stream()
-                .flatMap(queryWord -> findIndexes(queryWord, siteModel))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-    private Stream<IndexModel> findIndexes(String queryWord, SiteModel siteModel) {
-        return siteModel == null
-                ? findIndexesBy2Params(queryWord).stream()
-                : findIndexesBy3Params(queryWord, siteModel).stream();
-    }
+  private Stream<IndexModel> findIndexes(String queryWord, SiteModel siteModel) {
+    return siteModel == null
+        ? findIndexesBy2Params(queryWord).stream()
+        : findIndexesBy3Params(queryWord, siteModel).stream();
+  }
 
-    private Collection<IndexModel> findIndexesBy2Params(String queryWord) {
-        try{
-            lock.readLock().lock();
-            return indexRepository.findByLemmaAndFrequencyLessThan(
-                    queryWord, morphologySettings.getMaxFrequency());
-        }finally{
-            lock.readLock().unlock();
-        }
-    }
+  private synchronized Collection<IndexModel> findIndexesBy2Params(String queryWord) {
+    return indexRepository.findByLemmaAndFrequencyLessThan(
+        queryWord, morphologySettings.getMaxFrequency());
+  }
 
-    private Collection<IndexModel> findIndexesBy3Params(String queryWord, SiteModel siteModel) {
-        try{
-            lock.readLock().lock();
-            return indexRepository.findByLemmaAndFrequencyLessThanAndSiteId(
-                    queryWord, morphologySettings.getMaxFrequency(), siteModel.getId());
-        }finally{
-            lock.readLock().unlock();
-        }
-    }
+  private synchronized Collection<IndexModel> findIndexesBy3Params(
+      String queryWord, SiteModel siteModel) {
+    return indexRepository.findByLemmaAndFrequencyLessThanAndSiteId(
+        queryWord, morphologySettings.getMaxFrequency(), siteModel.getId());
+  }
 }

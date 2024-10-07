@@ -30,13 +30,8 @@ public abstract class EntitySaverTemplate<T> {
    * @return the saved entities
    */
   public Collection<T> saveEntities(Collection<T> entities) {
-    validateEntities();
-    setEntities(entities);
+    setEntities(getValidatedEntitiesBeforeSaving(entities));
     return performSaveEntities();
-  }
-
-  private void validateEntities() {
-    entities = getValidatedEntitiesBeforeSaving(entities);
   }
 
   /**
@@ -50,18 +45,18 @@ public abstract class EntitySaverTemplate<T> {
 
   private Collection<T> performSaveEntities() {
     try {
-      return saveAllEntities(entities);
+      return lockedSaveAllEntities(entities);
     } catch (DataIntegrityViolationException e) {
-      return saveEntityWhenException(entities);
+      return lockedSaveEntityWhenException(entities);
     }
   }
 
   @Transactional
-  private List<T> saveAllEntities(Collection<T> entities) throws DataIntegrityViolationException {
-
+  private List<T> lockedSaveAllEntities(Collection<T> entities)
+      throws DataIntegrityViolationException {
+    JpaRepository<T, ?> repository = getRepository(entities);
+    lock.writeLock().lock();
     try {
-      lock.writeLock().lock();
-      JpaRepository<T, ?> repository = getRepository(entities);
       List<T> result = repository.saveAll(entities);
       repository.flush();
       return result;
@@ -80,9 +75,9 @@ public abstract class EntitySaverTemplate<T> {
     return repositorySelector.getRepository(entities);
   }
 
-  private Collection<T> saveEntityWhenException(Collection<T> entities) {
+  private Collection<T> lockedSaveEntityWhenException(Collection<T> entities) {
+    lock.writeLock().lock();
     try {
-      lock.writeLock().lock();
       return getSaver(entities).saveIndividuallyAndFlush(entities);
     } finally {
       lock.writeLock().unlock();

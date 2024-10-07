@@ -5,5 +5,5 @@ import searchengine.model.IndexModel;
 import searchengine.model.PageModel;
 
 public interface SnippetTransmitter {
-    String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel);
+  String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel);
 }

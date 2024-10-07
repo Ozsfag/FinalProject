@@ -14,44 +14,45 @@ import searchengine.utils.searching.snippetTransmitter.contentMatcher.ContentMat
 @Component
 @Lazy
 public class SnippetTransmitterImpl implements SnippetTransmitter {
-    @Setter private PageModel pageModel;
-    private String content;
-    private final ContentMatcher contentMatcher;
-    private final ContentFormatter contentFormatter;
+  @Setter private PageModel pageModel;
+  private String content;
+  private final ContentMatcher contentMatcher;
+  private final ContentFormatter contentFormatter;
 
-    public SnippetTransmitterImpl(ContentMatcher contentMatcher, ContentFormatter contentFormatter) {
-        this.contentMatcher = contentMatcher;
-        this.contentFormatter = contentFormatter;
-    }
+  public SnippetTransmitterImpl(ContentMatcher contentMatcher, ContentFormatter contentFormatter) {
+    this.contentMatcher = contentMatcher;
+    this.contentFormatter = contentFormatter;
+  }
 
-    @Override
-    public String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel) {
+  @Override
+  public String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel) {
 
-        setPageModel(pageModel);
-        setContent();
+    setPageModel(pageModel);
+    setContent();
 
-        Collection<String> matchingSentences =
-                uniqueSet.stream()
-                        .filter(this::itemPageIsEqualToPage)
-                        .map(this::getMatchingSentences)
-                        .toList();
+    Collection<String> matchingSentences =
+        uniqueSet.stream()
+            .filter(this::itemPageIsEqualToPage)
+            .map(this::getMatchingSentences)
+            .toList();
 
-        return String.join("............. ", matchingSentences);
-    }
+    return String.join("............. ", matchingSentences);
+  }
 
-    private boolean itemPageIsEqualToPage(IndexModel item) {
-        return item.getPage().equals(pageModel);
-    }
+  private boolean itemPageIsEqualToPage(IndexModel item) {
+    return item.getPage().equals(pageModel);
+  }
 
-    private String getMatchingSentences(IndexModel item) {
-        String word = getWord(item);
-        return contentFormatter.format(contentMatcher.match(content, word), word);
-    }
+  private String getMatchingSentences(IndexModel item) {
+    String word = getWord(item);
+    return contentFormatter.format(contentMatcher.match(content, word), word);
+  }
 
-    private void setContent() {
-        content =  pageModel.getContent().toLowerCase(Locale.ROOT);
-    }
-    private String getWord(IndexModel item){
-        return item.getLemma().getLemma();
-    }
+  private void setContent() {
+    content = pageModel.getContent().toLowerCase(Locale.ROOT);
+  }
+
+  private String getWord(IndexModel item) {
+    return item.getLemma().getLemma();
+  }
 }

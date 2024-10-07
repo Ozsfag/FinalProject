@@ -30,7 +30,8 @@ public class SearchingImpl implements SearchingService {
   @Override
   public ResponseInterface search(String query, String url, int offset, int limit) {
     SiteModel siteModel = getSiteModel(url);
-    Collection<IndexModel> uniqueSet = queryToIndexesTransformer.transformQueryToIndexModels(query, siteModel);
+    Collection<IndexModel> uniqueSet =
+        queryToIndexesTransformer.transformQueryToIndexModels(query, siteModel);
 
     if (uniqueSet.isEmpty()) {
       return new TotalEmptyResponse(false, "Not found");
@@ -52,8 +53,6 @@ public class SearchingImpl implements SearchingService {
             .findFirst()
             .get();
   }
-
-
 
   /**
    * Generates a list of detailed search responses based on the given parameters.

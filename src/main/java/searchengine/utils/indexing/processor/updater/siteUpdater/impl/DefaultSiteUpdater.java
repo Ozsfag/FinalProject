@@ -1,39 +1,37 @@
 package searchengine.utils.indexing.processor.updater.siteUpdater.impl;
 
 import java.util.Date;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
 import searchengine.model.Status;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.processor.updater.siteUpdater.SiteUpdater;
+import searchengine.utils.lockWrapper.LockWrapper;
 
 @Component
-@RequiredArgsConstructor
 public class DefaultSiteUpdater implements SiteUpdater {
-
-  private final SiteRepository siteRepository;
-  private final ReentrantReadWriteLock lock;
+  @Autowired private LockWrapper lockWrapper;
+  @Autowired private SiteRepository siteRepository;
 
   @Override
   public void updateSiteWhenSuccessful(SiteModel siteModel) {
-    try {
-      lock.writeLock().lock();
-      siteRepository.updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteModel.getUrl());
-    } finally {
-      lock.writeLock().unlock();
-    }
+    lockWrapper.writeLock(
+        () ->
+            getSiteRepository()
+                .updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteModel.getUrl()));
+  }
+
+  private SiteRepository getSiteRepository() {
+    return lockWrapper.readLock(() -> this.siteRepository);
   }
 
   @Override
   public void updateSiteWhenFailed(SiteModel siteModel, Throwable re) {
-    try {
-      lock.writeLock().lock();
-      siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(
-          Status.FAILED, new Date(), re.getLocalizedMessage(), siteModel.getUrl());
-    } finally {
-      lock.writeLock().unlock();
-    }
+    lockWrapper.writeLock(
+        () ->
+            getSiteRepository()
+                .updateStatusAndStatusTimeAndLastErrorByUrl(
+                    Status.FAILED, new Date(), re.getLocalizedMessage(), siteModel.getUrl()));
   }
 }

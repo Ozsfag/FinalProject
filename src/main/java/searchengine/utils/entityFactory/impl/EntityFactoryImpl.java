@@ -1,7 +1,7 @@
 package searchengine.utils.entityFactory.impl;
 
 import java.util.Date;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.dto.indexing.Site;
@@ -10,9 +10,8 @@ import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.webScraper.WebScraper;
 
 @Component
-@RequiredArgsConstructor
 public class EntityFactoryImpl implements EntityFactory {
-  private final WebScraper webScraper;
+  @Autowired private WebScraper webScraper;
 
   @Override
   public SiteModel createSiteModel(Site site) {

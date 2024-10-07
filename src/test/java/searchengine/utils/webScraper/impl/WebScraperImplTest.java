@@ -25,20 +25,17 @@ public class WebScraperImplTest {
   public void setUp() {
     jsoupConnectionBuilder = mock(JsoupConnectionBuilder.class);
     connectionResponseBuilder = mock(ConnectionResponseBuilder.class);
-    webScraper = new WebScraperImpl(jsoupConnectionBuilder, connectionResponseBuilder);
+    webScraper = new WebScraperImpl();
   }
 
   @Test
   public void testValidUrlReturnsConnectionResponse() throws IOException {
     String url = "http://valid.url";
     Connection mockConnection = mock(Connection.class);
-    Connection.Response mockResponse = mock(Connection.Response.class);
     ConnectionResponse expectedResponse = new ConnectionResponse();
 
     when(jsoupConnectionBuilder.createJsoupConnection(url)).thenReturn(mockConnection);
-    when(mockConnection.execute()).thenReturn(mockResponse);
-    when(connectionResponseBuilder.buildConnectionResponse(url, mockResponse, mockConnection))
-        .thenReturn(expectedResponse);
+    when(connectionResponseBuilder.buildConnectionResponse(url)).thenReturn(expectedResponse);
 
     ConnectionResponse actualResponse = webScraper.getConnectionResponse(url);
 
@@ -61,13 +58,10 @@ public class WebScraperImplTest {
   public void testValidUrlResponseCode200() throws IOException {
     String url = "http://valid.url";
     Connection mockConnection = mock(Connection.class);
-    Connection.Response mockResponse = mock(Connection.Response.class);
     ConnectionResponse expectedResponse = new ConnectionResponse();
 
     when(jsoupConnectionBuilder.createJsoupConnection(url)).thenReturn(mockConnection);
-    when(mockConnection.execute()).thenReturn(mockResponse);
-    when(connectionResponseBuilder.buildConnectionResponse(url, mockResponse, mockConnection))
-        .thenReturn(expectedResponse);
+    when(connectionResponseBuilder.buildConnectionResponse(url)).thenReturn(expectedResponse);
 
     ConnectionResponse actualResponse = webScraper.getConnectionResponse(url);
 
@@ -98,15 +92,14 @@ public class WebScraperImplTest {
     final int DEFAULT_STATUS_CODE = 0;
     final String DEFAULT_STATUS_MESSAGE = null;
     // Arrange
-    ConnectionResponse expectedResponse = ConnectionResponse.builder()
-            .errorMessage(EXPECTED_ERROR_MESSAGE)
-            .build();
+    ConnectionResponse expectedResponse =
+        ConnectionResponse.builder().errorMessage(EXPECTED_ERROR_MESSAGE).build();
 
     when(jsoupConnectionBuilder.createJsoupConnection(EMPTY_URL))
-            .thenThrow(new IllegalArgumentException(EXPECTED_ERROR_MESSAGE));
+        .thenThrow(new IllegalArgumentException(EXPECTED_ERROR_MESSAGE));
     when(connectionResponseBuilder.buildConnectionResponseWithException(
             eq(EMPTY_URL), eq(DEFAULT_STATUS_CODE), eq(DEFAULT_STATUS_MESSAGE)))
-            .thenReturn(expectedResponse);
+        .thenReturn(expectedResponse);
 
     // Act
     ConnectionResponse actualResponse = webScraper.getConnectionResponse(EMPTY_URL);
@@ -115,7 +108,8 @@ public class WebScraperImplTest {
     assertEquals(expectedResponse, actualResponse);
     verify(jsoupConnectionBuilder, times(1)).createJsoupConnection(EMPTY_URL);
     verify(connectionResponseBuilder, times(1))
-            .buildConnectionResponseWithException(eq(EMPTY_URL), eq(DEFAULT_STATUS_CODE), eq(DEFAULT_STATUS_MESSAGE));
+        .buildConnectionResponseWithException(
+            eq(EMPTY_URL), eq(DEFAULT_STATUS_CODE), eq(DEFAULT_STATUS_MESSAGE));
   }
 
   @Test
@@ -175,13 +169,10 @@ public class WebScraperImplTest {
   public void testThreadSafetyMultipleRequests() throws IOException {
     String url = "http://valid.url";
     Connection mockConnection = mock(Connection.class);
-    Connection.Response mockResponse = mock(Connection.Response.class);
     ConnectionResponse expectedResponse = new ConnectionResponse();
 
     when(jsoupConnectionBuilder.createJsoupConnection(url)).thenReturn(mockConnection);
-    when(mockConnection.execute()).thenReturn(mockResponse);
-    when(connectionResponseBuilder.buildConnectionResponse(url, mockResponse, mockConnection))
-        .thenReturn(expectedResponse);
+    when(connectionResponseBuilder.buildConnectionResponse(url)).thenReturn(expectedResponse);
 
     ConnectionResponse actualResponse = webScraper.getConnectionResponse(url);
 
@@ -192,15 +183,11 @@ public class WebScraperImplTest {
   public void testConnectionResponseBuilderInjection() throws IOException {
     String testUrl = "http://test.url";
     Connection mockConnection = mock(Connection.class);
-    Connection.Response mockConnectionResponse = mock(Connection.Response.class);
     ConnectionResponse mockResponse =
         new ConnectionResponse("testPath", 200, "testContent", null, null, "testTitle");
 
     when(jsoupConnectionBuilder.createJsoupConnection(testUrl)).thenReturn(mockConnection);
-    when(mockConnection.execute()).thenReturn(mockConnectionResponse);
-    when(connectionResponseBuilder.buildConnectionResponse(
-            testUrl, mockConnectionResponse, mockConnection))
-        .thenReturn(mockResponse);
+    when(connectionResponseBuilder.buildConnectionResponse(testUrl)).thenReturn(mockResponse);
 
     ConnectionResponse response = webScraper.getConnectionResponse(testUrl);
 
@@ -212,7 +199,6 @@ public class WebScraperImplTest {
 
     verify(jsoupConnectionBuilder, times(1)).createJsoupConnection(testUrl);
     verify(mockConnection, times(1)).execute();
-    verify(connectionResponseBuilder, times(1))
-        .buildConnectionResponse(testUrl, mockConnectionResponse, mockConnection);
+    verify(connectionResponseBuilder, times(1)).buildConnectionResponse(testUrl);
   }
 }

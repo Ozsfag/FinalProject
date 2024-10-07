@@ -1,13 +1,12 @@
 package searchengine.utils.webScraper.connectionResponseBuilder;
 
 import java.io.IOException;
-import org.jsoup.Connection;
 import searchengine.dto.indexing.ConnectionResponse;
 
 public interface ConnectionResponseBuilder {
 
-  ConnectionResponse buildConnectionResponse(
-      String url, Connection.Response response, Connection connection) throws IOException;
+  ConnectionResponse buildConnectionResponse(String url) throws IOException;
 
-  ConnectionResponse buildConnectionResponseWithException(String url, int statusCode, String statusMessage);
+  ConnectionResponse buildConnectionResponseWithException(
+      String url, int statusCode, String statusMessage);
 }
