@@ -3,17 +3,15 @@ package searchengine.utils.entitySaver.impl;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.model.PageModel;
 import searchengine.repositories.PageRepository;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
-import searchengine.utils.lockWrapper.LockWrapper;
 
 @Component
-public class PageModelSaver extends EntitySaverTemplate<PageModel> {
-  @Autowired private LockWrapper lockWrapper;
+public class PageModelSaver extends EntitySaverTemplate<PageModel> implements Cloneable {
+  //  @Autowired private LockWrapper lockWrapper;
   @Setter private PageRepository pageRepository;
   private Collection<String> existingPaths;
 
@@ -30,27 +28,14 @@ public class PageModelSaver extends EntitySaverTemplate<PageModel> {
     setFoundedPath(entitiesToValidate);
 
     return entitiesToValidate.stream()
-        .filter(entity -> !getExistingPaths().contains(entity.getPath()))
+        .filter(entity -> !existingPaths.contains(entity.getPath()))
         .collect(Collectors.toSet());
   }
 
   private void setFoundedPath(Collection<PageModel> entitiesToValidate) {
-    lockWrapper.writeLock(
-        () ->
-            this.existingPaths =
-                getPageRepository()
-                    .findAllPathsByPathIn(
-                        entitiesToValidate.stream()
-                            .map(PageModel::getPath)
-                            .collect(Collectors.toSet())));
-  }
-
-  private PageRepository getPageRepository() {
-    return lockWrapper.readLock(() -> this.pageRepository);
-  }
-
-  private Collection<String> getExistingPaths() {
-    return lockWrapper.readLock(() -> this.existingPaths);
+    this.existingPaths =
+        pageRepository.findAllPathsByPathIn(
+            entitiesToValidate.stream().map(PageModel::getPath).collect(Collectors.toSet()));
   }
 
   @Override
@@ -59,21 +44,27 @@ public class PageModelSaver extends EntitySaverTemplate<PageModel> {
   }
 
   private PageModel saveOrSkipPage(PageModel pageModel) {
-    if (isLockedExistedByPath(pageModel.getPath())) {
+    if (isExistedByPath(pageModel.getPath())) {
       return doSaveAndFlush(pageModel);
     }
     return null;
   }
 
-  private boolean isLockedExistedByPath(String path) {
-    return lockWrapper.readLock(() -> !getPageRepository().existsByPath(path));
+  private boolean isExistedByPath(String path) {
+    return !pageRepository.existsByPath(path);
   }
 
   private PageModel doSaveAndFlush(PageModel pageModel) {
-    return lockWrapper.readLock(
-        () -> {
-          lockWrapper.writeLock(() -> getPageRepository().saveAndFlush(pageModel));
-          return pageModel;
-        });
+    return pageRepository.saveAndFlush(pageModel);
+  }
+
+  @Override
+  public PageModelSaver clone() {
+    try {
+      // TODO: copy mutable state here, so the clone can't change the internals of the original
+      return (PageModelSaver) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
   }
 }

@@ -2,7 +2,6 @@ package searchengine.utils.morphology.queryToIndexesTransformer.impl;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import searchengine.config.MorphologySettings;
 import searchengine.model.IndexModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.IndexRepository;
+import searchengine.utils.lockWrapper.LockWrapper;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.morphology.queryToIndexesTransformer.QueryToIndexesTransformer;
 
@@ -19,7 +19,7 @@ import searchengine.utils.morphology.queryToIndexesTransformer.QueryToIndexesTra
 @Lazy
 public class QueryToIndexesTransformerImpl implements QueryToIndexesTransformer {
   @Autowired private Morphology morphology;
-  @Autowired private ReentrantReadWriteLock lock;
+  @Autowired private LockWrapper lockWrapper;
   @Autowired private IndexRepository indexRepository;
   @Autowired private MorphologySettings morphologySettings;
 
@@ -36,14 +36,17 @@ public class QueryToIndexesTransformerImpl implements QueryToIndexesTransformer 
         : findIndexesBy3Params(queryWord, siteModel).stream();
   }
 
-  private synchronized Collection<IndexModel> findIndexesBy2Params(String queryWord) {
-    return indexRepository.findByLemmaAndFrequencyLessThan(
-        queryWord, morphologySettings.getMaxFrequency());
+  private Collection<IndexModel> findIndexesBy2Params(String queryWord) {
+    return lockWrapper.readLock(
+        () ->
+            indexRepository.findByLemmaAndFrequencyLessThan(
+                queryWord, morphologySettings.getMaxFrequency()));
   }
 
-  private synchronized Collection<IndexModel> findIndexesBy3Params(
-      String queryWord, SiteModel siteModel) {
-    return indexRepository.findByLemmaAndFrequencyLessThanAndSiteId(
-        queryWord, morphologySettings.getMaxFrequency(), siteModel.getId());
+  private Collection<IndexModel> findIndexesBy3Params(String queryWord, SiteModel siteModel) {
+    return lockWrapper.readLock(
+        () ->
+            indexRepository.findByLemmaAndFrequencyLessThanAndSiteId(
+                queryWord, morphologySettings.getMaxFrequency(), siteModel.getId()));
   }
 }

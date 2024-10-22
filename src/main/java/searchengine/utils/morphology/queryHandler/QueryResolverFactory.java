@@ -1,5 +1,6 @@
 package searchengine.utils.morphology.queryHandler;
 
+import java.util.Collection;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
@@ -57,7 +58,7 @@ public class QueryResolverFactory {
       String nonLetters,
       LuceneMorphology primaryMorphology,
       LuceneMorphology secondaryMorphology,
-      String[] particles,
+      Collection particles,
       String onlyLetters) {
     return new QueryResolverImpl(
         nonLetters,

@@ -1,20 +1,28 @@
 package searchengine.config;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.Site;
 
-@Getter
-@Setter
-@Builder
 @Component
 @ConfigurationProperties(prefix = "indexing-settings")
-@Lazy
+@NoArgsConstructor(force = true)
 public class SitesList {
-  private List<Site> sites;
+  private Collection<Site> sites;
+
+  public SitesList(Collection<Site> sites) {
+    this.sites = new ArrayList<>(sites);
+  }
+
+  public void setSites(Collection<Site> sites) {
+    this.sites = new ArrayList<>(sites);
+  }
+
+  public List<Site> getSites() {
+    return new ArrayList<>(sites);
+  }
 }

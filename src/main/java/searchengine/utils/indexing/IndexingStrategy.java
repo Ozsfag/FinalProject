@@ -1,7 +1,7 @@
 package searchengine.utils.indexing;
 
 import java.util.*;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
 import searchengine.utils.entityHandlers.IndexHandler;
@@ -27,13 +27,12 @@ import searchengine.utils.morphology.Morphology;
  * @Ozsfag
  */
 @Component
-@RequiredArgsConstructor
 public class IndexingStrategy {
-  private final PageHandler pageHandler;
-  private final EntitySaverTemplate entitySaverTemplate;
-  private final Morphology morphology;
-  private final LemmaHandler lemmaHandler;
-  private final IndexHandler indexHandler;
+  @Autowired private PageHandler pageHandler;
+  @Autowired private EntitySaverTemplate entitySaverTemplate;
+  @Autowired private Morphology morphology;
+  @Autowired private LemmaHandler lemmaHandler;
+  @Autowired private IndexHandler indexHandler;
 
   /**
    * Indexes the lemmas and indexes for a list of pages.

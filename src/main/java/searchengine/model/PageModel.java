@@ -36,7 +36,7 @@ public class PageModel implements Serializable, EntityInterface {
   private String path;
 
   @Column(nullable = false, columnDefinition = "INT")
-  private int code;
+  private Integer code;
 
   @Column(nullable = false, columnDefinition = "TEXT")
   private String content;

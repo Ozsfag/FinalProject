@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Optional;
 import org.jsoup.Connection;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,7 +95,8 @@ public class WebScraperImplTest {
     final String DEFAULT_STATUS_MESSAGE = null;
     // Arrange
     ConnectionResponse expectedResponse =
-        ConnectionResponse.builder().errorMessage(EXPECTED_ERROR_MESSAGE).build();
+        new ConnectionResponse(
+            new ArrayList<>(), EMPTY_URL, "", DEFAULT_STATUS_MESSAGE, "", DEFAULT_STATUS_CODE);
 
     when(jsoupConnectionBuilder.createJsoupConnection(EMPTY_URL))
         .thenThrow(new IllegalArgumentException(EXPECTED_ERROR_MESSAGE));
@@ -184,7 +187,7 @@ public class WebScraperImplTest {
     String testUrl = "http://test.url";
     Connection mockConnection = mock(Connection.class);
     ConnectionResponse mockResponse =
-        new ConnectionResponse("testPath", 200, "testContent", null, null, "testTitle");
+        new ConnectionResponse(new ArrayList<>(), "testPath", "testContent", "", "testTitle", 200);
 
     when(jsoupConnectionBuilder.createJsoupConnection(testUrl)).thenReturn(mockConnection);
     when(connectionResponseBuilder.buildConnectionResponse(testUrl)).thenReturn(mockResponse);
@@ -193,7 +196,7 @@ public class WebScraperImplTest {
 
     assertNotNull(response);
     assertEquals("testPath", response.getPath());
-    assertEquals(200, response.getResponseCode());
+    assertEquals(200, Optional.ofNullable(response.getResponseCode()));
     assertEquals("testContent", response.getContent());
     assertEquals("testTitle", response.getTitle());
 

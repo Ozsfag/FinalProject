@@ -22,7 +22,7 @@ class EntityFactoryTest {
   @BeforeEach
   void setUp() {
     webScraper = mock(WebScraper.class);
-    entityFactory = new EntityFactoryImpl(webScraper);
+    entityFactory = new EntityFactoryImpl();
   }
 
   @Test
@@ -48,14 +48,9 @@ class EntityFactoryTest {
     SiteModel siteModel = SiteModel.builder().build();
     String path = "http://example.com";
     ConnectionResponse connectionResponse =
-        ConnectionResponse.builder()
-            .path(path)
-            .responseCode(200)
-            .content("Example content")
-            .urls(Collections.emptyList())
-            .errorMessage("")
-            .title("Example title")
-            .build();
+        new ConnectionResponse(
+            Collections.emptyList(), path, "Example content", "", "Example title", 200);
+
     when(webScraper.getConnectionResponse(path)).thenReturn(connectionResponse);
 
     PageModel pageModel = entityFactory.createPageModel(siteModel, path);

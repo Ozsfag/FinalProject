@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import searchengine.dto.indexing.Site;
@@ -18,7 +17,6 @@ public class SiteHandlerImplTest {
 
   private SiteRepository siteRepository;
   private EntityFactory entityFactory;
-  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
   private SiteHandlerImpl siteHandler;
 
   @BeforeEach

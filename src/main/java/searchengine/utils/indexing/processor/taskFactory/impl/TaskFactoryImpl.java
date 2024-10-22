@@ -8,17 +8,20 @@ import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.IndexingStrategy;
 import searchengine.utils.indexing.processor.taskFactory.TaskFactory;
 import searchengine.utils.indexing.recursiveParser.RecursiveParser;
+import searchengine.utils.lockWrapper.LockWrapper;
 import searchengine.utils.urlsChecker.UrlsChecker;
 
 @Component
 public class TaskFactoryImpl implements TaskFactory {
   @Autowired private UrlsChecker urlsChecker;
   @Autowired private IndexingStrategy indexingStrategy;
+  @Autowired private LockWrapper lockWrapper;
   @Autowired private SiteRepository siteRepository;
 
   @Override
   public ForkJoinTask<?> initTask(SiteModel siteModel, String url) {
-    RecursiveParser task = new RecursiveParser(urlsChecker, indexingStrategy, siteRepository, this);
+    RecursiveParser task =
+        new RecursiveParser(urlsChecker, indexingStrategy, lockWrapper, siteRepository, this);
     task.init(siteModel, url);
     return task;
   }

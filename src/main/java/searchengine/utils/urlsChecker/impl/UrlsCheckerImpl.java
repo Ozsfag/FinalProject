@@ -21,8 +21,6 @@ public class UrlsCheckerImpl implements UrlsChecker {
   @Autowired private LockWrapper lockWrapper;
   @Autowired private UrlValidator urlValidator;
 
-  //  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
   /**
    * Returns a collection of URLs that have been checked for correctness and duplication.
    *
@@ -35,7 +33,7 @@ public class UrlsCheckerImpl implements UrlsChecker {
     Collection<String> urlsToCheck = fetchUrlsToCheck(href);
 
     Stream<String> filteredUrls = filterOutAlreadyParsedUrls(urlsToCheck, siteModel.getUrl(), href);
-    return filteredUrls.parallel()
+    return filteredUrls
         .filter(url -> urlValidator.isValidUrl(url, siteModel.getUrl()))
         .collect(Collectors.toSet());
   }
@@ -48,16 +46,15 @@ public class UrlsCheckerImpl implements UrlsChecker {
   private Stream<String> filterOutAlreadyParsedUrls(
       Collection<String> scrappedUrls, String siteUrl, String href) {
     Collection<String> alreadyParsedUrls = findAlreadyParsedUrls(scrappedUrls);
-    return scrappedUrls.parallelStream()
+    return scrappedUrls.stream()
         .filter(url -> !alreadyParsedUrls.contains(url))
         .filter(url -> !siteUrl.equals(url))
         .filter(url -> !href.equals(url));
   }
 
   private Collection<String> findAlreadyParsedUrls(Collection<String> urls) {
-    return lockWrapper.readLock(()-> urls.isEmpty() ? Collections.emptyList() : getPageRepository().findAllPathsByPathIn(urls));
-  }
-  private PageRepository getPageRepository() {
-    return lockWrapper.readLock(() -> this.pageRepository);
+    return urls.isEmpty()
+        ? Collections.emptyList()
+        : lockWrapper.readLock(() -> pageRepository.findAllPathsByPathIn(urls));
   }
 }

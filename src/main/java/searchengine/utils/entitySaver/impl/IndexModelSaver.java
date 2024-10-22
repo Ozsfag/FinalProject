@@ -9,7 +9,7 @@ import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 
 @Component
-public class IndexModelSaver extends EntitySaverTemplate<IndexModel> {
+public class IndexModelSaver extends EntitySaverTemplate<IndexModel> implements Cloneable {
 
   public IndexModelSaver(RepositorySelector repositorySelector) {
     super(repositorySelector);
@@ -27,5 +27,14 @@ public class IndexModelSaver extends EntitySaverTemplate<IndexModel> {
     JpaRepository<IndexModel, ?> repository = super.getRepository(entities);
     entities.forEach(repository::saveAndFlush);
     return entities;
+  }
+
+  @Override
+  public IndexModelSaver clone() {
+    try {
+      return (IndexModelSaver) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
   }
 }

@@ -25,12 +25,12 @@ public class ConnectionResponseBuilderImpl implements ConnectionResponseBuilder 
     JsoupConnectionResponseDto response = jsoupConnectionDtoExecutor.executeDto(connection, url);
     Document document = retrieveDocument(connection);
     return new ConnectionResponse(
-        url,
-        response.getStatusCode(),
-        documentExtractor.extractContent(document),
         documentExtractor.extractUrls(document),
+        url,
+        documentExtractor.extractContent(document),
         response.getStatusMessage(),
-        documentExtractor.extractTitle(document));
+        documentExtractor.extractTitle(document),
+        response.getStatusCode());
   }
 
   private Document retrieveDocument(Connection connection) throws IOException {
@@ -40,6 +40,6 @@ public class ConnectionResponseBuilderImpl implements ConnectionResponseBuilder 
   @Override
   public ConnectionResponse buildConnectionResponseWithException(
       String url, int statusCode, String statusMessage) {
-    return new ConnectionResponse(url, statusCode, "", new ArrayList<>(), statusMessage, "");
+    return new ConnectionResponse(new ArrayList<>(), url, "", statusMessage, "", statusCode);
   }
 }

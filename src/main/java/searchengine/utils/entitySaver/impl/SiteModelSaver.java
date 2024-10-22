@@ -10,7 +10,7 @@ import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySel
 
 @Component
 @Primary
-public class SiteModelSaver extends EntitySaverTemplate<SiteModel> {
+public class SiteModelSaver extends EntitySaverTemplate<SiteModel> implements Cloneable {
 
   public SiteModelSaver(RepositorySelector repositorySelector) {
     super(repositorySelector);
@@ -27,5 +27,14 @@ public class SiteModelSaver extends EntitySaverTemplate<SiteModel> {
     JpaRepository<SiteModel, ?> repository = super.getRepository(entities);
     entities.forEach(repository::saveAndFlush);
     return entities;
+  }
+
+  @Override
+  public SiteModelSaver clone() {
+    try {
+      return (SiteModelSaver) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
   }
 }

@@ -20,7 +20,7 @@ import lombok.*;
 @RequiredArgsConstructor
 @Builder
 @AllArgsConstructor
-public class SiteModel implements Serializable, EntityInterface {
+public class SiteModel implements Serializable, EntityInterface, Cloneable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "site_id", columnDefinition = "INT")
@@ -51,4 +51,14 @@ public class SiteModel implements Serializable, EntityInterface {
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   private Set<LemmaModel> lemma;
+
+  @Override
+  public SiteModel clone() {
+    try {
+      // TODO: copy mutable state here, so the clone can't change the internals of the original
+      return (SiteModel) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
+  }
 }

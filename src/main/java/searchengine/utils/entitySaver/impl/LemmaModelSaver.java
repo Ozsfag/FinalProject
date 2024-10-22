@@ -9,7 +9,7 @@ import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 
 @Component
-public class LemmaModelSaver extends EntitySaverTemplate<LemmaModel> {
+public class LemmaModelSaver extends EntitySaverTemplate<LemmaModel> implements Cloneable {
 
   public LemmaModelSaver(RepositorySelector repositorySelector) {
     super(repositorySelector);
@@ -27,5 +27,14 @@ public class LemmaModelSaver extends EntitySaverTemplate<LemmaModel> {
     JpaRepository<LemmaModel, ?> repository = super.getRepository(entities);
     entities.forEach(repository::saveAndFlush);
     return entities;
+  }
+
+  @Override
+  public LemmaModelSaver clone() {
+    try {
+      return (LemmaModelSaver) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
   }
 }

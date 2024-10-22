@@ -1,13 +1,15 @@
 package searchengine.dto.statistics.responseImpl;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import searchengine.dto.ResponseInterface;
 import searchengine.dto.statistics.StatisticsData;
 
-@Data
 @RequiredArgsConstructor
+@NoArgsConstructor(force = true)
+@Getter
 public class StatisticsResponse implements ResponseInterface {
-  private final boolean result;
+  private final Boolean result;
   private final StatisticsData statistics;
 }

@@ -1,10 +1,8 @@
 package searchengine.utils.entitySaver;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,15 +11,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
+import searchengine.utils.lockWrapper.LockWrapper;
 
 @Component
 @RequiredArgsConstructor
 public abstract class EntitySaverTemplate<T> {
   @Autowired @Lazy private SaverSelector saverSelector;
-  @Autowired private ReentrantReadWriteLock lock;
+  @Autowired private LockWrapper lockWrapper;
   public final RepositorySelector repositorySelector;
-
-  @Setter private Collection<T> entities;
 
   /**
    * Saves a collection of entities.
@@ -30,8 +27,9 @@ public abstract class EntitySaverTemplate<T> {
    * @return the saved entities
    */
   public Collection<T> saveEntities(Collection<T> entities) {
-    setEntities(getValidatedEntitiesBeforeSaving(entities));
-    return performSaveEntities();
+    if (entities.isEmpty()) return Collections.EMPTY_LIST;
+    Collection<T> validatedEntities = getValidatedEntitiesBeforeSaving(entities);
+    return performSaveEntities(validatedEntities);
   }
 
   /**
@@ -43,26 +41,20 @@ public abstract class EntitySaverTemplate<T> {
   protected abstract Collection<T> getValidatedEntitiesBeforeSaving(
       Collection<T> entitiesToValidate);
 
-  private Collection<T> performSaveEntities() {
+  private Collection<T> performSaveEntities(Collection<T> validatedEntities) {
     try {
-      return lockedSaveAllEntities(entities);
+      return saveAllEntities(validatedEntities);
     } catch (DataIntegrityViolationException e) {
-      return lockedSaveEntityWhenException(entities);
+      return saveEntityWhenException(validatedEntities);
     }
   }
 
   @Transactional
-  private List<T> lockedSaveAllEntities(Collection<T> entities)
+  private Collection<T> saveAllEntities(Collection<T> validatedEntities)
       throws DataIntegrityViolationException {
-    JpaRepository<T, ?> repository = getRepository(entities);
-    lock.writeLock().lock();
-    try {
-      List<T> result = repository.saveAll(entities);
-      repository.flush();
-      return result;
-    } finally {
-      lock.writeLock().unlock();
-    }
+    JpaRepository<T, ?> repository = getRepository(validatedEntities);
+    lockWrapper.writeLock(() -> repository.saveAllAndFlush(validatedEntities));
+    return validatedEntities;
   }
 
   /**
@@ -75,17 +67,12 @@ public abstract class EntitySaverTemplate<T> {
     return repositorySelector.getRepository(entities);
   }
 
-  private Collection<T> lockedSaveEntityWhenException(Collection<T> entities) {
-    lock.writeLock().lock();
-    try {
-      return getSaver(entities).saveIndividuallyAndFlush(entities);
-    } finally {
-      lock.writeLock().unlock();
-    }
+  private Collection<T> saveEntityWhenException(Collection<T> validatedEntities) {
+    return getSaverForEntityType(validatedEntities).saveIndividuallyAndFlush(validatedEntities);
   }
 
-  private EntitySaverTemplate<T> getSaver(Collection<T> entities) {
-    return saverSelector.getSaver(entities);
+  private EntitySaverTemplate<T> getSaverForEntityType(Collection<T> validatedEntities) {
+    return saverSelector.getSaver(validatedEntities);
   }
 
   /**

@@ -19,10 +19,7 @@ public class IndexingConfiguration {
   @Bean
   public ForkJoinPool forkJoinPool() {
     return new ForkJoinPool(
-        Runtime.getRuntime().availableProcessors() - ForkJoinPool.commonPool().getPoolSize(),
-        ForkJoinPool.defaultForkJoinWorkerThreadFactory,
-        null,
-        true);
+        sitesList.getSites().size(), ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, true);
   }
 
   /**

@@ -46,14 +46,7 @@ public class MorphologyTest {
     when(wordsCounterFactory.createEnglishWordCounter()).thenReturn(englishWordCounter);
     when(wordsCounterFactory.createRussianWordCounter()).thenReturn(russianWordCounter);
 
-    morphologyImpl =
-        new MorphologyImpl(
-            russianLuceneMorphology,
-            englishLuceneMorphology,
-            morphologySettings,
-            validator,
-            wordsCounterFactory,
-            queryResolverFactory);
+    morphologyImpl = new MorphologyImpl();
   }
 
   @Test
@@ -182,14 +175,7 @@ public class MorphologyTest {
     when(englishWordCounter.countWordsFromContent(content)).thenReturn(Map.of());
     when(russianWordCounter.countWordsFromContent(content)).thenReturn(Map.of());
 
-    MorphologyImpl morphologyImplWithNullSettings =
-        new MorphologyImpl(
-            russianLuceneMorphology,
-            englishLuceneMorphology,
-            null,
-            validator,
-            wordsCounterFactory,
-            queryResolverFactory);
+    MorphologyImpl morphologyImplWithNullSettings = new MorphologyImpl();
 
     // Act
     Map<String, Integer> actualFrequency =

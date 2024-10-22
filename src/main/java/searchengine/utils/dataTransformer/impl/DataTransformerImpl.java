@@ -3,7 +3,6 @@ package searchengine.utils.dataTransformer.impl;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -13,10 +12,9 @@ import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.validator.Validator;
 
 @Component
-@Data
 public class DataTransformerImpl implements DataTransformer {
   @Autowired @Lazy private SitesList sitesList;
-  @Autowired @Lazy private final Validator validator;
+  @Autowired @Lazy private Validator validator;
 
   @Override
   public Collection<String> transformUrlToUrls(String url) {

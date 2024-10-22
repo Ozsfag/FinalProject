@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
-import searchengine.config.MorphologySettings;
 
 public class ValidatorTest {
 
@@ -14,7 +13,6 @@ public class ValidatorTest {
   @Test
   public void test_valid_url_returns_correct_components() throws URISyntaxException {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "http://example.com/path";
     String[] expectedComponents = {"http://example.com/", "/path", "example"};
@@ -29,7 +27,6 @@ public class ValidatorTest {
   public void url_with_valid_scheme_and_host_but_empty_path_returns_correct_components()
       throws URISyntaxException {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "http://example.com";
     String[] expectedComponents = {"http://example.com/", "", "example"};
@@ -43,7 +40,6 @@ public class ValidatorTest {
   @Test
   public void test_valid_url_components_extraction() throws URISyntaxException {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "http://example.com/path";
     String[] expectedComponents = {"http://example.com/", "/path", "example"};
@@ -57,7 +53,6 @@ public class ValidatorTest {
   @Test
   public void test_url_missing_scheme_throws_exception() {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "://example.com/path";
 
@@ -68,7 +63,6 @@ public class ValidatorTest {
   @Test
   public void url_with_missing_host_throws_uri_syntax_exception() {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "httzxczxcz";
 
@@ -79,7 +73,6 @@ public class ValidatorTest {
   @Test
   public void url_with_missing_path_throws_uri_syntax_exception() {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "htzxczxc";
 
@@ -90,7 +83,6 @@ public class ValidatorTest {
   @Test
   public void url_with_invalid_format_throws_uri_syntax_exception() {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String invalidUrl = "invalid_url";
 
@@ -101,7 +93,6 @@ public class ValidatorTest {
   @Test
   public void url_with_special_characters_returns_correct_components() throws URISyntaxException {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "http://example.com/path?query=1";
     String[] expectedComponents = {"http://example.com/", "/path", "example"};
@@ -115,7 +106,6 @@ public class ValidatorTest {
   @Test
   public void url_with_subdomains_returns_correct_host_component() throws URISyntaxException {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "http://sub.example.com/path";
     String[] expectedComponents = {"http://sub.example.com/", "/path", "sub"};
@@ -129,7 +119,6 @@ public class ValidatorTest {
   @Test
   public void url_with_port_returns_correct_components() throws URISyntaxException {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "http://example.com:8080/path";
     String[] expectedComponents = {"http://example.com/", "/path", "example"};
@@ -143,7 +132,6 @@ public class ValidatorTest {
   @Test
   public void url_with_query_parameters_returns_correct_components() throws URISyntaxException {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "http://example.com/path?query=parameters";
     String[] expectedComponents = {"http://example.com/", "/path", "example"};
@@ -157,7 +145,6 @@ public class ValidatorTest {
   @Test
   public void url_with_fragment_returns_correct_components() throws URISyntaxException {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "http://example.com/path#fragment";
     String[] expectedComponents = {"http://example.com/", "/path", "example"};
@@ -171,7 +158,6 @@ public class ValidatorTest {
   @Test
   public void url_with_ip_address_returns_correct_components() throws URISyntaxException {
     Validator validator = new Validator();
-    MorphologySettings morphologySettings = new MorphologySettings();
 
     String url = "http://192.168.0.1/path";
     String[] expectedComponents = {"http://192.168.0.1/", "/path", "192"};

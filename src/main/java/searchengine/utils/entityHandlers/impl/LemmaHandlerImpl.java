@@ -2,10 +2,6 @@ package searchengine.utils.entityHandlers.impl;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.model.LemmaModel;
 import searchengine.model.SiteModel;
@@ -15,88 +11,56 @@ import searchengine.utils.entityHandlers.LemmaHandler;
 import searchengine.utils.lockWrapper.LockWrapper;
 
 @Component
-@EqualsAndHashCode
 public class LemmaHandlerImpl implements LemmaHandler {
-  @Autowired private LockWrapper lockWrapper;
-  @Autowired private LemmaRepository lemmaRepository;
-  @Autowired private EntityFactory entityFactory;
+  private final LockWrapper lockWrapper;
+  private final LemmaRepository lemmaRepository;
+  private final EntityFactory entityFactory;
 
-  @Setter @Getter private SiteModel siteModel;
-  private Map<String, Integer> countedWords;
-  private Collection<LemmaModel> existedLemmaModels;
+  public LemmaHandlerImpl(
+      LockWrapper lockWrapper, LemmaRepository lemmaRepository, EntityFactory entityFactory) {
+    this.lockWrapper = lockWrapper;
+    this.lemmaRepository = lemmaRepository;
+    this.entityFactory = entityFactory;
+  }
 
   @Override
   public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
       SiteModel siteModel, Map<String, Integer> wordsCount) {
-
-    setSiteModel(siteModel);
-    setCountedWords(wordsCount);
-
-    setExistedLemmaModels();
-
-    setCountedWords(getFilteredExistedLemmasFromCountedWords());
-
-    getExistedLemmaModels().addAll(getNewLemmas());
-
-    return getExistedLemmaModels();
+    Collection<LemmaModel> existedLemmaModels = getExistedLemmaModels(siteModel, wordsCount);
+    Collection<LemmaModel> newLemmas = getNewLemmas(wordsCount, siteModel, existedLemmaModels);
+    existedLemmaModels.addAll(newLemmas);
+    return Collections.unmodifiableCollection(existedLemmaModels);
   }
 
-  private void setCountedWords(Map<String, Integer> countedWords) {
-    lockWrapper.writeLock(() -> this.countedWords = countedWords);
+  private Collection<LemmaModel> getExistedLemmaModels(
+      SiteModel siteModel, Map<String, Integer> wordsCount) {
+    Collection<String> countedWords = wordsCount.keySet();
+    return countedWords.isEmpty()
+        ? Collections.emptySet()
+        : getFoundedLemmas(siteModel, countedWords);
   }
 
-  private void setExistedLemmaModels() {
-    lockWrapper.writeLock(
-        () ->
-            this.existedLemmaModels =
-                getCountedWords().keySet().isEmpty() ? Collections.emptySet() : getFoundedLemmas());
-  }
-
-  private Map<String, Integer> getCountedWords() {
-    return lockWrapper.readLock(() -> this.countedWords);
-  }
-
-  private Collection<LemmaModel> getFoundedLemmas() {
+  private Collection<LemmaModel> getFoundedLemmas(
+      SiteModel siteModel, Collection<String> countedWords) {
     return lockWrapper.readLock(
-        () ->
-            getLemmaRepository()
-                .findByLemmaInAndSiteId(getCountedWords().keySet(), getSiteModel().getId()));
+        () -> lemmaRepository.findByLemmaInAndSiteId(countedWords, siteModel.getId()));
   }
 
-  private LemmaRepository getLemmaRepository() {
-    return lockWrapper.readLock(() -> this.lemmaRepository);
+  private Collection<LemmaModel> getNewLemmas(
+      Map<String, Integer> countedWords,
+      SiteModel siteModel,
+      Collection<LemmaModel> existedLemmaModels) {
+    return countedWords.entrySet().parallelStream()
+        .filter(entry -> !isExistedLemma(entry.getKey(), existedLemmaModels))
+        .map(entry -> createLemmaModel(siteModel, entry))
+        .collect(Collectors.toSet());
   }
 
-  private Map<String, Integer> getFilteredExistedLemmasFromCountedWords() {
-    return lockWrapper.readLock(
-        () ->
-            getCountedWords().entrySet().stream()
-                .filter(this::isNotExistedLemma)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+  private boolean isExistedLemma(String lemma, Collection<LemmaModel> existedLemmaModels) {
+    return existedLemmaModels.parallelStream().map(LemmaModel::getLemma).toList().contains(lemma);
   }
 
-  private boolean isNotExistedLemma(Map.Entry<String, Integer> entry) {
-    return lockWrapper.readLock(
-        () ->
-            !getExistedLemmaModels().parallelStream()
-                .map(LemmaModel::getLemma)
-                .toList()
-                .contains(entry.getKey()));
-  }
-
-  private Collection<LemmaModel> getExistedLemmaModels() {
-    return lockWrapper.readLock(() -> this.existedLemmaModels);
-  }
-
-  private Collection<LemmaModel> getNewLemmas() {
-    return lockWrapper.readLock(
-        () ->
-            getCountedWords().entrySet().parallelStream()
-                .map(this::createLemmaModel)
-                .collect(Collectors.toSet()));
-  }
-
-  private LemmaModel createLemmaModel(Map.Entry<String, Integer> entry) {
-    return entityFactory.createLemmaModel(getSiteModel(), entry.getKey(), entry.getValue());
+  private LemmaModel createLemmaModel(SiteModel siteModel, Map.Entry<String, Integer> entry) {
+    return entityFactory.createLemmaModel(siteModel, entry.getKey(), entry.getValue());
   }
 }

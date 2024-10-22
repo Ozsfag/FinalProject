@@ -27,67 +27,42 @@ public class StatisticsDtoFactoryImpl implements StatisticsDtoFactory {
 
   @Override
   public TotalStatistics getTotalStatistics() {
-    return TotalStatistics.builder()
-        .sites(getLockedSites().getSites().size())
-        .indexing(IndexingImpl.isIndexing)
-        .pages(getPagesCount())
-        .lemmas(getLemmasCount())
-        .build();
-  }
-
-  private SitesList getLockedSites() {
-    return lockWrapper.readLock(() -> this.sites);
+    return new TotalStatistics(
+        sites.getSites().size(), getPagesCount(), getLemmasCount(), IndexingImpl.isIndexing);
   }
 
   private long getPagesCount() {
-    return lockWrapper.readLock(() -> getPageRepository().count());
-  }
-
-  private PageRepository getPageRepository() {
-    return lockWrapper.readLock(() -> this.pageRepository);
+    return lockWrapper.readLock(() -> pageRepository.count());
   }
 
   private long getLemmasCount() {
-    return lockWrapper.readLock(() -> getLemmaRepository().count());
-  }
-
-  private LemmaRepository getLemmaRepository() {
-    return lockWrapper.readLock(() -> this.lemmaRepository);
+    return lockWrapper.readLock(() -> pageRepository.count());
   }
 
   @Override
   public DetailedStatisticsItem getEmptyDetailedStatisticsItem() {
-    return DetailedStatisticsItem.builder()
-        .name("")
-        .url("")
-        .pages(0)
-        .lemmas(0)
-        .status("")
-        .error("")
-        .statusTime(new Date().getTime())
-        .build();
+    return new DetailedStatisticsItem("", "", "", "", new Date().getTime(), 0L, 0L);
   }
 
   @Override
   public DetailedStatisticsItem getDetailedStatisticsItem(Site site, SiteModel siteModel) {
-    return DetailedStatisticsItem.builder()
-        .name(site.getName())
-        .url(site.getUrl())
-        .pages(siteModel.getPages().size())
-        .lemmas(getLockedLemmasCountedBySiteUrl(site.getUrl()))
-        .status(String.valueOf(siteModel.getStatus()))
-        .error(siteModel.getLastError())
-        .statusTime(siteModel.getStatusTime().getTime())
-        .build();
+    return new DetailedStatisticsItem(
+        site.getUrl(),
+        site.getName(),
+        String.valueOf(siteModel.getStatus()),
+        siteModel.getLastError(),
+        siteModel.getStatusTime().getTime(),
+        (long) siteModel.getPages().size(),
+        getLockedLemmasCountedBySiteUrl(site.getUrl()));
   }
 
   private long getLockedLemmasCountedBySiteUrl(String url) {
-    return lockWrapper.readLock(() -> getLemmaRepository().countBySiteUrl(url));
+    return lockWrapper.readLock(() -> lemmaRepository.countBySiteUrl(url));
   }
 
   @Override
   public StatisticsData getStatisticsData(
       TotalStatistics total, Collection<DetailedStatisticsItem> detailed) {
-    return StatisticsData.builder().total(total).detailed(detailed).build();
+    return new StatisticsData(total, detailed);
   }
 }

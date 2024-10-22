@@ -3,8 +3,6 @@ package searchengine.utils.entityHandlers.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
@@ -21,72 +19,36 @@ public class IndexHandlerImpl implements IndexHandler {
   @Autowired private IndexRepository indexRepository;
   @Autowired private EntityFactory entityFactory;
 
-  @Setter @Getter private PageModel pageModel;
-  private Collection<LemmaModel> lemmas;
-  private Collection<IndexModel> existingIndexModels;
-
   @Override
   public Collection<IndexModel> getIndexedIndexModelsFromCountedWords(
       PageModel pageModel, Collection<LemmaModel> lemmas) {
 
-    setPageModel(pageModel);
-    setLemmas(lemmas);
+    Collection<IndexModel> existingIndexModels =  getExistingIndexesFromLemmasByPage(lemmas, pageModel);
 
-    setExistingIndexes();
-    setLemmas(getFilteredExistedIndexesFromNew());
-    getExistingIndexModels().addAll(getNewIndexes());
+    Collection<IndexModel> updatedIndexModel = getUpdateExistedIndexModel(existingIndexModels, lemmas, pageModel);
 
-    return getExistingIndexModels();
+    return Collections.unmodifiableCollection(updatedIndexModel);
   }
 
-  private void setLemmas(Collection<LemmaModel> lemmas) {
-    lockWrapper.writeLock(() -> this.lemmas = lemmas);
+  private Collection<IndexModel> getExistingIndexesFromLemmasByPage(Collection<LemmaModel> lemmas, PageModel pageModel) {
+    return lemmas.isEmpty() ? Collections.emptySet() : getFoundedIndexes(lemmas, pageModel);
   }
 
-  private Collection<LemmaModel> getLemmas() {
-    return lockWrapper.readLock(() -> this.lemmas);
-  }
-
-  private void setExistingIndexes() {
-    lockWrapper.writeLock(
-        () ->
-            this.existingIndexModels =
-                getLemmas().isEmpty() ? Collections.emptySet() : getFoundedIndexes());
-  }
-
-  private Collection<IndexModel> getFoundedIndexes() {
+  private Collection<IndexModel> getFoundedIndexes(Collection<LemmaModel> lemmas, PageModel pageModel) {
     return lockWrapper.readLock(
-        () -> getIndexRepository().findByPageIdAndLemmaIn(getPageModel().getId(), getLemmas()));
+        () -> indexRepository.findByPageIdAndLemmaIn(pageModel.getId(), lemmas));
   }
 
-  private IndexRepository getIndexRepository() {
-    return lockWrapper.readLock(() -> this.indexRepository);
+  private Collection<IndexModel> getUpdateExistedIndexModel(Collection<IndexModel> existingIndexModels, Collection<LemmaModel> lemmas, PageModel pageModel) {
+      existingIndexModels.addAll(getNewIndexesByLemmaAndPage(lemmas, pageModel));
+    return existingIndexModels;
   }
 
-  private Collection<LemmaModel> getFilteredExistedIndexesFromNew() {
-    return lockWrapper.readLock(
-        () -> getLemmas().stream().filter(this::isNotExistedLemma).toList());
+  private Collection<IndexModel> getNewIndexesByLemmaAndPage(Collection<LemmaModel> lemmas, PageModel pageModel) {
+    return lemmas.parallelStream().map(lemmaModel -> createIndexModel(lemmaModel, pageModel)).collect(Collectors.toSet());
   }
 
-  private boolean isNotExistedLemma(LemmaModel lemmaModel) {
-    return lockWrapper.readLock(
-        () ->
-            !getExistingIndexModels().parallelStream()
-                .map(IndexModel::getLemma)
-                .toList()
-                .contains(lemmaModel.getLemma()));
-  }
-
-  private Collection<IndexModel> getExistingIndexModels() {
-    return lockWrapper.readLock(() -> this.existingIndexModels);
-  }
-
-  private Collection<IndexModel> getNewIndexes() {
-    return lockWrapper.readLock(
-        () -> getLemmas().parallelStream().map(this::createIndexModel).collect(Collectors.toSet()));
-  }
-
-  private IndexModel createIndexModel(LemmaModel lemma) {
-    return entityFactory.createIndexModel(getPageModel(), lemma, (float) lemma.getFrequency());
+  private IndexModel createIndexModel(LemmaModel lemma, PageModel pageModel) {
+    return entityFactory.createIndexModel(pageModel, lemma, (float) lemma.getFrequency());
   }
 }

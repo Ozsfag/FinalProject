@@ -1,9 +1,10 @@
 package searchengine.services.indexing.impl;
 
 import java.util.concurrent.CompletableFuture;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
@@ -17,15 +18,15 @@ import searchengine.utils.indexing.IndexingStrategy;
 import searchengine.utils.indexing.executor.Executor;
 
 @Service
-@RequiredArgsConstructor
+@Getter
 @Slf4j
 public class IndexingImpl implements IndexingService {
 
-  public static volatile boolean isIndexing = true;
-  public final Executor executor;
-  private final DataTransformer dataTransformer;
-  private final IndexingStrategy indexingStrategy;
-  private final SiteHandler siteHandler;
+  public static volatile Boolean isIndexing = true;
+  @Autowired private Executor executor;
+  @Autowired private DataTransformer dataTransformer;
+  @Autowired private IndexingStrategy indexingStrategy;
+  @Autowired private SiteHandler siteHandler;
 
   @Override
   public ResponseInterface startIndexing() {
@@ -33,32 +34,36 @@ public class IndexingImpl implements IndexingService {
       return new Bad(false, "Индексация уже запущена");
     }
 
-    CompletableFuture.runAsync(executor::executeIndexing);
+    CompletableFuture.runAsync(getExecutor()::executeIndexing);
     return new Successful(true);
   }
 
-  private boolean isIndexingAlreadyRunning() {
+  private Boolean isIndexingAlreadyRunning() {
     return !isIndexing;
   }
 
   @Override
   public ResponseInterface stopIndexing() {
     if (!isIndexing) return new Stop(false, "Индексация не запущена");
-    isIndexing = false;
+    setIsIndexingToFalse();
     return new Stop(true, "Индексация остановлена пользователем");
+  }
+
+  private void setIsIndexingToFalse() {
+    isIndexing = false;
   }
 
   @SneakyThrows
   @Override
   public ResponseInterface indexPage(String url) {
     SiteModel siteModel = getSiteModelByUrl(url);
-    indexingStrategy.processIndexing(dataTransformer.transformUrlToUrls(url), siteModel);
+    getIndexingStrategy().processIndexing(getDataTransformer().transformUrlToUrls(url), siteModel);
     return new Successful(true);
   }
 
   private SiteModel getSiteModelByUrl(String url) {
-    return siteHandler
-        .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
+    return getSiteHandler()
+        .getIndexedSiteModelFromSites(getDataTransformer().transformUrlToSites(url))
         .iterator()
         .next();
   }

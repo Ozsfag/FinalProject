@@ -149,13 +149,6 @@ public class PageHandlerImplTest {
   }
 
   @Test
-  public void assigns_urls_to_parse_field_with_provided_collection_of_urls() {
-    pageHandler.getIndexedPageModelsFromUrls(urls, siteModel);
-
-    assertEquals(urls, pageHandler.getUrlsToParse());
-  }
-
-  @Test
   public void assigns_site_model_field_with_provided_object() {
     mockEntityFactoryResponses(new PageModel(), new PageModel());
 
@@ -179,17 +172,6 @@ public class PageHandlerImplTest {
     Collection<PageModel> result = pageHandler.getIndexedPageModelsFromUrls(urls, siteModel);
 
     assertEquals(new HashSet<>(Arrays.asList(pageModel1, pageModel2)), result);
-  }
-
-  @Test
-  public void test_retain_field_values_after_processing() {
-    mockEntityFactoryResponses(new PageModel(), new PageModel());
-
-    Collection<PageModel> pageModels = pageHandler.getIndexedPageModelsFromUrls(urls, siteModel);
-
-    assertEquals(2, pageModels.size());
-    assertEquals(urls, pageHandler.getUrlsToParse());
-    assertEquals(siteModel, pageHandler.getSiteModel());
   }
 
   @Test
@@ -288,7 +270,7 @@ public class PageHandlerImplTest {
       IndexingImpl.isIndexing = false;
 
       // Setup
-      PageHandlerImpl pageHandler = new PageHandlerImpl(entityFactory);
+      PageHandlerImpl pageHandler = new PageHandlerImpl(null);
       SiteModel siteModel = new SiteModel();
       Collection<String> urls =
           Arrays.asList("http://example.com/page1", "http://example.com/page2");

@@ -1,10 +1,9 @@
 package searchengine.utils.entitySaver.selectors.repositorySelector.impl;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
@@ -16,29 +15,37 @@ import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
+import searchengine.utils.lockWrapper.LockWrapper;
 
 @Component
 public class RepositorySelectorImpl implements RepositorySelector {
-  @Autowired private SiteRepository siteRepository;
-  @Autowired private PageRepository pageRepository;
-  @Autowired private LemmaRepository lemmaRepository;
-  @Autowired private IndexRepository indexRepository;
-  private volatile Map<Class<?>, JpaRepository> entityRepositories;
+  private final SiteRepository siteRepository;
+  private final PageRepository pageRepository;
+  private final LemmaRepository lemmaRepository;
+  private final IndexRepository indexRepository;
+  private final Map<Class<?>, JpaRepository> entityRepositories;
+
+  public RepositorySelectorImpl(
+      SiteRepository siteRepository,
+      PageRepository pageRepository,
+      LemmaRepository lemmaRepository,
+      IndexRepository indexRepository,
+      LockWrapper lockWrapper) {
+    this.siteRepository = siteRepository;
+    this.pageRepository = pageRepository;
+    this.lemmaRepository = lemmaRepository;
+    this.indexRepository = indexRepository;
+    this.entityRepositories = new ConcurrentHashMap<>();
+  }
 
   @Override
   public JpaRepository getRepository(Collection<?> entities) {
-    if (entities.isEmpty()) {
-      return null;
-    }
-
-    Object entity = entities.iterator().next();
-    Class<?> entityType = entity.getClass();
+    Class<?> entityType = entities.stream().findFirst().get().getClass();
     return entityRepositories.get(entityType);
   }
 
   @PostConstruct
   public void init() {
-    entityRepositories = new HashMap<>();
     entityRepositories.put(SiteModel.class, siteRepository);
     entityRepositories.put(PageModel.class, pageRepository);
     entityRepositories.put(LemmaModel.class, lemmaRepository);

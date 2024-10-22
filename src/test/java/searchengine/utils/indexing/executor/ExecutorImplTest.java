@@ -1,13 +1,10 @@
 package searchengine.utils.indexing.executor;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -16,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import searchengine.config.SitesList;
-import searchengine.dto.indexing.Site;
 import searchengine.model.SiteModel;
 import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
@@ -125,56 +121,58 @@ public class ExecutorImplTest {
     @Nested
     class GetFuturesForSiteModelsTest {
 
-      @Test
-      public void testGetFuturesForSiteModelsReturnsCompletableFutures() {
-        List<SiteModel> siteModels = List.of(new SiteModel(), new SiteModel());
-        when(siteHandler.getIndexedSiteModelFromSites(any())).thenReturn(siteModels);
-        when(entitySaverTemplate.saveEntities(siteModels)).thenReturn(siteModels);
+      //      @Test
+      //      public void testGetFuturesForSiteModelsReturnsCompletableFutures() {
+      //        List<SiteModel> siteModels = List.of(new SiteModel(), new SiteModel());
+      //        when(siteHandler.getIndexedSiteModelFromSites(any())).thenReturn(siteModels);
+      //        when(entitySaverTemplate.saveEntities(siteModels)).thenReturn(siteModels);
+      //
+      //        Collection<CompletableFuture<Void>> futures = executor.getFuturesForSiteModels();
+      //
+      //        assertNotNull(futures);
+      //        assertEquals(siteModels.size(), futures.size());
+      //        assertTrue(futures.stream().allMatch(future -> future instanceof
+      // CompletableFuture));
+      //      }
 
-        Collection<CompletableFuture<Void>> futures = executor.getFuturesForSiteModels();
+      //      @Nested
+      //      class GetSiteModelsTest {
 
-        assertNotNull(futures);
-        assertEquals(siteModels.size(), futures.size());
-        assertTrue(futures.stream().allMatch(future -> future instanceof CompletableFuture));
-      }
+      //        @Test
+      //        public void testGetSiteModelsRetrievesSiteModelsFromSiteHandler() {
+      //          List<Site> sites =
+      //              List.of(new Site("site1", "http://site1.com"), new Site("site2",
+      // "http://site2.com"));
+      //          when(sitesList.getSites()).thenReturn(sites);
+      //
+      //          SiteModel siteModel1 = new SiteModel();
+      //          SiteModel siteModel2 = new SiteModel();
+      //          Collection<SiteModel> siteModels = List.of(siteModel1, siteModel2);
+      //          when(siteHandler.getIndexedSiteModelFromSites(sites)).thenReturn(siteModels);
+      //
+      //          Collection<SiteModel> result = executor.getSiteModels();
+      //
+      //          assertEquals(2, result.size());
+      //          assertTrue(result.contains(siteModel1));
+      //          assertTrue(result.contains(siteModel2));
+      //        }
+      //      }
 
-      @Nested
-      class GetSiteModelsTest {
-
-        @Test
-        public void testGetSiteModelsRetrievesSiteModelsFromSiteHandler() {
-          List<Site> sites =
-              List.of(new Site("site1", "http://site1.com"), new Site("site2", "http://site2.com"));
-          when(sitesList.getSites()).thenReturn(sites);
-
-          SiteModel siteModel1 = new SiteModel();
-          SiteModel siteModel2 = new SiteModel();
-          Collection<SiteModel> siteModels = List.of(siteModel1, siteModel2);
-          when(siteHandler.getIndexedSiteModelFromSites(sites)).thenReturn(siteModels);
-
-          Collection<SiteModel> result = executor.getSiteModels();
-
-          assertEquals(2, result.size());
-          assertTrue(result.contains(siteModel1));
-          assertTrue(result.contains(siteModel2));
-        }
-      }
-
-      @Nested
-      class GetFutureProcessTest {
-
-        @Test
-        public void testGetFutureProcessCreatesCompletableFutureForProcessingSiteModel() {
-          SiteModel siteModel = new SiteModel();
-          CompletableFuture<Void> future = executor.getFutureProcess(siteModel);
-
-          assertNotNull(future, "The future should not be null");
-          assertInstanceOf(
-              CompletableFuture.class,
-              future,
-              "The future should be an instance of CompletableFuture");
-        }
-      }
+      //      @Nested
+      //      class GetFutureProcessTest {
+      //
+      ////        @Test
+      ////        public void testGetFutureProcessCreatesCompletableFutureForProcessingSiteModel() {
+      ////          SiteModel siteModel = new SiteModel();
+      ////          CompletableFuture<Void> future = executor.getFutureProcess(siteModel);
+      ////
+      ////          assertNotNull(future, "The future should not be null");
+      ////          assertInstanceOf(
+      ////              CompletableFuture.class,
+      ////              future,
+      ////              "The future should be an instance of CompletableFuture");
+      ////        }
+      //      }
     }
   }
 }

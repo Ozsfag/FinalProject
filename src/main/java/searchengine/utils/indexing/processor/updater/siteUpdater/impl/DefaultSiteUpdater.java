@@ -18,20 +18,15 @@ public class DefaultSiteUpdater implements SiteUpdater {
   public void updateSiteWhenSuccessful(SiteModel siteModel) {
     lockWrapper.writeLock(
         () ->
-            getSiteRepository()
-                .updateStatusAndStatusTimeByUrl(Status.INDEXED, new Date(), siteModel.getUrl()));
-  }
-
-  private SiteRepository getSiteRepository() {
-    return lockWrapper.readLock(() -> this.siteRepository);
+            siteRepository.updateStatusAndStatusTimeByUrl(
+                Status.INDEXED, new Date(), siteModel.getUrl()));
   }
 
   @Override
   public void updateSiteWhenFailed(SiteModel siteModel, Throwable re) {
     lockWrapper.writeLock(
         () ->
-            getSiteRepository()
-                .updateStatusAndStatusTimeAndLastErrorByUrl(
-                    Status.FAILED, new Date(), re.getLocalizedMessage(), siteModel.getUrl()));
+            siteRepository.updateStatusAndStatusTimeAndLastErrorByUrl(
+                Status.FAILED, new Date(), re.getLocalizedMessage(), siteModel.getUrl()));
   }
 }

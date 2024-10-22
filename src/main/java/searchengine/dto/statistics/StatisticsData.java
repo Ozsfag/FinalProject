@@ -1,12 +1,24 @@
 package searchengine.dto.statistics;
 
 import java.util.Collection;
-import lombok.Builder;
-import lombok.Data;
+import java.util.Collections;
+import lombok.*;
 
-@Builder
-@Data
+@NoArgsConstructor(force = true)
 public class StatisticsData {
-  private TotalStatistics total;
-  private Collection<DetailedStatisticsItem> detailed;
+  private final TotalStatistics total;
+  private final Collection<DetailedStatisticsItem> detailed;
+
+  public StatisticsData(TotalStatistics total, Collection<DetailedStatisticsItem> detailed) {
+    this.total = total.clone();
+    this.detailed = Collections.unmodifiableCollection(detailed);
+  }
+
+  public Collection<DetailedStatisticsItem> getDetailed() {
+    return Collections.unmodifiableCollection(detailed);
+  }
+
+  public TotalStatistics getTotal() {
+    return total.clone();
+  }
 }

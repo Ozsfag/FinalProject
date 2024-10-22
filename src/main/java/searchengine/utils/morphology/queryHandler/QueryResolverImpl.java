@@ -1,6 +1,7 @@
 package searchengine.utils.morphology.queryHandler;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
@@ -11,7 +12,7 @@ public class QueryResolverImpl implements QueryResolver {
   private final String nonLetters;
   private final LuceneMorphology luceneMorphology1;
   private final LuceneMorphology luceneMorphology2;
-  private final String[] particles;
+  private final Collection particles;
   private final String onlyLetters;
   private final String emptyString;
   private final String splitter;
@@ -32,7 +33,7 @@ public class QueryResolverImpl implements QueryResolver {
   private boolean wordIsNotParticle(String word) {
     return word.length() > 2
         && !word.isBlank()
-        && Arrays.stream(particles)
+        && particles.stream()
             .noneMatch(part -> luceneMorphology1.getMorphInfo(word).contains(part));
   }
 

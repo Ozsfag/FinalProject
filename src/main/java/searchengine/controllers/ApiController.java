@@ -1,6 +1,6 @@
 package searchengine.controllers;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.ResponseInterface;
@@ -12,13 +12,12 @@ import searchengine.services.statistics.StatisticsService;
 
 @RestController
 @RequestMapping("/api")
-@RequiredArgsConstructor
 public class ApiController {
 
-  private final StatisticsService statisticsService;
-  private final IndexingService indexingService;
-  private final SearchingService searchingService;
-  private final DeletingService deletingService;
+  @Autowired private StatisticsService statisticsService;
+  @Autowired private IndexingService indexingService;
+  @Autowired private SearchingService searchingService;
+  @Autowired private DeletingService deletingService;
 
   /**
    * Retrieves the statistics from the statistics service and returns it as a response entity.
