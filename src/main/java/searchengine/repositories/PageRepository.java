@@ -10,9 +10,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import searchengine.model.PageModel;
+import searchengine.model.SiteModel;
 
 @Repository
 public interface PageRepository extends JpaRepository<PageModel, Integer> {
+
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  @Query("select (count(p) > 0) from PageModel p where p.site = ?1")
+  boolean existsBySite(@Param("site") SiteModel site);
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Query("SELECT p.path FROM PageModel p WHERE p.path IN :paths")

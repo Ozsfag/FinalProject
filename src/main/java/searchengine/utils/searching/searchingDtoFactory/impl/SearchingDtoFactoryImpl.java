@@ -4,7 +4,6 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.dto.searching.responseImpl.DetailedSearchResponse;
@@ -18,13 +17,25 @@ import searchengine.utils.webScraper.WebScraper;
 
 @Component
 @Lazy
-@RequiredArgsConstructor
 public class SearchingDtoFactoryImpl implements SearchingDtoFactory {
   private final ReentrantReadWriteLock lock;
   private final PageRepository pageRepository;
   private final Validator validator;
   private final WebScraper webScraper;
   private final SnippetTransmitter snippetTransmitter;
+
+  public SearchingDtoFactoryImpl(
+      ReentrantReadWriteLock lock,
+      PageRepository pageRepository,
+      Validator validator,
+      WebScraper webScraper,
+      SnippetTransmitter snippetTransmitter) {
+    this.lock = lock;
+    this.pageRepository = pageRepository;
+    this.validator = validator;
+    this.webScraper = webScraper;
+    this.snippetTransmitter = snippetTransmitter;
+  }
 
   @Override
   public DetailedSearchResponse getDetailedSearchResponse(

@@ -23,29 +23,39 @@ public class IndexHandlerImpl implements IndexHandler {
   public Collection<IndexModel> getIndexedIndexModelsFromCountedWords(
       PageModel pageModel, Collection<LemmaModel> lemmas) {
 
-    Collection<IndexModel> existingIndexModels =  getExistingIndexesFromLemmasByPage(lemmas, pageModel);
+    Collection<IndexModel> existingIndexModels =
+        getExistingIndexesFromLemmasByPage(lemmas, pageModel);
 
-    Collection<IndexModel> updatedIndexModel = getUpdateExistedIndexModel(existingIndexModels, lemmas, pageModel);
+    Collection<IndexModel> updatedIndexModel =
+        getUpdateExistedIndexModel(existingIndexModels, lemmas, pageModel);
 
     return Collections.unmodifiableCollection(updatedIndexModel);
   }
 
-  private Collection<IndexModel> getExistingIndexesFromLemmasByPage(Collection<LemmaModel> lemmas, PageModel pageModel) {
+  private Collection<IndexModel> getExistingIndexesFromLemmasByPage(
+      Collection<LemmaModel> lemmas, PageModel pageModel) {
     return lemmas.isEmpty() ? Collections.emptySet() : getFoundedIndexes(lemmas, pageModel);
   }
 
-  private Collection<IndexModel> getFoundedIndexes(Collection<LemmaModel> lemmas, PageModel pageModel) {
+  private Collection<IndexModel> getFoundedIndexes(
+      Collection<LemmaModel> lemmas, PageModel pageModel) {
     return lockWrapper.readLock(
         () -> indexRepository.findByPageIdAndLemmaIn(pageModel.getId(), lemmas));
   }
 
-  private Collection<IndexModel> getUpdateExistedIndexModel(Collection<IndexModel> existingIndexModels, Collection<LemmaModel> lemmas, PageModel pageModel) {
-      existingIndexModels.addAll(getNewIndexesByLemmaAndPage(lemmas, pageModel));
+  private Collection<IndexModel> getUpdateExistedIndexModel(
+      Collection<IndexModel> existingIndexModels,
+      Collection<LemmaModel> lemmas,
+      PageModel pageModel) {
+    existingIndexModels.addAll(getNewIndexesByLemmaAndPage(lemmas, pageModel));
     return existingIndexModels;
   }
 
-  private Collection<IndexModel> getNewIndexesByLemmaAndPage(Collection<LemmaModel> lemmas, PageModel pageModel) {
-    return lemmas.parallelStream().map(lemmaModel -> createIndexModel(lemmaModel, pageModel)).collect(Collectors.toSet());
+  private Collection<IndexModel> getNewIndexesByLemmaAndPage(
+      Collection<LemmaModel> lemmas, PageModel pageModel) {
+    return lemmas.parallelStream()
+        .map(lemmaModel -> createIndexModel(lemmaModel, pageModel))
+        .collect(Collectors.toSet());
   }
 
   private IndexModel createIndexModel(LemmaModel lemma, PageModel pageModel) {

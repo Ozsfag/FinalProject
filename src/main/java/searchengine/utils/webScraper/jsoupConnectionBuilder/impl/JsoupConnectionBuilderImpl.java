@@ -11,7 +11,7 @@ public class JsoupConnectionBuilderImpl implements JsoupConnectionBuilder {
   private final JsoupConnectionSettings jsoupConnectionSettings;
 
   public JsoupConnectionBuilderImpl(JsoupConnectionSettings jsoupConnectionSettings) {
-    this.jsoupConnectionSettings = jsoupConnectionSettings;
+    this.jsoupConnectionSettings = jsoupConnectionSettings.clone();
   }
 
   @Override

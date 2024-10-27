@@ -89,18 +89,18 @@ public class ExecutorImplTest {
       when(siteHandler.getIndexedSiteModelFromSites(any())).thenReturn(siteModels);
       when(entitySaverTemplate.saveEntities(siteModels)).thenReturn(siteModels);
 
-      executor.executeIndexing();
+      executor.executeSeveralPagesIndexing();
 
-      verify(processor, never()).processSiteIndexing(any(SiteModel.class));
+      verify(processor, never()).processSiteIndexingRecursively(any(SiteModel.class));
     }
 
     @Test
     public void testExecuteIndexingHandlesNullReturnFromSiteHandler() {
       when(siteHandler.getIndexedSiteModelFromSites(any())).thenReturn(null);
 
-      executor.executeIndexing();
+      executor.executeSeveralPagesIndexing();
 
-      verify(processor, never()).processSiteIndexing(any(SiteModel.class));
+      verify(processor, never()).processSiteIndexingRecursively(any(SiteModel.class));
     }
 
     //    @Test

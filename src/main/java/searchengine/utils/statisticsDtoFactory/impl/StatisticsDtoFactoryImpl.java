@@ -14,14 +14,12 @@ import searchengine.model.SiteModel;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.services.indexing.impl.IndexingImpl;
-import searchengine.utils.lockWrapper.LockWrapper;
 import searchengine.utils.statisticsDtoFactory.StatisticsDtoFactory;
 
 @Component
 @Lazy
 public class StatisticsDtoFactoryImpl implements StatisticsDtoFactory {
   @Autowired private SitesList sites;
-  @Autowired private LockWrapper lockWrapper;
   @Autowired private PageRepository pageRepository;
   @Autowired private LemmaRepository lemmaRepository;
 
@@ -32,11 +30,11 @@ public class StatisticsDtoFactoryImpl implements StatisticsDtoFactory {
   }
 
   private long getPagesCount() {
-    return lockWrapper.readLock(() -> pageRepository.count());
+    return pageRepository.count();
   }
 
   private long getLemmasCount() {
-    return lockWrapper.readLock(() -> pageRepository.count());
+    return lemmaRepository.count();
   }
 
   @Override
@@ -53,11 +51,11 @@ public class StatisticsDtoFactoryImpl implements StatisticsDtoFactory {
         siteModel.getLastError(),
         siteModel.getStatusTime().getTime(),
         (long) siteModel.getPages().size(),
-        getLockedLemmasCountedBySiteUrl(site.getUrl()));
+        getLemmasCountedBySiteUrl(site.getUrl()));
   }
 
-  private long getLockedLemmasCountedBySiteUrl(String url) {
-    return lockWrapper.readLock(() -> lemmaRepository.countBySiteUrl(url));
+  private long getLemmasCountedBySiteUrl(String url) {
+    return lemmaRepository.countBySiteUrl(url);
   }
 
   @Override

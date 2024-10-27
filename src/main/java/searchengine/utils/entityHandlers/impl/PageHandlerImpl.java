@@ -3,7 +3,6 @@ package searchengine.utils.entityHandlers.impl;
 import static searchengine.services.indexing.impl.IndexingImpl.isIndexing;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -26,8 +25,9 @@ public class PageHandlerImpl implements PageHandler {
       Collection<String> urlsToParse, SiteModel siteModel) {
 
     return urlsToParse.parallelStream()
-            .map(url -> getPageModelByUrl(url, siteModel))
-            .filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
+        .map(url -> getPageModelByUrl(url, siteModel))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toUnmodifiableSet());
   }
 
   private PageModel getPageModelByUrl(String url, SiteModel siteModel) {

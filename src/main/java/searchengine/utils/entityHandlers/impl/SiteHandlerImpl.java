@@ -1,7 +1,6 @@
 package searchengine.utils.entityHandlers.impl;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,8 @@ public class SiteHandlerImpl implements SiteHandler {
   @Override
   public Collection<SiteModel> getIndexedSiteModelFromSites(Collection<Site> sitesToParse) {
     return sitesToParse.parallelStream()
-            .map(this::getSiteIfExistOrCreate).collect(Collectors.toUnmodifiableSet());
+        .map(this::getSiteIfExistOrCreate)
+        .collect(Collectors.toUnmodifiableSet());
   }
 
   private SiteModel getSiteIfExistOrCreate(Site site) {

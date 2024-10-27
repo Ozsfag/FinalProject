@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import searchengine.model.SiteModel;
+import searchengine.repositories.PageRepository;
+import searchengine.utils.indexing.IndexingStrategy;
 import searchengine.utils.indexing.processor.impl.ProcessorImpl;
 import searchengine.utils.indexing.processor.taskFactory.TaskFactory;
 import searchengine.utils.indexing.processor.updater.siteUpdater.SiteUpdater;
@@ -21,21 +23,25 @@ public class ProcessorImplTest {
   private static final Logger log = LoggerFactory.getLogger(ProcessorImplTest.class);
   private ForkJoinPool forkJoinPool;
   private TaskFactory taskFactory;
+  private PageRepository pageRepository;
   private SiteUpdater siteUpdater;
   private LockWrapper lockWrapper;
   private SiteModel siteModel;
   private ProcessorImpl processor;
   private ForkJoinTask task;
+  private IndexingStrategy indexingStrategy;
 
   @BeforeEach
   public void setUp() {
     forkJoinPool = mock(ForkJoinPool.class);
     taskFactory = mock(TaskFactory.class);
+    pageRepository = mock(PageRepository.class);
     siteUpdater = mock(SiteUpdater.class);
     lockWrapper = mock(LockWrapper.class);
+    indexingStrategy = mock(IndexingStrategy.class);
     siteModel = new SiteModel();
     siteModel.setUrl("http://example.com");
-    processor = new ProcessorImpl(lockWrapper, taskFactory, siteUpdater);
+    processor = new ProcessorImpl(taskFactory, pageRepository, siteUpdater, indexingStrategy);
     task = mock(ForkJoinTask.class);
     when(taskFactory.initTask(siteModel, siteModel.getUrl())).thenReturn(task);
   }
@@ -43,7 +49,7 @@ public class ProcessorImplTest {
   @Test
   public void testSuccessfulSiteIndexing() {
     // Act
-    processor.processSiteIndexing(siteModel);
+    processor.processSiteIndexingRecursively(siteModel);
 
     // Assert
     verify(task).fork();
@@ -57,7 +63,7 @@ public class ProcessorImplTest {
     doThrow(new Error("Task execution failed")).when(task).join();
 
     // Act
-    processor.processSiteIndexing(siteModel);
+    processor.processSiteIndexingRecursively(siteModel);
 
     // Assert
     verify(task).fork();
@@ -72,7 +78,7 @@ public class ProcessorImplTest {
     when(taskFactory.initTask(siteModel, null)).thenReturn(task);
 
     // Act
-    processor.processSiteIndexing(siteModel);
+    processor.processSiteIndexingRecursively(siteModel);
 
     // Assert
     verify(task).fork();
@@ -84,7 +90,7 @@ public class ProcessorImplTest {
   @Test
   public void testTaskJoinCalledAfterForking() {
     // Act
-    processor.processSiteIndexing(siteModel);
+    processor.processSiteIndexingRecursively(siteModel);
 
     // Assert
     verify(task).fork();
@@ -100,7 +106,7 @@ public class ProcessorImplTest {
   @Test
   public void testUrlMatchingInitTask() {
     // Act
-    processor.processSiteIndexing(siteModel);
+    processor.processSiteIndexingRecursively(siteModel);
 
     // Assert
     verify(taskFactory).initTask(siteModel, siteModel.getUrl());

@@ -7,6 +7,7 @@ import java.util.concurrent.ForkJoinPool;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.model.SiteModel;
+import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.indexing.executor.Executor;
@@ -21,6 +22,7 @@ public class ExecutorImpl implements Executor {
   private final Processor processor;
   private final SitesList sitesList;
   private final ForkJoinPool forkJoinPool;
+  private final DataTransformer dataTransformer;
 
   public ExecutorImpl(
       EntitySaverTemplate entitySaverTemplate,
@@ -28,17 +30,20 @@ public class ExecutorImpl implements Executor {
       SiteHandler siteHandler,
       Processor processor,
       SitesList sitesList,
-      ForkJoinPool forkJoinPool) {
+      ForkJoinPool forkJoinPool,
+      DataTransformer dataTransformer) {
+
     this.entitySaverTemplate = entitySaverTemplate;
     this.lockWrapper = lockWrapper;
     this.siteHandler = siteHandler;
     this.processor = processor;
     this.sitesList = sitesList;
     this.forkJoinPool = forkJoinPool;
+    this.dataTransformer = dataTransformer;
   }
 
   @Override
-  public void executeIndexing() {
+  public void executeSeveralPagesIndexing() {
     Collection<CompletableFuture<Void>> futures = getFuturesForSiteModels();
     CompletableFuture<Void> allFutures =
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
@@ -47,18 +52,33 @@ public class ExecutorImpl implements Executor {
     allCompletableFuture.toCompletableFuture();
   }
 
-  public Collection<CompletableFuture<Void>> getFuturesForSiteModels() {
+  private Collection<CompletableFuture<Void>> getFuturesForSiteModels() {
     Collection<SiteModel> siteModels = getSiteModels();
     siteModels = entitySaverTemplate.saveEntities(siteModels);
 
     return siteModels.parallelStream().map(this::getFutureProcess).toList();
   }
 
-  public Collection<SiteModel> getSiteModels() {
+  private Collection<SiteModel> getSiteModels() {
     return siteHandler.getIndexedSiteModelFromSites(sitesList.getSites());
   }
 
-  public CompletableFuture<Void> getFutureProcess(SiteModel siteModel) {
-    return CompletableFuture.runAsync(() -> processor.processSiteIndexing(siteModel), forkJoinPool);
+  private CompletableFuture<Void> getFutureProcess(SiteModel siteModel) {
+    return CompletableFuture.runAsync(
+        () -> processor.processSiteIndexingRecursively(siteModel), forkJoinPool);
+  }
+
+  @Override
+  public void executeOnePageIndexing(String url) {
+    SiteModel siteModel = getSiteModelByUrl(url);
+    Collection<String> urls = dataTransformer.transformUrlToUrls(url);
+    processor.processOneSiteIndexing(url, siteModel, urls);
+  }
+
+  private SiteModel getSiteModelByUrl(String url) {
+    return siteHandler
+        .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
+        .iterator()
+        .next();
   }
 }

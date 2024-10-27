@@ -1,6 +1,5 @@
 package searchengine.config;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.*;
@@ -35,14 +34,14 @@ public class MorphologySettings {
       String onlyLatinLetters,
       String onlyCyrillicLetters,
       Integer maxFrequency) {
-    this.russianParticleNames = new ArrayList<>(russianParticleNames);
-    this.englishParticlesNames = new ArrayList<>(englishParticlesNames);
+    this.russianParticleNames = Collections.unmodifiableCollection(russianParticleNames);
+    this.englishParticlesNames = Collections.unmodifiableCollection(englishParticlesNames);
     this.notCyrillicLetters = notCyrillicLetters;
     this.notLatinLetters = notLatinLetters;
     this.splitter = splitter;
     this.emptyString = emptyString;
-    this.formats = new ArrayList<>(formats);
-    this.allowedSchemas = new ArrayList<>(allowedSchemas);
+    this.formats = Collections.unmodifiableCollection(formats);
+    this.allowedSchemas = Collections.unmodifiableCollection(allowedSchemas);
     this.onlyLatinLetters = onlyLatinLetters;
     this.onlyCyrillicLetters = onlyCyrillicLetters;
     this.maxFrequency = maxFrequency;

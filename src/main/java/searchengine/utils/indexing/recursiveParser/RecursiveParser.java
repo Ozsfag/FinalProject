@@ -96,8 +96,9 @@ public class RecursiveParser extends RecursiveTask<Boolean> implements Serializa
 
   private void setSubtasks() {
     this.subtasks =
-            urlsToParse.stream()
-                    .map(url -> taskFactory.initTask(siteModel, url)).collect(Collectors.toUnmodifiableSet());
+        urlsToParse.stream()
+            .map(url -> taskFactory.initTask(siteModel, url))
+            .collect(Collectors.toUnmodifiableSet());
   }
 
   private void invokeSubtask() {

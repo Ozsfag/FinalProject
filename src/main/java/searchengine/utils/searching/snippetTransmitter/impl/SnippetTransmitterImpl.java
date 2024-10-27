@@ -2,7 +2,6 @@ package searchengine.utils.searching.snippetTransmitter.impl;
 
 import java.util.Collection;
 import java.util.Locale;
-import lombok.Setter;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
@@ -14,8 +13,6 @@ import searchengine.utils.searching.snippetTransmitter.contentMatcher.ContentMat
 @Component
 @Lazy
 public class SnippetTransmitterImpl implements SnippetTransmitter {
-  @Setter private PageModel pageModel;
-  private String content;
   private final ContentMatcher contentMatcher;
   private final ContentFormatter contentFormatter;
 
@@ -27,29 +24,28 @@ public class SnippetTransmitterImpl implements SnippetTransmitter {
   @Override
   public String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel) {
 
-    setPageModel(pageModel);
-    setContent();
+    String content = getContentFromPage(pageModel);
 
     Collection<String> matchingSentences =
         uniqueSet.stream()
-            .filter(this::itemPageIsEqualToPage)
-            .map(this::getMatchingSentences)
+            .filter(item -> itemPageIsEqualToPage(item, pageModel))
+            .map(indexItem -> getMatchingSentencesFromContent(indexItem, content))
             .toList();
 
     return String.join("............. ", matchingSentences);
   }
 
-  private boolean itemPageIsEqualToPage(IndexModel item) {
+  private boolean itemPageIsEqualToPage(IndexModel item, PageModel pageModel) {
     return item.getPage().equals(pageModel);
   }
 
-  private String getMatchingSentences(IndexModel item) {
+  private String getMatchingSentencesFromContent(IndexModel item, String content) {
     String word = getWord(item);
     return contentFormatter.format(contentMatcher.match(content, word), word);
   }
 
-  private void setContent() {
-    content = pageModel.getContent().toLowerCase(Locale.ROOT);
+  private String getContentFromPage(PageModel pageModel) {
+    return pageModel.getContent().toLowerCase(Locale.ROOT);
   }
 
   private String getWord(IndexModel item) {
