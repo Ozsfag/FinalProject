@@ -7,6 +7,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
@@ -36,7 +37,7 @@ public class RecursiveParser extends RecursiveTask<Boolean> implements Serializa
   private final SiteRepository siteRepository;
   private final transient TaskFactory taskFactory;
 
-  private SiteModel siteModel;
+  @Setter private SiteModel siteModel;
   private String href;
   private Collection<String> urlsToParse;
   private Collection<ForkJoinTask<?>> subtasks;
@@ -50,10 +51,6 @@ public class RecursiveParser extends RecursiveTask<Boolean> implements Serializa
   public void init(SiteModel siteModel, String href) {
     setSiteModel(siteModel);
     setHref(href);
-  }
-
-  public void setSiteModel(SiteModel siteModel) {
-    this.siteModel = siteModel.clone();
   }
 
   public void setHref(String href) {

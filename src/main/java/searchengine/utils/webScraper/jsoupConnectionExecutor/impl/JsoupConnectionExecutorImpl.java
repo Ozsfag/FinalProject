@@ -1,10 +1,9 @@
 package searchengine.utils.webScraper.jsoupConnectionExecutor.impl;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import javax.annotation.PostConstruct;
 import org.jsoup.Connection;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.JsoupConnectionResponseDto;
 import searchengine.utils.webScraper.jsoupConnectionExecutor.JsoupConnectionExecutor;
@@ -13,12 +12,25 @@ import searchengine.utils.webScraper.jsoupConnectionExecutor.exceptionHandlers.i
 
 @Component
 public class JsoupConnectionExecutorImpl implements JsoupConnectionExecutor {
-  @Autowired HttpStatusExceptionHandler httpStatusExceptionHandler;
-  @Autowired IOExceptionHandler ioExceptionHandler;
-  @Autowired SocketTimeoutExceptionHandler socketTimeoutExceptionHandler;
-  @Autowired MalformedInputExceptionHandler malformedInputExceptionHandler;
-  @Autowired UnsupportedMimeTypeExceptionHandler unsupportedMimeTypeExceptionHandler;
-  private volatile List<ExceptionHandler> exceptionHandlers;
+  private final HttpStatusExceptionHandler httpStatusExceptionHandler;
+  private final IOExceptionHandler ioExceptionHandler;
+  private final SocketTimeoutExceptionHandler socketTimeoutExceptionHandler;
+  private final MalformedInputExceptionHandler malformedInputExceptionHandler;
+  private final UnsupportedMimeTypeExceptionHandler unsupportedMimeTypeExceptionHandler;
+  private volatile Collection<ExceptionHandler> exceptionHandlers;
+
+  public JsoupConnectionExecutorImpl(
+      HttpStatusExceptionHandler httpStatusExceptionHandler,
+      IOExceptionHandler ioExceptionHandler,
+      SocketTimeoutExceptionHandler socketTimeoutExceptionHandler,
+      MalformedInputExceptionHandler malformedInputExceptionHandler,
+      UnsupportedMimeTypeExceptionHandler unsupportedMimeTypeExceptionHandler) {
+    this.httpStatusExceptionHandler = httpStatusExceptionHandler;
+    this.ioExceptionHandler = ioExceptionHandler;
+    this.socketTimeoutExceptionHandler = socketTimeoutExceptionHandler;
+    this.malformedInputExceptionHandler = malformedInputExceptionHandler;
+    this.unsupportedMimeTypeExceptionHandler = unsupportedMimeTypeExceptionHandler;
+  }
 
   @Override
   public JsoupConnectionResponseDto executeDto(Connection connection, String url) {

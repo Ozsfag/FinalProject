@@ -1,5 +1,6 @@
 package searchengine.services.indexing.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.CompletableFuture;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +14,13 @@ import searchengine.services.indexing.IndexingService;
 import searchengine.utils.indexing.executor.Executor;
 
 @Service
-
 @Slf4j
 public class IndexingImpl implements IndexingService {
 
   public static volatile Boolean isIndexing = true;
   @Autowired private Executor executor;
 
+  @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
   @Override
   public ResponseInterface startIndexing() {
     if (isIndexingAlreadyRunning()) {
