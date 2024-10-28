@@ -67,7 +67,6 @@ public class QueryResolverFactory {
         particles,
         onlyLetters,
         morphologySettings.getEmptyString(),
-        morphologySettings.getSplitter(),
-        validator);
+        morphologySettings.getSplitter());
   }
 }

@@ -4,8 +4,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 import org.apache.lucene.morphology.LuceneMorphology;
-import searchengine.utils.validator.Validator;
+import org.springframework.context.annotation.Lazy;
 
+@Lazy
 public class QueryResolverImpl implements QueryResolver {
   private final String nonLetters;
   private final LuceneMorphology luceneMorphology1;
@@ -14,9 +15,8 @@ public class QueryResolverImpl implements QueryResolver {
   private final String onlyLetters;
   private final String emptyString;
   private final String splitter;
-  private final Validator validator;
 
-  public QueryResolverImpl(String nonLetters, LuceneMorphology luceneMorphology1, LuceneMorphology luceneMorphology2, Collection<String> particles, String onlyLetters, String emptyString, String splitter, Validator validator) {
+  public QueryResolverImpl(String nonLetters, LuceneMorphology luceneMorphology1, LuceneMorphology luceneMorphology2, Collection<String> particles, String onlyLetters, String emptyString, String splitter) {
     this.nonLetters = nonLetters;
     this.luceneMorphology1 = luceneMorphology1;
     this.luceneMorphology2 = luceneMorphology2;
@@ -24,7 +24,6 @@ public class QueryResolverImpl implements QueryResolver {
     this.onlyLetters = onlyLetters;
     this.emptyString = emptyString;
     this.splitter = splitter;
-    this.validator = validator;
   }
 
   @Override

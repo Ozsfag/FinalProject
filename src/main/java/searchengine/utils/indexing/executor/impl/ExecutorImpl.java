@@ -12,13 +12,11 @@ import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.indexing.executor.Executor;
 import searchengine.utils.indexing.processor.Processor;
-import searchengine.utils.lockWrapper.LockWrapper;
 
 @Component
 public class ExecutorImpl implements Executor {
   private final EntitySaverTemplate entitySaverTemplate;
-  private final LockWrapper lockWrapper;
-  private final SiteHandler siteHandler;
+    private final SiteHandler siteHandler;
   private final Processor processor;
   private final SitesList sitesList;
   private final ForkJoinPool forkJoinPool;
@@ -26,7 +24,6 @@ public class ExecutorImpl implements Executor {
 
   public ExecutorImpl(
       EntitySaverTemplate entitySaverTemplate,
-      LockWrapper lockWrapper,
       SiteHandler siteHandler,
       Processor processor,
       SitesList sitesList,
@@ -34,7 +31,6 @@ public class ExecutorImpl implements Executor {
       DataTransformer dataTransformer) {
 
     this.entitySaverTemplate = entitySaverTemplate;
-    this.lockWrapper = lockWrapper;
     this.siteHandler = siteHandler;
     this.processor = processor;
     this.sitesList = sitesList;
