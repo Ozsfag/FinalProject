@@ -1,11 +1,13 @@
 package searchengine.model;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP"})
 @Entity
 @Table(
     name = "lemmas",

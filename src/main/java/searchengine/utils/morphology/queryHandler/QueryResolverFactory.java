@@ -58,7 +58,7 @@ public class QueryResolverFactory {
       String nonLetters,
       LuceneMorphology primaryMorphology,
       LuceneMorphology secondaryMorphology,
-      Collection particles,
+      Collection<String> particles,
       String onlyLetters) {
     return new QueryResolverImpl(
         nonLetters,
@@ -67,7 +67,6 @@ public class QueryResolverFactory {
         particles,
         onlyLetters,
         morphologySettings.getEmptyString(),
-        morphologySettings.getSplitter(),
-        validator);
+        morphologySettings.getSplitter());
   }
 }

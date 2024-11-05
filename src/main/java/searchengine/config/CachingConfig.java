@@ -17,9 +17,10 @@ import org.springframework.lang.NonNull;
 @Configuration
 @EnableCaching
 @RequiredArgsConstructor
+@Lazy
 public class CachingConfig implements CacheManager {
 
-  @Lazy private final ForkJoinPool forkJoinPool;
+  private final ForkJoinPool forkJoinPool;
   private CaffeineCacheManager caffeineCacheManager;
 
   @Primary

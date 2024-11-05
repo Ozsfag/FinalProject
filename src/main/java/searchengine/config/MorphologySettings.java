@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "morphology-settings")
 @NoArgsConstructor(force = true)
-public class MorphologySettings {
+public class MorphologySettings implements Cloneable {
   private Collection<String> russianParticleNames;
   private Collection<String> englishParticlesNames;
   private Collection<String> formats;
@@ -101,5 +101,15 @@ public class MorphologySettings {
 
   public String getOnlyCyrillicLetters() {
     return String.copyValueOf(onlyCyrillicLetters.toCharArray());
+  }
+
+  @Override
+  public MorphologySettings clone() {
+    try {
+      // TODO: copy mutable state here, so the clone can't change the internals of the original
+      return (MorphologySettings) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
   }
 }

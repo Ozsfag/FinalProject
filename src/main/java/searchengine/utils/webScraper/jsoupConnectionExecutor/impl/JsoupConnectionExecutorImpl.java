@@ -1,7 +1,7 @@
 package searchengine.utils.webScraper.jsoupConnectionExecutor.impl;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import javax.annotation.PostConstruct;
 import org.jsoup.Connection;
 import org.springframework.stereotype.Component;
@@ -17,9 +17,14 @@ public class JsoupConnectionExecutorImpl implements JsoupConnectionExecutor {
   private final SocketTimeoutExceptionHandler socketTimeoutExceptionHandler;
   private final MalformedInputExceptionHandler malformedInputExceptionHandler;
   private final UnsupportedMimeTypeExceptionHandler unsupportedMimeTypeExceptionHandler;
-  private volatile List<ExceptionHandler> exceptionHandlers;
+  private volatile Collection<ExceptionHandler> exceptionHandlers;
 
-  public JsoupConnectionExecutorImpl(HttpStatusExceptionHandler httpStatusExceptionHandler, IOExceptionHandler ioExceptionHandler, SocketTimeoutExceptionHandler socketTimeoutExceptionHandler, MalformedInputExceptionHandler malformedInputExceptionHandler, UnsupportedMimeTypeExceptionHandler unsupportedMimeTypeExceptionHandler) {
+  public JsoupConnectionExecutorImpl(
+      HttpStatusExceptionHandler httpStatusExceptionHandler,
+      IOExceptionHandler ioExceptionHandler,
+      SocketTimeoutExceptionHandler socketTimeoutExceptionHandler,
+      MalformedInputExceptionHandler malformedInputExceptionHandler,
+      UnsupportedMimeTypeExceptionHandler unsupportedMimeTypeExceptionHandler) {
     this.httpStatusExceptionHandler = httpStatusExceptionHandler;
     this.ioExceptionHandler = ioExceptionHandler;
     this.socketTimeoutExceptionHandler = socketTimeoutExceptionHandler;
