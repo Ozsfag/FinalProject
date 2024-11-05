@@ -1,7 +1,6 @@
 package searchengine.utils.webScraper.impl;
 
 import java.io.IOException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.utils.webScraper.WebScraper;
@@ -14,7 +13,11 @@ import searchengine.utils.webScraper.connectionResponseBuilder.ConnectionRespons
  */
 @Component
 public class WebScraperImpl implements WebScraper {
-  @Autowired private ConnectionResponseBuilder connectionResponseBuilder;
+  private final ConnectionResponseBuilder connectionResponseBuilder;
+
+  public WebScraperImpl(ConnectionResponseBuilder connectionResponseBuilder) {
+    this.connectionResponseBuilder = connectionResponseBuilder;
+  }
 
   @Override
   public ConnectionResponse getConnectionResponse(String url) {

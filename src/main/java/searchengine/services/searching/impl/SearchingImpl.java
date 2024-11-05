@@ -2,7 +2,6 @@ package searchengine.services.searching.impl;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.dto.ResponseInterface;
@@ -21,11 +20,19 @@ import searchengine.utils.searching.searchingDtoFactory.SearchingDtoFactory;
 @Service
 @Lazy
 public class SearchingImpl implements SearchingService {
-  @Autowired private QueryToIndexesTransformer queryToIndexesTransformer;
-  @Autowired private PageRanker pageRanker;
-  @Autowired private SearchingDtoFactory searchingDtoFactory;
-  @Autowired private SiteHandler siteHandler;
-  @Autowired private DataTransformer dataTransformer;
+  private final QueryToIndexesTransformer queryToIndexesTransformer;
+  private final PageRanker pageRanker;
+  private final SearchingDtoFactory searchingDtoFactory;
+  private final SiteHandler siteHandler;
+  private final DataTransformer dataTransformer;
+
+  public SearchingImpl(QueryToIndexesTransformer queryToIndexesTransformer, PageRanker pageRanker, SearchingDtoFactory searchingDtoFactory, SiteHandler siteHandler, DataTransformer dataTransformer) {
+    this.queryToIndexesTransformer = queryToIndexesTransformer;
+    this.pageRanker = pageRanker;
+    this.searchingDtoFactory = searchingDtoFactory;
+    this.siteHandler = siteHandler;
+    this.dataTransformer = dataTransformer;
+  }
 
   @Override
   public ResponseInterface search(String query, String url, int offset, int limit) {

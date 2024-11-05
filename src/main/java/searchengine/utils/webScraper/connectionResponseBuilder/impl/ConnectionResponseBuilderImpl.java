@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
 import searchengine.dto.indexing.JsoupConnectionResponseDto;
@@ -15,9 +14,15 @@ import searchengine.utils.webScraper.jsoupConnectionExecutor.JsoupConnectionExec
 
 @Component
 public class ConnectionResponseBuilderImpl implements ConnectionResponseBuilder {
-  @Autowired private JsoupConnectionBuilder jsoupConnectionBuilder;
-  @Autowired private JsoupConnectionExecutor jsoupConnectionDtoExecutor;
-  @Autowired private DocumentExtractor documentExtractor;
+  private final JsoupConnectionBuilder jsoupConnectionBuilder;
+  private final JsoupConnectionExecutor jsoupConnectionDtoExecutor;
+  private final DocumentExtractor documentExtractor;
+
+  public ConnectionResponseBuilderImpl(JsoupConnectionBuilder jsoupConnectionBuilder, JsoupConnectionExecutor jsoupConnectionDtoExecutor, DocumentExtractor documentExtractor) {
+    this.jsoupConnectionBuilder = jsoupConnectionBuilder;
+    this.jsoupConnectionDtoExecutor = jsoupConnectionDtoExecutor;
+    this.documentExtractor = documentExtractor;
+  }
 
   @Override
   public ConnectionResponse buildConnectionResponse(String url) throws IOException {

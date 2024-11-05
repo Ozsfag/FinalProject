@@ -13,7 +13,6 @@ import searchengine.services.indexing.IndexingService;
 import searchengine.utils.indexing.executor.Executor;
 
 @Service
-
 @Slf4j
 public class IndexingImpl implements IndexingService {
 
