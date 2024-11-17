@@ -21,7 +21,6 @@ public class TotalStatistics implements Cloneable, Serializable {
   @Override
   public TotalStatistics clone() {
     try {
-      // TODO: copy mutable state here, so the clone can't change the internals of the original
       return (TotalStatistics) super.clone();
     } catch (CloneNotSupportedException e) {
       throw new AssertionError();

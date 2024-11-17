@@ -6,11 +6,11 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import searchengine.factory.QueryResolverFactory;
+import searchengine.factory.WordsCounterFactory;
 import searchengine.utils.morphology.Morphology;
 import searchengine.utils.morphology.queryHandler.QueryResolver;
-import searchengine.utils.morphology.queryHandler.QueryResolverFactory;
 import searchengine.utils.morphology.wordCounter.WordCounter;
-import searchengine.utils.morphology.wordCounter.WordsCounterFactory;
 
 /**
  * Util that responsible for morphology transformation

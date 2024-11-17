@@ -16,7 +16,7 @@ import searchengine.utils.indexing.processor.Processor;
 @Component
 public class ExecutorImpl implements Executor {
   private final EntitySaverTemplate entitySaverTemplate;
-    private final SiteHandler siteHandler;
+  private final SiteHandler siteHandler;
   private final Processor processor;
   private final SitesList sitesList;
   private final ForkJoinPool forkJoinPool;

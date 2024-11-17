@@ -2,7 +2,6 @@ package searchengine.utils.entitySaver.impl;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 import searchengine.model.PageModel;
 import searchengine.repositories.PageRepository;
@@ -11,8 +10,7 @@ import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySel
 
 @Component
 public class PageModelSaver extends EntitySaverTemplate<PageModel> implements Cloneable {
-  //  @Autowired private LockWrapper lockWrapper;
-  @Setter private PageRepository pageRepository;
+  private PageRepository pageRepository;
   private Collection<String> existingPaths;
 
   public PageModelSaver(RepositorySelector repositorySelector) {
@@ -23,13 +21,17 @@ public class PageModelSaver extends EntitySaverTemplate<PageModel> implements Cl
   protected Collection<PageModel> getValidatedEntitiesBeforeSaving(
       Collection<PageModel> entitiesToValidate) {
 
-    setPageRepository((PageRepository) getRepository(entitiesToValidate));
+    setPageRepository(entitiesToValidate);
 
     setFoundedPath(entitiesToValidate);
 
     return entitiesToValidate.stream()
         .filter(entity -> !existingPaths.contains(entity.getPath()))
         .collect(Collectors.toSet());
+  }
+
+  private void setPageRepository(Collection<PageModel> entitiesToValidate) {
+    this.pageRepository = (PageRepository) getRepository(entitiesToValidate);
   }
 
   private void setFoundedPath(Collection<PageModel> entitiesToValidate) {
@@ -61,7 +63,6 @@ public class PageModelSaver extends EntitySaverTemplate<PageModel> implements Cl
   @Override
   public PageModelSaver clone() {
     try {
-      // TODO: copy mutable state here, so the clone can't change the internals of the original
       return (PageModelSaver) super.clone();
     } catch (CloneNotSupportedException e) {
       throw new AssertionError();

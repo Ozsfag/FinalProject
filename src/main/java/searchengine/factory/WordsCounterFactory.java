@@ -1,9 +1,11 @@
-package searchengine.utils.morphology.wordCounter;
+package searchengine.factory;
 
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
+import searchengine.utils.morphology.wordCounter.WordCounter;
+import searchengine.utils.morphology.wordCounter.WordCounterImpl;
 
 @Component
 public class WordsCounterFactory {

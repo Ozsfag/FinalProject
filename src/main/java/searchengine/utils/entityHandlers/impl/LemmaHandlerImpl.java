@@ -3,10 +3,10 @@ package searchengine.utils.entityHandlers.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
+import searchengine.factory.EntityFactory;
 import searchengine.model.LemmaModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.LemmaRepository;
-import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.entityHandlers.LemmaHandler;
 import searchengine.utils.lockWrapper.LockWrapper;
 

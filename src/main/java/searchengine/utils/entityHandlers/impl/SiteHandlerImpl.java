@@ -3,20 +3,26 @@ package searchengine.utils.entityHandlers.impl;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.Site;
+import searchengine.factory.EntityFactory;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.lockWrapper.LockWrapper;
 
 @Component
 public class SiteHandlerImpl implements SiteHandler {
-  @Autowired private LockWrapper lockWrapper;
-  @Autowired private SiteRepository siteRepository;
-  @Autowired private EntityFactory entityFactory;
+  private final LockWrapper lockWrapper;
+  private final SiteRepository siteRepository;
+  private final EntityFactory entityFactory;
+
+  public SiteHandlerImpl(
+      LockWrapper lockWrapper, SiteRepository siteRepository, EntityFactory entityFactory) {
+    this.lockWrapper = lockWrapper;
+    this.siteRepository = siteRepository;
+    this.entityFactory = entityFactory;
+  }
 
   @Override
   public Collection<SiteModel> getIndexedSiteModelFromSites(Collection<Site> sitesToParse) {

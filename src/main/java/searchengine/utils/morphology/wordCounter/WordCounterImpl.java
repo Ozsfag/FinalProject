@@ -14,7 +14,12 @@ public class WordCounterImpl implements WordCounter {
   private final String emptyString;
   private final String splitter;
 
-  public WordCounterImpl(LuceneMorphology luceneMorphology, String notLetterRegex, Collection<String> particles, String emptyString, String splitter) {
+  public WordCounterImpl(
+      LuceneMorphology luceneMorphology,
+      String notLetterRegex,
+      Collection<String> particles,
+      String emptyString,
+      String splitter) {
     this.luceneMorphology = luceneMorphology;
     this.notLetterRegex = notLetterRegex;
     this.particles = particles;

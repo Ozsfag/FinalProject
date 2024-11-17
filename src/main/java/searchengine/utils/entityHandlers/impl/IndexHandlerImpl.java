@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import searchengine.factory.EntityFactory;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.repositories.IndexRepository;
-import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.entityHandlers.IndexHandler;
 import searchengine.utils.lockWrapper.LockWrapper;
 

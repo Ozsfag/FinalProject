@@ -3,8 +3,8 @@ package searchengine.utils.webScraper.impl;
 import java.io.IOException;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ConnectionResponse;
+import searchengine.factory.ConnectionResponseFactory;
 import searchengine.utils.webScraper.WebScraper;
-import searchengine.utils.webScraper.connectionResponseBuilder.ConnectionResponseBuilder;
 
 /**
  * a util that parses a page
@@ -13,10 +13,10 @@ import searchengine.utils.webScraper.connectionResponseBuilder.ConnectionRespons
  */
 @Component
 public class WebScraperImpl implements WebScraper {
-  private final ConnectionResponseBuilder connectionResponseBuilder;
+  private final ConnectionResponseFactory connectionResponseFactory;
 
-  public WebScraperImpl(ConnectionResponseBuilder connectionResponseBuilder) {
-    this.connectionResponseBuilder = connectionResponseBuilder;
+  public WebScraperImpl(ConnectionResponseFactory connectionResponseFactory) {
+    this.connectionResponseFactory = connectionResponseFactory;
   }
 
   @Override
@@ -29,11 +29,11 @@ public class WebScraperImpl implements WebScraper {
   }
 
   private ConnectionResponse buildConnectionResponse(String url) throws IOException {
-    return connectionResponseBuilder.buildConnectionResponse(url);
+    return connectionResponseFactory.buildConnectionResponse(url);
   }
 
   private ConnectionResponse buildConnectionResponseWithException(String url, IOException e) {
-    return connectionResponseBuilder.buildConnectionResponseWithException(
+    return connectionResponseFactory.buildConnectionResponseWithException(
         url, e.hashCode(), e.getMessage());
   }
 }

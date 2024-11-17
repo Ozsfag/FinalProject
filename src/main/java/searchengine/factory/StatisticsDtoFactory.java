@@ -1,8 +1,7 @@
-package searchengine.utils.statisticsDtoFactory.impl;
+package searchengine.factory;
 
 import java.util.Collection;
 import java.util.Date;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
@@ -14,16 +13,21 @@ import searchengine.model.SiteModel;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.services.indexing.impl.IndexingImpl;
-import searchengine.utils.statisticsDtoFactory.StatisticsDtoFactory;
 
 @Component
 @Lazy
-public class StatisticsDtoFactoryImpl implements StatisticsDtoFactory {
-  @Autowired private SitesList sites;
-  @Autowired private PageRepository pageRepository;
-  @Autowired private LemmaRepository lemmaRepository;
+public class StatisticsDtoFactory {
+  private final SitesList sites;
+  private final PageRepository pageRepository;
+  private final LemmaRepository lemmaRepository;
 
-  @Override
+  public StatisticsDtoFactory(
+      SitesList sites, PageRepository pageRepository, LemmaRepository lemmaRepository) {
+    this.sites = sites;
+    this.pageRepository = pageRepository;
+    this.lemmaRepository = lemmaRepository;
+  }
+
   public TotalStatistics getTotalStatistics() {
     return new TotalStatistics(
         sites.getSites().size(), getPagesCount(), getLemmasCount(), IndexingImpl.isIndexing);
@@ -37,12 +41,10 @@ public class StatisticsDtoFactoryImpl implements StatisticsDtoFactory {
     return lemmaRepository.count();
   }
 
-  @Override
   public DetailedStatisticsItem getEmptyDetailedStatisticsItem() {
     return new DetailedStatisticsItem("", "", "", "", new Date().getTime(), 0L, 0L);
   }
 
-  @Override
   public DetailedStatisticsItem getDetailedStatisticsItem(Site site, SiteModel siteModel) {
     return new DetailedStatisticsItem(
         site.getUrl(),
@@ -58,7 +60,6 @@ public class StatisticsDtoFactoryImpl implements StatisticsDtoFactory {
     return lemmaRepository.countBySiteUrl(url);
   }
 
-  @Override
   public StatisticsData getStatisticsData(
       TotalStatistics total, Collection<DetailedStatisticsItem> detailed) {
     return new StatisticsData(total, detailed);

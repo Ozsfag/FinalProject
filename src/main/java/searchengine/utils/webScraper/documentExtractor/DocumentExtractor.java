@@ -1,4 +1,4 @@
-package searchengine.utils.webScraper.connectionResponseBuilder.documentExtractor;
+package searchengine.utils.webScraper.documentExtractor;
 
 import java.util.Collection;
 import org.jsoup.nodes.Document;

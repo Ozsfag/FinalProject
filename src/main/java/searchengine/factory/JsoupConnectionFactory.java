@@ -1,25 +1,24 @@
-package searchengine.utils.webScraper.jsoupConnectionBuilder.impl;
+package searchengine.factory;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Component;
 import searchengine.config.JsoupConnectionSettings;
-import searchengine.utils.webScraper.jsoupConnectionBuilder.JsoupConnectionBuilder;
 
 @Component
-public class JsoupConnectionBuilderImpl implements JsoupConnectionBuilder {
+public class JsoupConnectionFactory {
   private final JsoupConnectionSettings jsoupConnectionSettings;
 
-  public JsoupConnectionBuilderImpl(JsoupConnectionSettings jsoupConnectionSettings) {
+  public JsoupConnectionFactory(JsoupConnectionSettings jsoupConnectionSettings) {
     this.jsoupConnectionSettings = jsoupConnectionSettings.clone();
   }
 
-  @Override
   public Connection createJsoupConnection(String url) {
     return Jsoup.connect(url)
         .userAgent(getUserAgent())
         .referrer(getReferrer())
-        .ignoreHttpErrors(true);
+        .ignoreHttpErrors(true)
+        .timeout(5000);
   }
 
   private String getUserAgent() {

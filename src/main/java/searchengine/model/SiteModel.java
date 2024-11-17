@@ -53,5 +53,4 @@ public class SiteModel implements Serializable, EntityInterface {
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   private Set<LemmaModel> lemma;
-
 }

@@ -16,7 +16,14 @@ public class QueryResolverImpl implements QueryResolver {
   private final String emptyString;
   private final String splitter;
 
-  public QueryResolverImpl(String nonLetters, LuceneMorphology luceneMorphology1, LuceneMorphology luceneMorphology2, Collection<String> particles, String onlyLetters, String emptyString, String splitter) {
+  public QueryResolverImpl(
+      String nonLetters,
+      LuceneMorphology luceneMorphology1,
+      LuceneMorphology luceneMorphology2,
+      Collection<String> particles,
+      String onlyLetters,
+      String emptyString,
+      String splitter) {
     this.nonLetters = nonLetters;
     this.luceneMorphology1 = luceneMorphology1;
     this.luceneMorphology2 = luceneMorphology2;
