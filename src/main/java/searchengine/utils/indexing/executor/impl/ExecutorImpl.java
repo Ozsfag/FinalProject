@@ -16,7 +16,7 @@ import searchengine.utils.indexing.processor.Processor;
 @Component
 public class ExecutorImpl implements Executor {
   private final EntitySaverTemplate entitySaverTemplate;
-    private final SiteHandler siteHandler;
+  private final SiteHandler siteHandler;
   private final Processor processor;
   private final SitesList sitesList;
   private final ForkJoinPool forkJoinPool;
@@ -66,15 +66,8 @@ public class ExecutorImpl implements Executor {
 
   @Override
   public void executeOnePageIndexing(String url) {
-    SiteModel siteModel = getSiteModelByUrl(url);
+    SiteModel siteModel = dataTransformer.transformUrlToSiteModel(url);
     Collection<String> urls = dataTransformer.transformUrlToUrls(url);
     processor.processOneSiteIndexing(url, siteModel, urls);
-  }
-
-  private SiteModel getSiteModelByUrl(String url) {
-    return siteHandler
-        .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
-        .iterator()
-        .next();
   }
 }

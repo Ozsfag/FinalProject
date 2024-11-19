@@ -1,4 +1,4 @@
-package searchengine.utils.searching.searchingDtoFactory.impl;
+package searchengine.factory;
 
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -10,34 +10,32 @@ import searchengine.dto.searching.responseImpl.DetailedSearchResponse;
 import searchengine.model.IndexModel;
 import searchengine.model.PageModel;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.searching.searchingDtoFactory.SearchingDtoFactory;
+import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.searching.snippetTransmitter.SnippetTransmitter;
-import searchengine.utils.validator.Validator;
 import searchengine.utils.webScraper.WebScraper;
 
 @Component
 @Lazy
-public class SearchingDtoFactoryImpl implements SearchingDtoFactory {
+public class SearchingDtoFactory {
   private final ReentrantReadWriteLock lock;
   private final PageRepository pageRepository;
-  private final Validator validator;
+  private final DataTransformer dataTransformer;
   private final WebScraper webScraper;
   private final SnippetTransmitter snippetTransmitter;
 
-  public SearchingDtoFactoryImpl(
+  public SearchingDtoFactory(
       ReentrantReadWriteLock lock,
       PageRepository pageRepository,
-      Validator validator,
+      DataTransformer dataTransformer,
       WebScraper webScraper,
       SnippetTransmitter snippetTransmitter) {
     this.lock = lock;
     this.pageRepository = pageRepository;
-    this.validator = validator;
+    this.dataTransformer = dataTransformer;
     this.webScraper = webScraper;
     this.snippetTransmitter = snippetTransmitter;
   }
 
-  @Override
   public DetailedSearchResponse getDetailedSearchResponse(
       Map.Entry<Integer, Float> entry, Collection<IndexModel> uniqueSet) {
     PageModel pageModel = getPageModel(entry.getKey());
@@ -68,7 +66,7 @@ public class SearchingDtoFactoryImpl implements SearchingDtoFactory {
 
   private String[] getUrlComponents(PageModel pageModel) {
     try {
-      return validator.getValidUrlComponents(pageModel.getPath());
+      return dataTransformer.getValidUrlComponents(pageModel.getPath());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e.getLocalizedMessage());
     }

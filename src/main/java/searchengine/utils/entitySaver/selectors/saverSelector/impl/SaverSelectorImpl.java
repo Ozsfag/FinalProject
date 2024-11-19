@@ -3,7 +3,6 @@ package searchengine.utils.entitySaver.selectors.saverSelector.impl;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
@@ -31,19 +30,15 @@ public class SaverSelectorImpl implements SaverSelector {
     this.lemmaModelSaver = lemmaModelSaver.clone();
     this.indexModelSaver = indexModelSaver.clone();
     this.entitySavers = new ConcurrentHashMap<>();
+    this.entitySavers.put(SiteModel.class, siteModelSaver);
+    this.entitySavers.put(PageModel.class, pageModelSaver);
+    this.entitySavers.put(LemmaModel.class, lemmaModelSaver);
+    this.entitySavers.put(IndexModel.class, indexModelSaver);
   }
 
   @Override
   public EntitySaverTemplate getSaver(Collection entities) {
     Class<?> entityType = entities.stream().findFirst().get().getClass();
     return entitySavers.get(entityType);
-  }
-
-  @PostConstruct
-  public void init() {
-    entitySavers.put(SiteModel.class, siteModelSaver);
-    entitySavers.put(PageModel.class, pageModelSaver);
-    entitySavers.put(LemmaModel.class, lemmaModelSaver);
-    entitySavers.put(IndexModel.class, indexModelSaver);
   }
 }

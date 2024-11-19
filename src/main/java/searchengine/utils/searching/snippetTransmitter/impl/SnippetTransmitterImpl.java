@@ -35,6 +35,10 @@ public class SnippetTransmitterImpl implements SnippetTransmitter {
     return String.join("............. ", matchingSentences);
   }
 
+  private String getContentFromPage(PageModel pageModel) {
+    return pageModel.getContent().toLowerCase(Locale.ROOT);
+  }
+
   private boolean itemPageIsEqualToPage(IndexModel item, PageModel pageModel) {
     return item.getPage().equals(pageModel);
   }
@@ -42,10 +46,6 @@ public class SnippetTransmitterImpl implements SnippetTransmitter {
   private String getMatchingSentencesFromContent(IndexModel item, String content) {
     String word = getWord(item);
     return contentFormatter.format(contentMatcher.match(content, word), word);
-  }
-
-  private String getContentFromPage(PageModel pageModel) {
-    return pageModel.getContent().toLowerCase(Locale.ROOT);
   }
 
   private String getWord(IndexModel item) {

@@ -1,6 +1,5 @@
 package searchengine.utils.webScraper.jsoupConnectionExecutor.exceptionHandlers.impl;
 
-
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.JsoupConnectionResponseDto;

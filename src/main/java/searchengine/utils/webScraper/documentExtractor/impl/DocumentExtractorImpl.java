@@ -1,11 +1,11 @@
-package searchengine.utils.webScraper.connectionResponseBuilder.documentExtractor.impl;
+package searchengine.utils.webScraper.documentExtractor.impl;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
-import searchengine.utils.webScraper.connectionResponseBuilder.documentExtractor.DocumentExtractor;
+import searchengine.utils.webScraper.documentExtractor.DocumentExtractor;
 
 @Component
 public class DocumentExtractorImpl implements DocumentExtractor {

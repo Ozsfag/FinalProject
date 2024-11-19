@@ -3,7 +3,6 @@ package searchengine.utils.entitySaver.selectors.repositorySelector.impl;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.PostConstruct;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
@@ -36,19 +35,15 @@ public class RepositorySelectorImpl implements RepositorySelector {
     this.lemmaRepository = lemmaRepository;
     this.indexRepository = indexRepository;
     this.entityRepositories = new ConcurrentHashMap<>();
+    this.entityRepositories.put(SiteModel.class, siteRepository);
+    this.entityRepositories.put(PageModel.class, pageRepository);
+    this.entityRepositories.put(LemmaModel.class, lemmaRepository);
+    this.entityRepositories.put(IndexModel.class, indexRepository);
   }
 
   @Override
   public JpaRepository getRepository(Collection<?> entities) {
     Class<?> entityType = entities.stream().findFirst().get().getClass();
     return entityRepositories.get(entityType);
-  }
-
-  @PostConstruct
-  public void init() {
-    entityRepositories.put(SiteModel.class, siteRepository);
-    entityRepositories.put(PageModel.class, pageRepository);
-    entityRepositories.put(LemmaModel.class, lemmaRepository);
-    entityRepositories.put(IndexModel.class, indexRepository);
   }
 }

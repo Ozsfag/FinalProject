@@ -4,7 +4,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.CompletableFuture;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
@@ -18,9 +17,13 @@ import searchengine.utils.indexing.executor.Executor;
 public class IndexingImpl implements IndexingService {
 
   public static volatile Boolean isIndexing = true;
-  @Autowired private Executor executor;
+  private final Executor executor;
 
-  @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
+    public IndexingImpl(Executor executor) {
+        this.executor = executor;
+    }
+
+    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
   @Override
   public ResponseInterface startIndexing() {
     if (isIndexingAlreadyRunning()) {

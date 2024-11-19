@@ -1,24 +1,32 @@
-package searchengine.utils.morphology.queryHandler;
+package searchengine.factory;
 
 import java.util.Collection;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
-import searchengine.utils.validator.Validator;
+import searchengine.utils.morphology.queryHandler.QueryResolver;
+import searchengine.utils.morphology.queryHandler.QueryResolverImpl;
 
 @Component
+@Lazy
 public class QueryResolverFactory {
-  @Autowired @Lazy private RussianLuceneMorphology russianLuceneMorphology;
-  @Autowired @Lazy private EnglishLuceneMorphology englishLuceneMorphology;
-  @Autowired @Lazy private MorphologySettings morphologySettings;
-  @Autowired @Lazy private Validator validator;
-
+  @Lazy private final RussianLuceneMorphology russianLuceneMorphology;
+  @Lazy private final EnglishLuceneMorphology englishLuceneMorphology;
+  @Lazy private final MorphologySettings morphologySettings;
   private volatile QueryResolver russianQueryResolver;
   private volatile QueryResolver englishQueryResolver;
+
+  public QueryResolverFactory(
+      RussianLuceneMorphology russianLuceneMorphology,
+      EnglishLuceneMorphology englishLuceneMorphology,
+      MorphologySettings morphologySettings) {
+    this.russianLuceneMorphology = russianLuceneMorphology;
+    this.englishLuceneMorphology = englishLuceneMorphology;
+    this.morphologySettings = morphologySettings;
+  }
 
   public QueryResolver createRussianQueryHandler() {
     if (russianQueryResolver == null) {

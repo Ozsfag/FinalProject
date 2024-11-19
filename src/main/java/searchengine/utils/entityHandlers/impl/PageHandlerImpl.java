@@ -7,9 +7,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import searchengine.exceptions.StoppedExecutionException;
+import searchengine.factory.EntityFactory;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
-import searchengine.utils.entityFactory.EntityFactory;
 import searchengine.utils.entityHandlers.PageHandler;
 
 @Component

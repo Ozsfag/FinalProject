@@ -7,11 +7,11 @@ import searchengine.dto.statistics.DetailedStatisticsItem;
 import searchengine.dto.statistics.StatisticsData;
 import searchengine.dto.statistics.TotalStatistics;
 import searchengine.dto.statistics.responseImpl.StatisticsResponse;
+import searchengine.factory.StatisticsDtoFactory;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.statistics.StatisticsService;
 import searchengine.utils.lockWrapper.LockWrapper;
-import searchengine.utils.statisticsDtoFactory.StatisticsDtoFactory;
 
 @Service
 public class StatisticsServiceImpl implements StatisticsService {

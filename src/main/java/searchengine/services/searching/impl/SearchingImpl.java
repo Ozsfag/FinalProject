@@ -8,6 +8,7 @@ import searchengine.dto.ResponseInterface;
 import searchengine.dto.searching.responseImpl.DetailedSearchResponse;
 import searchengine.dto.searching.responseImpl.TotalEmptyResponse;
 import searchengine.dto.searching.responseImpl.TotalSearchResponse;
+import searchengine.factory.SearchingDtoFactory;
 import searchengine.model.IndexModel;
 import searchengine.model.SiteModel;
 import searchengine.services.searching.SearchingService;
@@ -15,7 +16,6 @@ import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.morphology.queryToIndexesTransformer.QueryToIndexesTransformer;
 import searchengine.utils.searching.PageRanker.PageRanker;
-import searchengine.utils.searching.searchingDtoFactory.SearchingDtoFactory;
 
 @Service
 @Lazy
@@ -26,7 +26,12 @@ public class SearchingImpl implements SearchingService {
   private final SiteHandler siteHandler;
   private final DataTransformer dataTransformer;
 
-  public SearchingImpl(QueryToIndexesTransformer queryToIndexesTransformer, PageRanker pageRanker, SearchingDtoFactory searchingDtoFactory, SiteHandler siteHandler, DataTransformer dataTransformer) {
+  public SearchingImpl(
+      QueryToIndexesTransformer queryToIndexesTransformer,
+      PageRanker pageRanker,
+      SearchingDtoFactory searchingDtoFactory,
+      SiteHandler siteHandler,
+      DataTransformer dataTransformer) {
     this.queryToIndexesTransformer = queryToIndexesTransformer;
     this.pageRanker = pageRanker;
     this.searchingDtoFactory = searchingDtoFactory;
