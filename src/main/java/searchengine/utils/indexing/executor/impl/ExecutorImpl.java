@@ -66,15 +66,8 @@ public class ExecutorImpl implements Executor {
 
   @Override
   public void executeOnePageIndexing(String url) {
-    SiteModel siteModel = getSiteModelByUrl(url);
+    SiteModel siteModel = dataTransformer.transformUrlToSiteModel(url);
     Collection<String> urls = dataTransformer.transformUrlToUrls(url);
     processor.processOneSiteIndexing(url, siteModel, urls);
-  }
-
-  private SiteModel getSiteModelByUrl(String url) {
-    return siteHandler
-        .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
-        .iterator()
-        .next();
   }
 }

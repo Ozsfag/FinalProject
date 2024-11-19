@@ -28,13 +28,21 @@ import searchengine.utils.morphology.Morphology;
  */
 @Component
 public class IndexingStrategy {
-  @Autowired private PageHandler pageHandler;
-  @Autowired private EntitySaverTemplate entitySaverTemplate;
-  @Autowired private Morphology morphology;
-  @Autowired private LemmaHandler lemmaHandler;
-  @Autowired private IndexHandler indexHandler;
+  private final PageHandler pageHandler;
+  private final EntitySaverTemplate entitySaverTemplate;
+  private final Morphology morphology;
+  private final LemmaHandler lemmaHandler;
+  private final IndexHandler indexHandler;
 
-  /**
+    public IndexingStrategy(PageHandler pageHandler, EntitySaverTemplate entitySaverTemplate, Morphology morphology, LemmaHandler lemmaHandler, IndexHandler indexHandler) {
+        this.pageHandler = pageHandler;
+        this.entitySaverTemplate = entitySaverTemplate;
+        this.morphology = morphology;
+        this.lemmaHandler = lemmaHandler;
+        this.indexHandler = indexHandler;
+    }
+
+    /**
    * Indexes the lemmas and indexes for a list of pages.
    *
    * @param urlsToParse the list of URLs to index

@@ -42,8 +42,6 @@ indexing-settings:
     #      name: Skillbox
     #    - url: http://www.playback.ru/
     #      name: PlayBack.Ru
-    - url: http://kremlin.ru/
-      name: Кремль
     - url: https://amurkino.ru/
       name: Kino
     - url: https://domrebenka.belzdrav.ru/
@@ -53,11 +51,11 @@ indexing-settings:
 
 
 connection-settings:
-  user-agent: EmelianIndexingBot
+  user-agent: FarEastIndexingBot
   referrer: https://www.google.com
 
 morphology-settings:
-  maxFrequency: 500
+  maxFrequency: 1000
   russianParticleNames:
     - МЕЖД
     - ПРЕДЛ

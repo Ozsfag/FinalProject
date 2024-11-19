@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
 import searchengine.utils.morphology.queryHandler.QueryResolver;
 import searchengine.utils.morphology.queryHandler.QueryResolverImpl;
-import searchengine.utils.validator.Validator;
 
 @Component
 @Lazy
@@ -17,19 +16,16 @@ public class QueryResolverFactory {
   @Lazy private final RussianLuceneMorphology russianLuceneMorphology;
   @Lazy private final EnglishLuceneMorphology englishLuceneMorphology;
   @Lazy private final MorphologySettings morphologySettings;
-  @Lazy private final Validator validator;
   private volatile QueryResolver russianQueryResolver;
   private volatile QueryResolver englishQueryResolver;
 
   public QueryResolverFactory(
       RussianLuceneMorphology russianLuceneMorphology,
       EnglishLuceneMorphology englishLuceneMorphology,
-      MorphologySettings morphologySettings,
-      Validator validator) {
+      MorphologySettings morphologySettings) {
     this.russianLuceneMorphology = russianLuceneMorphology;
     this.englishLuceneMorphology = englishLuceneMorphology;
     this.morphologySettings = morphologySettings;
-    this.validator = validator;
   }
 
   public QueryResolver createRussianQueryHandler() {

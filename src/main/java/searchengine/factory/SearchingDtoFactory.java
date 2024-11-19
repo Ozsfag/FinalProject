@@ -10,8 +10,8 @@ import searchengine.dto.searching.responseImpl.DetailedSearchResponse;
 import searchengine.model.IndexModel;
 import searchengine.model.PageModel;
 import searchengine.repositories.PageRepository;
+import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.searching.snippetTransmitter.SnippetTransmitter;
-import searchengine.utils.validator.Validator;
 import searchengine.utils.webScraper.WebScraper;
 
 @Component
@@ -19,19 +19,19 @@ import searchengine.utils.webScraper.WebScraper;
 public class SearchingDtoFactory {
   private final ReentrantReadWriteLock lock;
   private final PageRepository pageRepository;
-  private final Validator validator;
+  private final DataTransformer dataTransformer;
   private final WebScraper webScraper;
   private final SnippetTransmitter snippetTransmitter;
 
   public SearchingDtoFactory(
       ReentrantReadWriteLock lock,
       PageRepository pageRepository,
-      Validator validator,
+      DataTransformer dataTransformer,
       WebScraper webScraper,
       SnippetTransmitter snippetTransmitter) {
     this.lock = lock;
     this.pageRepository = pageRepository;
-    this.validator = validator;
+    this.dataTransformer = dataTransformer;
     this.webScraper = webScraper;
     this.snippetTransmitter = snippetTransmitter;
   }
@@ -66,7 +66,7 @@ public class SearchingDtoFactory {
 
   private String[] getUrlComponents(PageModel pageModel) {
     try {
-      return validator.getValidUrlComponents(pageModel.getPath());
+      return dataTransformer.getValidUrlComponents(pageModel.getPath());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e.getLocalizedMessage());
     }
