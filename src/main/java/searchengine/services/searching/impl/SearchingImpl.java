@@ -64,7 +64,7 @@ public class SearchingImpl implements SearchingService {
             .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
             .stream()
             .findFirst()
-            .get();
+            .orElseGet(null);
   }
 
   /**
@@ -82,7 +82,7 @@ public class SearchingImpl implements SearchingService {
         .skip(offset)
         .limit(limit)
         .map(entry -> searchingDtoFactory.getDetailedSearchResponse(entry, uniqueSet))
-        .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance))
+        .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance).reversed())
         .collect(Collectors.toCollection(LinkedList::new));
   }
 }
