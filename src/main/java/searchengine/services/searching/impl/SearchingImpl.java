@@ -2,6 +2,7 @@ package searchengine.services.searching.impl;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.dto.ResponseInterface;
@@ -53,7 +54,7 @@ public class SearchingImpl implements SearchingService {
     Collection<DetailedSearchResponse> detailedSearchResponse =
         getDetailedSearchResponses(rel, offset, limit, uniqueSet);
 
-    return new TotalSearchResponse(true, detailedSearchResponse.size(), detailedSearchResponse);
+    return new TotalSearchResponse(true, rel.size(), detailedSearchResponse);
   }
 
   private SiteModel getSiteModel(String url) {
