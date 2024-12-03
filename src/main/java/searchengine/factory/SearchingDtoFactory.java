@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import searchengine.dto.UrlComponents;
 import searchengine.dto.searching.responseImpl.DetailedSearchResponse;
 import searchengine.model.IndexModel;
 import searchengine.model.PageModel;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.searching.snippetTransmitter.SnippetTransmitter;
 import searchengine.utils.webScraper.WebScraper;
 
@@ -19,19 +19,19 @@ import searchengine.utils.webScraper.WebScraper;
 public class SearchingDtoFactory {
   private final ReentrantReadWriteLock lock;
   private final PageRepository pageRepository;
-  private final DataTransformer dataTransformer;
+  private final UrlComponentsFactory urlComponentsFactory;
   private final WebScraper webScraper;
   private final SnippetTransmitter snippetTransmitter;
 
   public SearchingDtoFactory(
       ReentrantReadWriteLock lock,
       PageRepository pageRepository,
-      DataTransformer dataTransformer,
+      UrlComponentsFactory urlComponentsFactory,
       WebScraper webScraper,
       SnippetTransmitter snippetTransmitter) {
     this.lock = lock;
     this.pageRepository = pageRepository;
-    this.dataTransformer = dataTransformer;
+    this.urlComponentsFactory = urlComponentsFactory;
     this.webScraper = webScraper;
     this.snippetTransmitter = snippetTransmitter;
   }
@@ -39,15 +39,15 @@ public class SearchingDtoFactory {
   public DetailedSearchResponse getDetailedSearchResponse(
       Map.Entry<Integer, Float> entry, Collection<IndexModel> uniqueSet) {
     PageModel pageModel = getPageModel(entry.getKey());
-    String[] urlComponents = getUrlComponents(pageModel);
+    UrlComponents urlComponents = getUrlComponents(pageModel);
     String siteName = pageModel.getSite().getName();
     double relevance = entry.getValue();
     String title = webScraper.getConnectionResponse(pageModel.getPath()).getTitle();
     String snippet = snippetTransmitter.getSnippet(uniqueSet, pageModel);
 
     return DetailedSearchResponse.builder()
-        .uri(urlComponents[1])
-        .site(urlComponents[0])
+        .uri(urlComponents.getPath())
+        .site(urlComponents.getSchemeAndHost())
         .title(title)
         .snippet(snippet)
         .siteName(siteName)
@@ -64,9 +64,9 @@ public class SearchingDtoFactory {
     }
   }
 
-  private String[] getUrlComponents(PageModel pageModel) {
+  private UrlComponents getUrlComponents(PageModel pageModel) {
     try {
-      return dataTransformer.getValidUrlComponents(pageModel.getPath());
+      return urlComponentsFactory.createValidUrlComponents(pageModel.getPath());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e.getLocalizedMessage());
     }

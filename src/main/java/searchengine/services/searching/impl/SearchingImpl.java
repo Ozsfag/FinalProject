@@ -2,7 +2,6 @@ package searchengine.services.searching.impl;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.dto.ResponseInterface;

@@ -1,8 +1,8 @@
 package searchengine.utils.dataTransformer;
 
-import java.net.URISyntaxException;
 import java.util.Collection;
 import searchengine.dto.indexing.Site;
+import searchengine.exceptions.NotInConfigurationException;
 import searchengine.model.SiteModel;
 
 public interface DataTransformer {
@@ -14,7 +14,7 @@ public interface DataTransformer {
    */
   Collection<String> transformUrlToUrls(String url);
 
-  SiteModel transformUrlToSiteModel(String url);
+  SiteModel transformUrlToSiteModel(String url) throws NotInConfigurationException;
 
   /**
    * Transforms a collection of URLs into a collection of Site objects.
@@ -23,6 +23,4 @@ public interface DataTransformer {
    * @return a collection of Site objects
    */
   Collection<Site> transformUrlToSites(String url);
-
-  String[] getValidUrlComponents(String url) throws URISyntaxException;
 }

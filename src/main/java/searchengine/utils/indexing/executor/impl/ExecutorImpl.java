@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
+import searchengine.exceptions.NotInConfigurationException;
 import searchengine.model.SiteModel;
 import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandlers.SiteHandler;
@@ -65,7 +66,7 @@ public class ExecutorImpl implements Executor {
   }
 
   @Override
-  public void executeOnePageIndexing(String url) {
+  public void executeOnePageIndexing(String url) throws NotInConfigurationException {
     SiteModel siteModel = dataTransformer.transformUrlToSiteModel(url);
     Collection<String> urls = dataTransformer.transformUrlToUrls(url);
     processor.processOneSiteIndexing(url, siteModel, urls);

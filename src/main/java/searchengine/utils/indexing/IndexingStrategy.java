@@ -1,7 +1,6 @@
 package searchengine.utils.indexing;
 
 import java.util.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.model.*;
 import searchengine.utils.entityHandlers.IndexHandler;
@@ -34,15 +33,20 @@ public class IndexingStrategy {
   private final LemmaHandler lemmaHandler;
   private final IndexHandler indexHandler;
 
-    public IndexingStrategy(PageHandler pageHandler, EntitySaverTemplate entitySaverTemplate, Morphology morphology, LemmaHandler lemmaHandler, IndexHandler indexHandler) {
-        this.pageHandler = pageHandler;
-        this.entitySaverTemplate = entitySaverTemplate;
-        this.morphology = morphology;
-        this.lemmaHandler = lemmaHandler;
-        this.indexHandler = indexHandler;
-    }
+  public IndexingStrategy(
+      PageHandler pageHandler,
+      EntitySaverTemplate entitySaverTemplate,
+      Morphology morphology,
+      LemmaHandler lemmaHandler,
+      IndexHandler indexHandler) {
+    this.pageHandler = pageHandler;
+    this.entitySaverTemplate = entitySaverTemplate;
+    this.morphology = morphology;
+    this.lemmaHandler = lemmaHandler;
+    this.indexHandler = indexHandler;
+  }
 
-    /**
+  /**
    * Indexes the lemmas and indexes for a list of pages.
    *
    * @param urlsToParse the list of URLs to index

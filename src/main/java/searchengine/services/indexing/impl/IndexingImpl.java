@@ -9,6 +9,7 @@ import searchengine.dto.ResponseInterface;
 import searchengine.dto.indexing.responseImpl.Bad;
 import searchengine.dto.indexing.responseImpl.Stop;
 import searchengine.dto.indexing.responseImpl.Successful;
+import searchengine.exceptions.NotInConfigurationException;
 import searchengine.services.indexing.IndexingService;
 import searchengine.utils.indexing.executor.Executor;
 
@@ -19,11 +20,11 @@ public class IndexingImpl implements IndexingService {
   public static volatile Boolean isIndexing = true;
   private final Executor executor;
 
-    public IndexingImpl(Executor executor) {
-        this.executor = executor;
-    }
+  public IndexingImpl(Executor executor) {
+    this.executor = executor;
+  }
 
-    @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
+  @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
   @Override
   public ResponseInterface startIndexing() {
     if (isIndexingAlreadyRunning()) {
@@ -52,7 +53,15 @@ public class IndexingImpl implements IndexingService {
   @SneakyThrows
   @Override
   public ResponseInterface indexPage(String url) {
-    CompletableFuture.runAsync(() -> executor.executeOnePageIndexing(url));
-    return new Successful(true);
+    return CompletableFuture.supplyAsync(
+            () -> {
+              try {
+                executor.executeOnePageIndexing(url);
+                return new Successful(true);
+              } catch (NotInConfigurationException e) {
+                return new Bad(false, e.getLocalizedMessage());
+              }
+            })
+        .get();
   }
 }

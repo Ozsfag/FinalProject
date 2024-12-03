@@ -1,22 +1,20 @@
-package searchengine.utils.validator;
+package searchengine.factory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import searchengine.config.MorphologySettings;
+import searchengine.dto.UrlComponents;
 
 @Component
-public class Validator {
-  @Autowired @Lazy private MorphologySettings morphologySettings;
-
+@Lazy
+public class UrlComponentsFactory {
   /**
    * split transmitted link into scheme and host, and path
    *
    * @param url@return valid url components
    */
-  public String[] getValidUrlComponents(String url) throws URISyntaxException {
+  public UrlComponents createValidUrlComponents(String url) throws URISyntaxException {
     final URI uri = new URI(url);
     if (uri.getScheme() == null || uri.getHost() == null || uri.getPath() == null) {
       throw new URISyntaxException(url, "Invalid URL");
@@ -24,6 +22,6 @@ public class Validator {
     final String schemeAndHost = uri.getScheme() + "://" + uri.getHost() + "/";
     final String path = uri.getPath();
     final String host = uri.getHost().substring(0, uri.getHost().indexOf("."));
-    return new String[] {schemeAndHost, path, host};
+    return UrlComponents.builder().host(host).path(path).schemeAndHost(schemeAndHost).build();
   }
 }
