@@ -2,6 +2,8 @@ package searchengine.services.searching.impl;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import lombok.SneakyThrows;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.dto.ResponseInterface;
@@ -56,6 +58,7 @@ public class SearchingImpl implements SearchingService {
     return new TotalSearchResponse(true, rel.size(), detailedSearchResponse);
   }
 
+  @SneakyThrows
   private SiteModel getSiteModel(String url) {
     return url == null
         ? null

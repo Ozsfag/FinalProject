@@ -36,7 +36,7 @@ public class DataTransformerImpl implements DataTransformer {
   }
 
   @Override
-  public SiteModel transformUrlToSiteModel(String url) throws NotInConfigurationException {
+  public SiteModel transformUrlToSiteModel(String url) throws NotInConfigurationException, URISyntaxException {
     Collection<Site> sites = transformUrlToSites(url);
 
     if (sites.isEmpty()) throw new NotInConfigurationException("Site in not in configuration");
@@ -45,21 +45,19 @@ public class DataTransformerImpl implements DataTransformer {
   }
 
   @Override
-  public Collection<Site> transformUrlToSites(String url) {
-    Optional<Site> optionalSite =
-        sitesList.getSites().stream()
-            .filter(siteUrl -> isInConfiguration(url, siteUrl.getUrl()))
+  public Collection<Site> transformUrlToSites(String url) throws URISyntaxException {
+    String siteSchemeAndHost = getSiteSchemeAndHost(url);
+    Optional<Site> optionalSite = sitesList.getSites().stream()
+            .filter(site -> isSiteInConfiguration(siteSchemeAndHost, site.getUrl()))
             .findFirst();
     return optionalSite.map(List::of).orElse(Collections.emptyList());
   }
 
-  private boolean isInConfiguration(String currentUrl, String siteUrl) {
-    try {
-      String siteSchemeAndHost =
-          urlComponentsFactory.createValidUrlComponents(currentUrl).getSchemeAndHost();
-      return siteUrl.equals(siteSchemeAndHost);
-    } catch (URISyntaxException e) {
-      return false;
-    }
+  private String getSiteSchemeAndHost(String url) throws URISyntaxException {
+    return urlComponentsFactory.createValidUrlComponents(url).getSchemeAndHost();
+  }
+
+  private boolean isSiteInConfiguration(String siteSchemeAndHost, String siteUrl) {
+    return siteUrl.contains(siteSchemeAndHost);
   }
 }

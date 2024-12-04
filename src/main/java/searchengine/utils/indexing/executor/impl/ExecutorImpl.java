@@ -1,5 +1,6 @@
 package searchengine.utils.indexing.executor.impl;
 
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -66,7 +67,7 @@ public class ExecutorImpl implements Executor {
   }
 
   @Override
-  public void executeOnePageIndexing(String url) throws NotInConfigurationException {
+  public void executeOnePageIndexing(String url) throws NotInConfigurationException, URISyntaxException {
     SiteModel siteModel = dataTransformer.transformUrlToSiteModel(url);
     Collection<String> urls = dataTransformer.transformUrlToUrls(url);
     processor.processOneSiteIndexing(url, siteModel, urls);

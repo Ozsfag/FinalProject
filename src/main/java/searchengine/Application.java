@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.config.BootstrapMode;
 import org.springframework.retry.annotation.EnableRetry;
 
-@SpringBootApplication()
-@EnableRetry()
+@SpringBootApplication
+@EnableRetry
 @EnableJpaRepositories(bootstrapMode = BootstrapMode.LAZY)
 public class Application {
   public static void main(String[] args) {

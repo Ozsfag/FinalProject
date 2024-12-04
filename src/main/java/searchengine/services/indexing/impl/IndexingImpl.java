@@ -1,6 +1,8 @@
 package searchengine.services.indexing.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +60,7 @@ public class IndexingImpl implements IndexingService {
               try {
                 executor.executeOnePageIndexing(url);
                 return new Successful(true);
-              } catch (NotInConfigurationException e) {
+              } catch (NotInConfigurationException | URISyntaxException e) {
                 return new Bad(false, e.getLocalizedMessage());
               }
             })
