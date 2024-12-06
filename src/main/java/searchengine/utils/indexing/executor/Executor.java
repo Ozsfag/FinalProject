@@ -1,8 +1,7 @@
 package searchengine.utils.indexing.executor;
 
-import searchengine.exceptions.NotInConfigurationException;
-
 import java.net.URISyntaxException;
+import searchengine.exceptions.NotInConfigurationException;
 
 public interface Executor {
   /** Starts the indexing process for all sites in the sitesList asynchronously. */

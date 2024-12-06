@@ -1,7 +1,6 @@
 package searchengine.services.indexing.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 import lombok.SneakyThrows;

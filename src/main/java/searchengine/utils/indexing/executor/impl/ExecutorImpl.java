@@ -67,7 +67,8 @@ public class ExecutorImpl implements Executor {
   }
 
   @Override
-  public void executeOnePageIndexing(String url) throws NotInConfigurationException, URISyntaxException {
+  public void executeOnePageIndexing(String url)
+      throws NotInConfigurationException, URISyntaxException {
     SiteModel siteModel = dataTransformer.transformUrlToSiteModel(url);
     Collection<String> urls = dataTransformer.transformUrlToUrls(url);
     processor.processOneSiteIndexing(url, siteModel, urls);

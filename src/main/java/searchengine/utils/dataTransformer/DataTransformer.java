@@ -15,7 +15,8 @@ public interface DataTransformer {
    */
   Collection<String> transformUrlToUrls(String url);
 
-  SiteModel transformUrlToSiteModel(String url) throws NotInConfigurationException, URISyntaxException;
+  SiteModel transformUrlToSiteModel(String url)
+      throws NotInConfigurationException, URISyntaxException;
 
   /**
    * Transforms a collection of URLs into a collection of Site objects.

@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
@@ -36,7 +35,8 @@ public class DataTransformerImpl implements DataTransformer {
   }
 
   @Override
-  public SiteModel transformUrlToSiteModel(String url) throws NotInConfigurationException, URISyntaxException {
+  public SiteModel transformUrlToSiteModel(String url)
+      throws NotInConfigurationException, URISyntaxException {
     Collection<Site> sites = transformUrlToSites(url);
 
     if (sites.isEmpty()) throw new NotInConfigurationException("Site in not in configuration");
@@ -47,7 +47,8 @@ public class DataTransformerImpl implements DataTransformer {
   @Override
   public Collection<Site> transformUrlToSites(String url) throws URISyntaxException {
     String siteSchemeAndHost = getSiteSchemeAndHost(url);
-    Optional<Site> optionalSite = sitesList.getSites().stream()
+    Optional<Site> optionalSite =
+        sitesList.getSites().stream()
             .filter(site -> isSiteInConfiguration(siteSchemeAndHost, site.getUrl()))
             .findFirst();
     return optionalSite.map(List::of).orElse(Collections.emptyList());

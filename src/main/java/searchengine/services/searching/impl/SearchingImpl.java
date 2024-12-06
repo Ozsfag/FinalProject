@@ -2,7 +2,6 @@ package searchengine.services.searching.impl;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -84,7 +83,11 @@ public class SearchingImpl implements SearchingService {
         .skip(offset)
         .limit(limit)
         .map(entry -> searchingDtoFactory.getDetailedSearchResponse(entry, uniqueSet))
-        .sorted(Comparator.comparing(DetailedSearchResponse::getRelevance).reversed())
+        .sorted(
+            Comparator.comparing(DetailedSearchResponse::getRelevance)
+                .reversed()
+                .thenComparing(dsr -> dsr.getSnippet().length())
+                    .reversed())
         .collect(Collectors.toCollection(LinkedList::new));
   }
 }

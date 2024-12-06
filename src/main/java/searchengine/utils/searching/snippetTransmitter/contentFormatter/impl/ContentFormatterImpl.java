@@ -9,8 +9,7 @@ import searchengine.utils.searching.snippetTransmitter.contentFormatter.ContentF
 public class ContentFormatterImpl implements ContentFormatter {
   @Override
   public String format(String matchedWord) {
-    if (matchedWord == null)
-      return null;
+    if (matchedWord == null) return null;
     return matchedWord.replace(matchedWord, "<b>" + matchedWord + "</b>");
   }
 }

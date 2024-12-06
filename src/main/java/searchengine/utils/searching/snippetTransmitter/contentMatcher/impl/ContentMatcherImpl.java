@@ -24,7 +24,7 @@ public class ContentMatcherImpl implements ContentMatcher {
     while (matcher.find()) {
       String formattedWord = getFormattedWord(matcher);
       String context = getContext(content, matcher.start(), matcher.end(), formattedWord);
-      matchingSentences.append(context).append(".................");
+      matchingSentences.append(context).append("|");
     }
 
     return matchingSentences.toString().trim();
@@ -43,9 +43,7 @@ public class ContentMatcherImpl implements ContentMatcher {
     int head = getHeadIndex(start);
     int tail = getTailIndex(end, content.length());
 
-    return content.substring(head, start) +
-            formattedWord +
-            content.substring(end, tail);
+    return content.substring(head, start) + formattedWord + content.substring(end, tail);
   }
 
   private int getHeadIndex(int start) {

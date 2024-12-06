@@ -14,9 +14,9 @@ import searchengine.utils.searching.snippetTransmitter.contentMatcher.ContentMat
 public class SnippetTransmitterImpl implements SnippetTransmitter {
   private final ContentMatcher contentMatcher;
 
-    public SnippetTransmitterImpl(ContentMatcher contentMatcher) {
+  public SnippetTransmitterImpl(ContentMatcher contentMatcher) {
     this.contentMatcher = contentMatcher;
-    }
+  }
 
   @Override
   public String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel) {
@@ -42,7 +42,7 @@ public class SnippetTransmitterImpl implements SnippetTransmitter {
 
   private String getMatchingSentencesFromContent(IndexModel item, String content) {
     String word = getWord(item);
-      return contentMatcher.match(content, word);
+    return contentMatcher.match(content, word);
   }
 
   private String getWord(IndexModel item) {
