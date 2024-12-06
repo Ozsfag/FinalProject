@@ -8,10 +8,9 @@ import searchengine.utils.searching.snippetTransmitter.contentFormatter.ContentF
 @Lazy
 public class ContentFormatterImpl implements ContentFormatter {
   @Override
-  public String format(String matchingSentence, String word) {
-    if (matchingSentence != null) {
-      return matchingSentence.replaceAll(word, "<b>" + word + "</b>");
-    }
-    return null;
+  public String format(String matchedWord) {
+    if (matchedWord == null)
+      return null;
+    return matchedWord.replace(matchedWord, "<b>" + matchedWord + "</b>");
   }
 }

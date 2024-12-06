@@ -7,19 +7,16 @@ import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
 import searchengine.model.PageModel;
 import searchengine.utils.searching.snippetTransmitter.SnippetTransmitter;
-import searchengine.utils.searching.snippetTransmitter.contentFormatter.ContentFormatter;
 import searchengine.utils.searching.snippetTransmitter.contentMatcher.ContentMatcher;
 
 @Component
 @Lazy
 public class SnippetTransmitterImpl implements SnippetTransmitter {
   private final ContentMatcher contentMatcher;
-  private final ContentFormatter contentFormatter;
 
-  public SnippetTransmitterImpl(ContentMatcher contentMatcher, ContentFormatter contentFormatter) {
+    public SnippetTransmitterImpl(ContentMatcher contentMatcher) {
     this.contentMatcher = contentMatcher;
-    this.contentFormatter = contentFormatter;
-  }
+    }
 
   @Override
   public String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel) {
@@ -45,7 +42,7 @@ public class SnippetTransmitterImpl implements SnippetTransmitter {
 
   private String getMatchingSentencesFromContent(IndexModel item, String content) {
     String word = getWord(item);
-    return contentFormatter.format(contentMatcher.match(content, word), word);
+      return contentMatcher.match(content, word);
   }
 
   private String getWord(IndexModel item) {
