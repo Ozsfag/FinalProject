@@ -22,31 +22,6 @@ public class MorphologySettings implements Cloneable {
   @Setter private String onlyCyrillicLetters;
   @Setter @Getter private Integer maxFrequency;
 
-  public MorphologySettings(
-      Collection<String> russianParticleNames,
-      Collection<String> englishParticlesNames,
-      String notCyrillicLetters,
-      String notLatinLetters,
-      String splitter,
-      String emptyString,
-      Collection<String> formats,
-      Collection<String> allowedSchemas,
-      String onlyLatinLetters,
-      String onlyCyrillicLetters,
-      Integer maxFrequency) {
-    this.russianParticleNames = Collections.unmodifiableCollection(russianParticleNames);
-    this.englishParticlesNames = Collections.unmodifiableCollection(englishParticlesNames);
-    this.notCyrillicLetters = notCyrillicLetters;
-    this.notLatinLetters = notLatinLetters;
-    this.splitter = splitter;
-    this.emptyString = emptyString;
-    this.formats = Collections.unmodifiableCollection(formats);
-    this.allowedSchemas = Collections.unmodifiableCollection(allowedSchemas);
-    this.onlyLatinLetters = onlyLatinLetters;
-    this.onlyCyrillicLetters = onlyCyrillicLetters;
-    this.maxFrequency = maxFrequency;
-  }
-
   public void setRussianParticleNames(Collection<String> russianParticleNames) {
     this.russianParticleNames = Collections.unmodifiableCollection(russianParticleNames);
   }

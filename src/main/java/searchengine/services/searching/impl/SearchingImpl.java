@@ -46,9 +46,7 @@ public class SearchingImpl implements SearchingService {
     Collection<IndexModel> uniqueSet =
         queryToIndexesTransformer.transformQueryToIndexModels(query, siteModel);
 
-    if (uniqueSet.isEmpty()) {
-      return new TotalEmptyResponse(false, "Not found");
-    }
+    if (uniqueSet.isEmpty()) return new TotalEmptyResponse(false, "Not found");
 
     Map<Integer, Float> rel = pageRanker.getPageId2AbsRank(uniqueSet);
     Collection<DetailedSearchResponse> detailedSearchResponse =
@@ -85,9 +83,8 @@ public class SearchingImpl implements SearchingService {
         .map(entry -> searchingDtoFactory.getDetailedSearchResponse(entry, uniqueSet))
         .sorted(
             Comparator.comparing(DetailedSearchResponse::getRelevance)
-                .reversed()
                 .thenComparing(dsr -> dsr.getSnippet().length())
-                    .reversed())
+                .reversed())
         .collect(Collectors.toCollection(LinkedList::new));
   }
 }

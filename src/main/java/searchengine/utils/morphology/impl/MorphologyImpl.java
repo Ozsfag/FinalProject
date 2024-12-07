@@ -3,7 +3,6 @@ package searchengine.utils.morphology.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.factory.QueryResolverFactory;
@@ -18,7 +17,6 @@ import searchengine.utils.morphology.wordCounter.WordCounter;
  * @author Ozsfag
  */
 @Component
-@Getter
 public class MorphologyImpl implements Morphology {
   @Autowired private WordsCounterFactory wordsCounterFactory;
   @Autowired private QueryResolverFactory queryResolverFactory;
@@ -27,8 +25,8 @@ public class MorphologyImpl implements Morphology {
   public Map<String, Integer> countWordFrequencyByLanguage(String content) {
     Map<String, Integer> result = new HashMap<>();
 
-    WordCounter russianCounter = getWordsCounterFactory().createRussianWordCounter();
-    WordCounter englishCounter = getWordsCounterFactory().createEnglishWordCounter();
+    WordCounter russianCounter = wordsCounterFactory.createRussianWordCounter();
+    WordCounter englishCounter = wordsCounterFactory.createEnglishWordCounter();
     Map<String, Integer> englishWordFrequency = englishCounter.countWordsFromContent(content);
     Map<String, Integer> russianWordFrequency = russianCounter.countWordsFromContent(content);
 
@@ -38,8 +36,8 @@ public class MorphologyImpl implements Morphology {
   }
 
   public Collection<String> getUniqueLemmasFromSearchQuery(String query) {
-    QueryResolver russianQueryResolver = getQueryResolverFactory().createRussianQueryHandler();
-    QueryResolver englishQueryResolver = getQueryResolverFactory().createEnglishQueryHandler();
+    QueryResolver russianQueryResolver = queryResolverFactory.createRussianQueryHandler();
+    QueryResolver englishQueryResolver = queryResolverFactory.createEnglishQueryHandler();
     Stream<String> russianLemmaStream = russianQueryResolver.getLemmasFromQuery(query);
     Stream<String> englishLemmaStream = englishQueryResolver.getLemmasFromQuery(query);
 

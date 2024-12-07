@@ -97,3 +97,4 @@ morphology-settings:
     - .yaml
     - .yml
     - .zip
+    - "\\"
