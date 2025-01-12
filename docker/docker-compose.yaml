@@ -1,20 +1,14 @@
 services:
 
   postgres:
-    build:
-      context: services/postgres
-      dockerfile: ../Dockerfile
-    container_name: postgres_container
-    image: postgres:16.1-alpine
+    container_name: search_engine_postgres_container
+    image: postgres:latest
     environment:
       POSTGRES_DB: search_engine
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 30091998As!
-      PGDATA: /var/lib/postgresql/data/pgdata
-      MAX_CONNECTION: 200
+      POSTGRES_PASSWORD: password
     volumes:
       - ./src/main/resources/init-scripts/init-database.sql:/docker-entrypoint-initdb.d/init-database.sql
-      - search-engine-data:/var/lib/postgresql/data
     ports:
       - 5432:5432
 
@@ -36,10 +30,10 @@ services:
 
   pgadmin:
     container_name: pgadmin_container
-    image: dpage/pgadmin4:8.10
+    image: dpage/pgadmin4:latest
     environment:
-      PGADMIN_DEFAULT_EMAIL: "Ozsfag3154artem@gmail.com"
-      PGADMIN_DEFAULT_PASSWORD: "30091998As!"
+      PGADMIN_DEFAULT_EMAIL: "example@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "password"
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
