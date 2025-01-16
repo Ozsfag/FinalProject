@@ -1,10 +1,10 @@
-package searchengine.dto.indexing.requestImpl;
+package searchengine.web.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class PageUrl {
+public class UpsertIndexingPageRequest {
   private String url;
 }

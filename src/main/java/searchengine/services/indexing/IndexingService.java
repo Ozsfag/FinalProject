@@ -1,6 +1,7 @@
 package searchengine.services.indexing;
 
 import searchengine.dto.ResponseInterface;
+import searchengine.web.model.UpsertIndexingPageRequest;
 
 /**
  * Service that indexing urls from application.yaml
@@ -25,8 +26,8 @@ public interface IndexingService {
   /**
    * index one page
    *
-   * @param url, that indexing
+   * @param upsertIndexingPageRequest that indexing
    * @return ResponseInterface
    */
-  ResponseInterface indexPage(String url);
+  ResponseInterface indexPage(UpsertIndexingPageRequest upsertIndexingPageRequest);
 }

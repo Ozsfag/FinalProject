@@ -2,6 +2,7 @@ package searchengine.services.searching.impl;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,11 @@ import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.morphology.queryToIndexesTransformer.QueryToIndexesTransformer;
 import searchengine.utils.searching.PageRanker.PageRanker;
+import searchengine.web.model.UpsertSearchRequest;
 
 @Service
 @Lazy
+@RequiredArgsConstructor
 public class SearchingImpl implements SearchingService {
   private final QueryToIndexesTransformer queryToIndexesTransformer;
   private final PageRanker pageRanker;
@@ -27,30 +30,19 @@ public class SearchingImpl implements SearchingService {
   private final SiteHandler siteHandler;
   private final DataTransformer dataTransformer;
 
-  public SearchingImpl(
-      QueryToIndexesTransformer queryToIndexesTransformer,
-      PageRanker pageRanker,
-      SearchingDtoFactory searchingDtoFactory,
-      SiteHandler siteHandler,
-      DataTransformer dataTransformer) {
-    this.queryToIndexesTransformer = queryToIndexesTransformer;
-    this.pageRanker = pageRanker;
-    this.searchingDtoFactory = searchingDtoFactory;
-    this.siteHandler = siteHandler;
-    this.dataTransformer = dataTransformer;
-  }
-
   @Override
-  public ResponseInterface search(String query, String url, int offset, int limit) {
-    SiteModel siteModel = getSiteModel(url);
+  public ResponseInterface search(UpsertSearchRequest upsertSearchRequest) {
+    SiteModel siteModel = getSiteModel(upsertSearchRequest.getSite());
     Collection<IndexModel> uniqueSet =
-        queryToIndexesTransformer.transformQueryToIndexModels(query, siteModel);
+        queryToIndexesTransformer.transformQueryToIndexModels(
+            upsertSearchRequest.getQuery(), siteModel);
 
     if (uniqueSet.isEmpty()) return new TotalEmptyResponse(false, "Not found");
 
     Map<Integer, Float> rel = pageRanker.getPageId2AbsRank(uniqueSet);
     Collection<DetailedSearchResponse> detailedSearchResponse =
-        getDetailedSearchResponses(rel, offset, limit, uniqueSet);
+        getDetailedSearchResponses(
+            rel, upsertSearchRequest.getOffset(), upsertSearchRequest.getLimit(), uniqueSet);
 
     return new TotalSearchResponse(true, rel.size(), detailedSearchResponse);
   }

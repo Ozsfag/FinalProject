@@ -13,6 +13,7 @@ import searchengine.dto.indexing.responseImpl.Successful;
 import searchengine.exceptions.NotInConfigurationException;
 import searchengine.services.indexing.IndexingService;
 import searchengine.utils.indexing.executor.Executor;
+import searchengine.web.model.UpsertIndexingPageRequest;
 
 @Service
 @Slf4j
@@ -53,11 +54,11 @@ public class IndexingImpl implements IndexingService {
 
   @SneakyThrows
   @Override
-  public ResponseInterface indexPage(String url) {
+  public ResponseInterface indexPage(UpsertIndexingPageRequest upsertIndexingPageRequest) {
     return CompletableFuture.supplyAsync(
             () -> {
               try {
-                executor.executeOnePageIndexing(url);
+                executor.executeOnePageIndexing(upsertIndexingPageRequest.getUrl());
                 return new Successful(true);
               } catch (NotInConfigurationException | URISyntaxException e) {
                 return new Bad(false, e.getLocalizedMessage());

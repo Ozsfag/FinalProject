@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.ResponseInterface;
-import searchengine.dto.indexing.requestImpl.PageUrl;
+import searchengine.web.model.UpsertIndexingPageRequest;
 import searchengine.services.deleting.DeletingService;
 import searchengine.services.indexing.IndexingService;
 
@@ -40,12 +40,14 @@ public class IndexingController {
    * Indexes a page by making a POST request to the "/indexPage" endpoint with a PageUrl object as
    * the request body.
    *
-   * @param pageUrl the PageUrl object containing the URL of the page to be indexed
+   * @param upsertIndexingPageRequest the PageUrl object containing the URL of the page to be
+   *     indexed
    * @return a ResponseEntity containing the result of the indexing process
    */
   @PostMapping(value = "/indexPage")
   @ResponseBody
-  public ResponseEntity<ResponseInterface> indexPage(PageUrl pageUrl) {
-    return ResponseEntity.ok(indexingService.indexPage(pageUrl.getUrl()));
+  public ResponseEntity<ResponseInterface> indexPage(
+      UpsertIndexingPageRequest upsertIndexingPageRequest) {
+    return ResponseEntity.ok(indexingService.indexPage(upsertIndexingPageRequest));
   }
 }
