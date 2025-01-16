@@ -1440,11 +1440,33 @@ var table = function(){
     };
 };
 table().init();
+const backendApiUrls = {
+    indexing: '/indexing',
+    searching: '/searching',
+    statistics: '/statistics'
+};
 
+function getBaseUrl(address) {
+    const urlMapping = {
+        'startIndexing': backendApiUrls.indexing,
+        'stopIndexing': backendApiUrls.indexing,
+        'indexPage': backendApiUrls.indexing,
+        'search': backendApiUrls.searching,
+        'statistics': backendApiUrls.statistics
+    };
+
+    for (const key in urlMapping) {
+        if (address.includes(key)) {
+            return urlMapping[key];
+        }
+    }
+
+    return ''; // Default case if no match is found
+}
 var API = function(){
     function sendData(address, type, data, cb, $this) {
         $.ajax({
-            url: backendApiUrl + address,
+            url: getBaseUrl(address) + address,
             type: type,
             dataType: 'json',
             data: data,
