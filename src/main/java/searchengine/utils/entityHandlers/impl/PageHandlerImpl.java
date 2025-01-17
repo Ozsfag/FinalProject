@@ -5,6 +5,7 @@ import static searchengine.services.indexing.impl.IndexingImpl.isIndexing;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.factory.EntityFactory;
@@ -13,12 +14,9 @@ import searchengine.model.SiteModel;
 import searchengine.utils.entityHandlers.PageHandler;
 
 @Component
+@RequiredArgsConstructor
 public class PageHandlerImpl implements PageHandler {
   private final EntityFactory entityFactory;
-
-  public PageHandlerImpl(EntityFactory entityFactory) {
-    this.entityFactory = entityFactory;
-  }
 
   @Override
   public Collection<PageModel> getIndexedPageModelsFromUrls(

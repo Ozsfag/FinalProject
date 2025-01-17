@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import searchengine.dto.indexing.ConnectionResponse;
+import searchengine.dto.indexing.HttpResponseDetails;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
 import searchengine.utils.lockWrapper.LockWrapper;
@@ -39,8 +39,8 @@ public class UrlsCheckerImpl implements UrlsChecker {
   }
 
   private Collection<String> fetchUrlsToCheck(String href) {
-    ConnectionResponse connectionResponse = webScraper.getConnectionResponse(href);
-    return connectionResponse.getUrls();
+    HttpResponseDetails httpResponseDetails = webScraper.getConnectionResponse(href);
+    return httpResponseDetails.getUrls();
   }
 
   private Stream<String> filterOutAlreadyParsedUrls(

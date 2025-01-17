@@ -1,6 +1,6 @@
 package searchengine.services.searching;
 
-import searchengine.dto.ResponseInterface;
+import searchengine.web.model.TotalSearchResponse;
 import searchengine.web.model.UpsertSearchRequest;
 
 /**
@@ -14,5 +14,5 @@ public interface SearchingService {
    *
    * @return ResponseInterface
    */
-  ResponseInterface search(UpsertSearchRequest upsertSearchRequest);
+  TotalSearchResponse search(UpsertSearchRequest upsertSearchRequest);
 }

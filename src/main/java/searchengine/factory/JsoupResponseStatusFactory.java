@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 import searchengine.config.JsoupConnectionSettings;
 
 @Component
-public class JsoupConnectionFactory {
+public class JsoupResponseStatusFactory {
   private final JsoupConnectionSettings jsoupConnectionSettings;
 
-  public JsoupConnectionFactory(JsoupConnectionSettings jsoupConnectionSettings) {
+  public JsoupResponseStatusFactory(JsoupConnectionSettings jsoupConnectionSettings) {
     this.jsoupConnectionSettings = jsoupConnectionSettings.clone();
   }
 

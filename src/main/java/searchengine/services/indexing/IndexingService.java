@@ -1,6 +1,6 @@
 package searchengine.services.indexing;
 
-import searchengine.dto.ResponseInterface;
+import searchengine.web.model.IndexingResponse;
 import searchengine.web.model.UpsertIndexingPageRequest;
 
 /**
@@ -12,22 +12,22 @@ public interface IndexingService {
   /**
    * start indexing
    *
-   * @return ResponseInterface
+   * @return IndexingResponse
    */
-  ResponseInterface startIndexing();
+  IndexingResponse startIndexing();
 
   /**
    * stop indexing
    *
-   * @return ResponseInterface
+   * @return IndexingResponse
    */
-  ResponseInterface stopIndexing();
+  IndexingResponse stopIndexing();
 
   /**
    * index one page
    *
    * @param upsertIndexingPageRequest that indexing
-   * @return ResponseInterface
+   * @return IndexingResponse
    */
-  ResponseInterface indexPage(UpsertIndexingPageRequest upsertIndexingPageRequest);
+  IndexingResponse indexPage(UpsertIndexingPageRequest upsertIndexingPageRequest);
 }

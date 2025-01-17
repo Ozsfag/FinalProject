@@ -2,8 +2,8 @@ package searchengine.utils.webScraper.impl;
 
 import java.io.IOException;
 import org.springframework.stereotype.Component;
-import searchengine.dto.indexing.ConnectionResponse;
-import searchengine.factory.ConnectionResponseFactory;
+import searchengine.dto.indexing.HttpResponseDetails;
+import searchengine.factory.HttpResponseDetailsFactory;
 import searchengine.utils.webScraper.WebScraper;
 
 /**
@@ -13,14 +13,14 @@ import searchengine.utils.webScraper.WebScraper;
  */
 @Component
 public class WebScraperImpl implements WebScraper {
-  private final ConnectionResponseFactory connectionResponseFactory;
+  private final HttpResponseDetailsFactory httpResponseDetailsFactory;
 
-  public WebScraperImpl(ConnectionResponseFactory connectionResponseFactory) {
-    this.connectionResponseFactory = connectionResponseFactory;
+  public WebScraperImpl(HttpResponseDetailsFactory httpResponseDetailsFactory) {
+    this.httpResponseDetailsFactory = httpResponseDetailsFactory;
   }
 
   @Override
-  public ConnectionResponse getConnectionResponse(String url) {
+  public HttpResponseDetails getConnectionResponse(String url) {
     try {
       return buildConnectionResponse(url);
     } catch (IOException e) {
@@ -28,12 +28,12 @@ public class WebScraperImpl implements WebScraper {
     }
   }
 
-  private ConnectionResponse buildConnectionResponse(String url) throws IOException {
-    return connectionResponseFactory.buildConnectionResponse(url);
+  private HttpResponseDetails buildConnectionResponse(String url) throws IOException {
+    return httpResponseDetailsFactory.buildConnectionResponse(url);
   }
 
-  private ConnectionResponse buildConnectionResponseWithException(String url, IOException e) {
-    return connectionResponseFactory.buildConnectionResponseWithException(
+  private HttpResponseDetails buildConnectionResponseWithException(String url, IOException e) {
+    return httpResponseDetailsFactory.buildConnectionResponseWithException(
         url, e.hashCode(), e.getMessage());
   }
 }

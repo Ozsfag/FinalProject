@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
@@ -17,17 +18,10 @@ import searchengine.utils.entityHandlers.SiteHandler;
 
 @Component
 @Lazy
+@RequiredArgsConstructor
 public class DataTransformerImpl implements DataTransformer {
   private final SitesList sitesList;
   private final SiteHandler siteHandler;
-  private final UrlComponentsFactory urlComponentsFactory;
-
-  public DataTransformerImpl(
-      SitesList sitesList, SiteHandler siteHandler, UrlComponentsFactory urlComponentsFactory) {
-    this.sitesList = sitesList;
-    this.siteHandler = siteHandler;
-    this.urlComponentsFactory = urlComponentsFactory;
-  }
 
   @Override
   public Collection<String> transformUrlToUrls(String url) {
@@ -55,7 +49,7 @@ public class DataTransformerImpl implements DataTransformer {
   }
 
   private String getSiteSchemeAndHost(String url) throws URISyntaxException {
-    return urlComponentsFactory.createValidUrlComponents(url).getSchemeAndHost();
+    return UrlComponentsFactory.createValidUrlComponents(url).getSchemeAndHost();
   }
 
   private boolean isSiteInConfiguration(String siteSchemeAndHost, String siteUrl) {

@@ -3,8 +3,8 @@ package searchengine.web.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import searchengine.dto.ResponseInterface;
 import searchengine.services.searching.SearchingService;
+import searchengine.web.model.TotalSearchResponse;
 import searchengine.web.model.UpsertSearchRequest;
 
 @RestController
@@ -19,7 +19,7 @@ public class SearchingController {
    * @return a ResponseEntity containing the search results
    */
   @GetMapping("/search")
-  public ResponseEntity<ResponseInterface> search(
+  public ResponseEntity<TotalSearchResponse> search(
       @ModelAttribute UpsertSearchRequest upsertSearchRequest) {
     return ResponseEntity.ok(searchingService.search(upsertSearchRequest));
   }

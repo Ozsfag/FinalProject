@@ -1,4 +1,4 @@
-package searchengine.utils.morphology.queryToIndexesTransformer.impl;
+package searchengine.mapper;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -13,18 +13,24 @@ import searchengine.model.SiteModel;
 import searchengine.repositories.IndexRepository;
 import searchengine.utils.lockWrapper.LockWrapper;
 import searchengine.utils.morphology.Morphology;
-import searchengine.utils.morphology.queryToIndexesTransformer.QueryToIndexesTransformer;
 
 @Component
 @Lazy
-public class QueryToIndexesTransformerImpl implements QueryToIndexesTransformer {
+public class QueryToIndexesMapper {
   @Autowired private Morphology morphology;
   @Autowired private LockWrapper lockWrapper;
   @Autowired private IndexRepository indexRepository;
   @Autowired private MorphologySettings morphologySettings;
 
-  @Override
-  public Collection<IndexModel> transformQueryToIndexModels(String query, SiteModel siteModel) {
+  /**
+   * Transforms a search query into a set of IndexModel objects.
+   *
+   * <p>This method takes a search query and a SiteModel object as parameters. It first retrieves
+   * unique lemmas from the search query using the Morphology service. Then, it maps each lemma to a
+   * set of IndexModel objects by calling the findIndexes method. Finally, it collects the results
+   * into a set and returns it.
+   */
+  public Collection<IndexModel> mapQueryToIndexModels(String query, SiteModel siteModel) {
     return morphology.getUniqueLemmasFromSearchQuery(query).stream()
         .flatMap(queryWord -> findIndexes(queryWord, siteModel))
         .collect(Collectors.toCollection(LinkedHashSet::new));

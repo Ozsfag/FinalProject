@@ -1,4 +1,4 @@
-package searchengine.dto.searching.responseImpl;
+package searchengine.dto.searching;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @Builder
-public class DetailedSearchResponse {
+public class DetailedSearchDto {
   String site;
   String siteName;
   String uri;

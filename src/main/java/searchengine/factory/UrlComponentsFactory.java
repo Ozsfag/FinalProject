@@ -2,11 +2,11 @@ package searchengine.factory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import lombok.experimental.UtilityClass;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import searchengine.dto.UrlComponents;
 
-@Component
+@UtilityClass
 @Lazy
 public class UrlComponentsFactory {
   /**

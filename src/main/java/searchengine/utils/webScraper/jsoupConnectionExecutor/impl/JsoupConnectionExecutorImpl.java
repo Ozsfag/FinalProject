@@ -5,7 +5,7 @@ import java.util.Collection;
 import javax.annotation.PostConstruct;
 import org.jsoup.Connection;
 import org.springframework.stereotype.Component;
-import searchengine.dto.indexing.JsoupConnectionResponseDto;
+import searchengine.dto.indexing.JsoupResponseStatus;
 import searchengine.utils.webScraper.jsoupConnectionExecutor.JsoupConnectionExecutor;
 import searchengine.utils.webScraper.jsoupConnectionExecutor.exceptionHandlers.ExceptionHandler;
 import searchengine.utils.webScraper.jsoupConnectionExecutor.exceptionHandlers.impl.*;
@@ -33,10 +33,10 @@ public class JsoupConnectionExecutorImpl implements JsoupConnectionExecutor {
   }
 
   @Override
-  public JsoupConnectionResponseDto executeDto(Connection connection, String url) {
+  public JsoupResponseStatus executeDto(Connection connection, String url) {
     try {
       Connection.Response response = connection.execute();
-      return JsoupConnectionResponseDto.builder()
+      return JsoupResponseStatus.builder()
           .statusCode(response.statusCode())
           .statusMessage(response.statusMessage())
           .build();
@@ -46,7 +46,7 @@ public class JsoupConnectionExecutorImpl implements JsoupConnectionExecutor {
           return handler.handle(e);
         }
       }
-      return JsoupConnectionResponseDto.builder()
+      return JsoupResponseStatus.builder()
           .statusCode(500)
           .statusMessage("Unhandled Exception: " + e.getMessage())
           .build();

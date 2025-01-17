@@ -6,13 +6,10 @@ import java.util.concurrent.CompletableFuture;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import searchengine.dto.ResponseInterface;
-import searchengine.dto.indexing.responseImpl.Bad;
-import searchengine.dto.indexing.responseImpl.Stop;
-import searchengine.dto.indexing.responseImpl.Successful;
 import searchengine.exceptions.NotInConfigurationException;
 import searchengine.services.indexing.IndexingService;
 import searchengine.utils.indexing.executor.Executor;
+import searchengine.web.model.IndexingResponse;
 import searchengine.web.model.UpsertIndexingPageRequest;
 
 @Service
@@ -28,13 +25,13 @@ public class IndexingImpl implements IndexingService {
 
   @SuppressFBWarnings("PA_PUBLIC_PRIMITIVE_ATTRIBUTE")
   @Override
-  public ResponseInterface startIndexing() {
+  public IndexingResponse startIndexing() {
     if (isIndexingAlreadyRunning()) {
-      return new Bad(false, "Индексация уже запущена");
+      return new IndexingResponse(false, "Индексация уже запущена");
     }
 
     CompletableFuture.runAsync(executor::executeSeveralPagesIndexing);
-    return new Successful(true);
+    return new IndexingResponse(true, "");
   }
 
   private Boolean isIndexingAlreadyRunning() {
@@ -42,10 +39,10 @@ public class IndexingImpl implements IndexingService {
   }
 
   @Override
-  public ResponseInterface stopIndexing() {
-    if (!isIndexing) return new Stop(false, "Индексация не запущена");
+  public IndexingResponse stopIndexing() {
+    if (!isIndexing) return new IndexingResponse(false, "Индексация не запущена");
     setIsIndexingToFalse();
-    return new Stop(true, "Индексация остановлена пользователем");
+    return new IndexingResponse(true, "Индексация остановлена пользователем");
   }
 
   private void setIsIndexingToFalse() {
@@ -54,14 +51,14 @@ public class IndexingImpl implements IndexingService {
 
   @SneakyThrows
   @Override
-  public ResponseInterface indexPage(UpsertIndexingPageRequest upsertIndexingPageRequest) {
+  public IndexingResponse indexPage(UpsertIndexingPageRequest upsertIndexingPageRequest) {
     return CompletableFuture.supplyAsync(
             () -> {
               try {
                 executor.executeOnePageIndexing(upsertIndexingPageRequest.getUrl());
-                return new Successful(true);
+                return new IndexingResponse(true, "");
               } catch (NotInConfigurationException | URISyntaxException e) {
-                return new Bad(false, e.getLocalizedMessage());
+                return new IndexingResponse(false, e.getLocalizedMessage());
               }
             })
         .get();

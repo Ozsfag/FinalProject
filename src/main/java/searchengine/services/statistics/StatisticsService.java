@@ -1,6 +1,6 @@
 package searchengine.services.statistics;
 
-import searchengine.dto.statistics.responseImpl.StatisticsResponse;
+import searchengine.web.model.StatisticsResponse;
 
 /**
  * get statistics for all sites, pages and lemmas

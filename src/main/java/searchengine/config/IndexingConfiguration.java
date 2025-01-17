@@ -4,7 +4,7 @@ import java.util.concurrent.ForkJoinPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import searchengine.dto.indexing.ConnectionResponse;
+import searchengine.dto.indexing.HttpResponseDetails;
 
 @Configuration
 public class IndexingConfiguration {
@@ -28,7 +28,7 @@ public class IndexingConfiguration {
    * @return a new instance of ConnectionResponse
    */
   @Bean
-  public ConnectionResponse connectionResponse() {
-    return new ConnectionResponse();
+  public HttpResponseDetails connectionResponse() {
+    return new HttpResponseDetails();
   }
 }

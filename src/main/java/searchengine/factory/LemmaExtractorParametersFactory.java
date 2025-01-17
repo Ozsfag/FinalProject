@@ -1,38 +1,30 @@
 package searchengine.factory;
 
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.english.EnglishLuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.config.MorphologySettings;
-import searchengine.utils.morphology.queryHandler.QueryResolver;
-import searchengine.utils.morphology.queryHandler.QueryResolverImpl;
+import searchengine.dto.indexing.LemmaExtractorParameters;
 
 @Component
 @Lazy
-public class QueryResolverFactory {
+@RequiredArgsConstructor
+public class LemmaExtractorParametersFactory {
   @Lazy private final RussianLuceneMorphology russianLuceneMorphology;
   @Lazy private final EnglishLuceneMorphology englishLuceneMorphology;
   @Lazy private final MorphologySettings morphologySettings;
-  private volatile QueryResolver russianQueryResolver;
-  private volatile QueryResolver englishQueryResolver;
+  private volatile LemmaExtractorParameters russianParameters;
+  private volatile LemmaExtractorParameters englishParameters;
 
-  public QueryResolverFactory(
-      RussianLuceneMorphology russianLuceneMorphology,
-      EnglishLuceneMorphology englishLuceneMorphology,
-      MorphologySettings morphologySettings) {
-    this.russianLuceneMorphology = russianLuceneMorphology;
-    this.englishLuceneMorphology = englishLuceneMorphology;
-    this.morphologySettings = morphologySettings;
-  }
-
-  public QueryResolver createRussianQueryHandler() {
-    if (russianQueryResolver == null) {
+  public LemmaExtractorParameters createRussianParameters() {
+    if (russianParameters == null) {
       synchronized (this) {
-        if (russianQueryResolver == null) {
-          russianQueryResolver =
+        if (russianParameters == null) {
+          russianParameters =
               createQueryHandler(
                   morphologySettings.getNotCyrillicLetters(),
                   russianLuceneMorphology,
@@ -42,14 +34,14 @@ public class QueryResolverFactory {
         }
       }
     }
-    return russianQueryResolver;
+    return russianParameters;
   }
 
-  public QueryResolver createEnglishQueryHandler() {
-    if (englishQueryResolver == null) {
+  public LemmaExtractorParameters createEnglishParameters() {
+    if (englishParameters == null) {
       synchronized (this) {
-        if (englishQueryResolver == null) {
-          englishQueryResolver =
+        if (englishParameters == null) {
+          englishParameters =
               createQueryHandler(
                   morphologySettings.getNotLatinLetters(),
                   englishLuceneMorphology,
@@ -59,22 +51,23 @@ public class QueryResolverFactory {
         }
       }
     }
-    return englishQueryResolver;
+    return englishParameters;
   }
 
-  private QueryResolver createQueryHandler(
+  private LemmaExtractorParameters createQueryHandler(
       String nonLetters,
       LuceneMorphology primaryMorphology,
       LuceneMorphology secondaryMorphology,
       Collection<String> particles,
       String onlyLetters) {
-    return new QueryResolverImpl(
-        nonLetters,
-        primaryMorphology,
-        secondaryMorphology,
-        particles,
-        onlyLetters,
-        morphologySettings.getEmptyString(),
-        morphologySettings.getSplitter());
+    return LemmaExtractorParameters.builder()
+        .nonLetters(nonLetters)
+        .primaryMorphology(primaryMorphology)
+        .secondaryMorphology(secondaryMorphology)
+        .particles(particles)
+        .onlyLetters(onlyLetters)
+        .emptyString(morphologySettings.getEmptyString())
+        .splitter(morphologySettings.getSplitter())
+        .build();
   }
 }

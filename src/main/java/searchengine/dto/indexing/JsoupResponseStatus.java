@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class JsoupConnectionResponseDto {
+public class JsoupResponseStatus {
   int statusCode;
   String statusMessage;
 }

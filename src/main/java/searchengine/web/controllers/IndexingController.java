@@ -3,10 +3,10 @@ package searchengine.web.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import searchengine.dto.ResponseInterface;
-import searchengine.web.model.UpsertIndexingPageRequest;
 import searchengine.services.deleting.DeletingService;
 import searchengine.services.indexing.IndexingService;
+import searchengine.web.model.IndexingResponse;
+import searchengine.web.model.UpsertIndexingPageRequest;
 
 @RestController
 @RequestMapping("/indexing")
@@ -17,10 +17,10 @@ public class IndexingController {
   /**
    * start indexing
    *
-   * @return ResponseInterface
+   * @return IndexingResponse
    */
   @GetMapping("/startIndexing")
-  public ResponseEntity<ResponseInterface> startIndexing() {
+  public ResponseEntity<IndexingResponse> startIndexing() {
     deletingService.deleteData();
     return ResponseEntity.ok(indexingService.startIndexing());
   }
@@ -29,10 +29,10 @@ public class IndexingController {
    * Stops the indexing process and returns a response entity containing the result of the
    * stopIndexing method from the indexingService.
    *
-   * @return ResponseInterface
+   * @return IndexingResponse
    */
   @GetMapping("/stopIndexing")
-  public ResponseEntity<ResponseInterface> stopIndexing() {
+  public ResponseEntity<IndexingResponse> stopIndexing() {
     return ResponseEntity.ok(indexingService.stopIndexing());
   }
 
@@ -42,11 +42,11 @@ public class IndexingController {
    *
    * @param upsertIndexingPageRequest the PageUrl object containing the URL of the page to be
    *     indexed
-   * @return a ResponseEntity containing the result of the indexing process
+   * @return a IndexingResponse containing the result of the indexing process
    */
   @PostMapping(value = "/indexPage")
   @ResponseBody
-  public ResponseEntity<ResponseInterface> indexPage(
+  public ResponseEntity<IndexingResponse> indexPage(
       UpsertIndexingPageRequest upsertIndexingPageRequest) {
     return ResponseEntity.ok(indexingService.indexPage(upsertIndexingPageRequest));
   }

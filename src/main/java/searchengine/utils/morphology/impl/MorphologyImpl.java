@@ -5,11 +5,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import searchengine.factory.QueryResolverFactory;
-import searchengine.factory.WordsCounterFactory;
+import searchengine.dto.indexing.LemmaExtractorParameters;
+import searchengine.dto.indexing.ContentWordFrequencyAnalyzerParameters;
+import searchengine.factory.LemmaExtractorParametersFactory;
+import searchengine.factory.ContentWordFrequencyAnalyzerFactory;
 import searchengine.utils.morphology.Morphology;
-import searchengine.utils.morphology.queryHandler.QueryResolver;
-import searchengine.utils.morphology.wordCounter.WordCounter;
+import searchengine.utils.morphology.LemmaExtractor;
+import searchengine.utils.morphology.ContentWordFrequencyAnalyzer;
 
 /**
  * Util that responsible for morphology transformation
@@ -18,30 +20,31 @@ import searchengine.utils.morphology.wordCounter.WordCounter;
  */
 @Component
 public class MorphologyImpl implements Morphology {
-  @Autowired private WordsCounterFactory wordsCounterFactory;
-  @Autowired private QueryResolverFactory queryResolverFactory;
+  @Autowired private ContentWordFrequencyAnalyzerFactory contentWordFrequencyAnalyzerFactory;
+  @Autowired private LemmaExtractorParametersFactory lemmaExtractorParametersFactory;
 
   @Override
   public Map<String, Integer> countWordFrequencyByLanguage(String content) {
     Map<String, Integer> result = new HashMap<>();
 
-    WordCounter russianCounter = wordsCounterFactory.createRussianWordCounter();
-    WordCounter englishCounter = wordsCounterFactory.createEnglishWordCounter();
-    Map<String, Integer> englishWordFrequency = englishCounter.countWordsFromContent(content);
-    Map<String, Integer> russianWordFrequency = russianCounter.countWordsFromContent(content);
+    ContentWordFrequencyAnalyzerParameters russianCounter =
+        contentWordFrequencyAnalyzerFactory.createRussianWordCounter();
+    ContentWordFrequencyAnalyzerParameters englishCounter =
+        contentWordFrequencyAnalyzerFactory.createEnglishWordCounter();
 
-    result.putAll(englishWordFrequency);
-    result.putAll(russianWordFrequency);
+    result.putAll(ContentWordFrequencyAnalyzer.countWordsFromContent(content, englishCounter));
+    result.putAll(ContentWordFrequencyAnalyzer.countWordsFromContent(content, russianCounter));
     return result;
   }
 
   public Collection<String> getUniqueLemmasFromSearchQuery(String query) {
-    QueryResolver russianQueryResolver = queryResolverFactory.createRussianQueryHandler();
-    QueryResolver englishQueryResolver = queryResolverFactory.createEnglishQueryHandler();
-    Stream<String> russianLemmaStream = russianQueryResolver.getLemmasFromQuery(query);
-    Stream<String> englishLemmaStream = englishQueryResolver.getLemmasFromQuery(query);
+    LemmaExtractorParameters russianParameters =
+        lemmaExtractorParametersFactory.createRussianParameters();
+    LemmaExtractorParameters englishParameters =
+        lemmaExtractorParametersFactory.createEnglishParameters();
+    Stream<String> russianLemmaStream = LemmaExtractor.getLemmasFromQuery(query, russianParameters);
+    Stream<String> englishLemmaStream = LemmaExtractor.getLemmasFromQuery(query, englishParameters);
 
-    return Stream.concat(russianLemmaStream.parallel(), englishLemmaStream.parallel())
-        .collect(Collectors.toSet());
+    return Stream.concat(russianLemmaStream, englishLemmaStream).collect(Collectors.toSet());
   }
 }

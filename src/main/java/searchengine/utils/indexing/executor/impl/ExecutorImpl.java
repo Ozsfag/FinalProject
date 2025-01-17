@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.exceptions.NotInConfigurationException;
@@ -16,6 +17,7 @@ import searchengine.utils.indexing.executor.Executor;
 import searchengine.utils.indexing.processor.Processor;
 
 @Component
+@RequiredArgsConstructor
 public class ExecutorImpl implements Executor {
   private final EntitySaverTemplate entitySaverTemplate;
   private final SiteHandler siteHandler;
@@ -23,22 +25,6 @@ public class ExecutorImpl implements Executor {
   private final SitesList sitesList;
   private final ForkJoinPool forkJoinPool;
   private final DataTransformer dataTransformer;
-
-  public ExecutorImpl(
-      EntitySaverTemplate entitySaverTemplate,
-      SiteHandler siteHandler,
-      Processor processor,
-      SitesList sitesList,
-      ForkJoinPool forkJoinPool,
-      DataTransformer dataTransformer) {
-
-    this.entitySaverTemplate = entitySaverTemplate;
-    this.siteHandler = siteHandler;
-    this.processor = processor;
-    this.sitesList = sitesList;
-    this.forkJoinPool = forkJoinPool;
-    this.dataTransformer = dataTransformer;
-  }
 
   @Override
   public void executeSeveralPagesIndexing() {

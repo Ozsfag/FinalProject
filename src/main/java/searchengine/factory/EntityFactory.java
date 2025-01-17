@@ -1,19 +1,17 @@
 package searchengine.factory;
 
 import java.util.Date;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import searchengine.dto.indexing.ConnectionResponse;
+import searchengine.dto.indexing.HttpResponseDetails;
 import searchengine.dto.indexing.Site;
 import searchengine.model.*;
 import searchengine.utils.webScraper.WebScraper;
 
 @Component
+@RequiredArgsConstructor
 public class EntityFactory {
   private final WebScraper webScraper;
-
-  public EntityFactory(WebScraper webScraper) {
-    this.webScraper = webScraper;
-  }
 
   /**
    * Creates a new SiteModel object with the provided site information.
@@ -39,12 +37,12 @@ public class EntityFactory {
    * @return the newly created PageModel object
    */
   public PageModel createPageModel(SiteModel siteModel, String path) {
-    ConnectionResponse connectionResponse = webScraper.getConnectionResponse(path);
+    HttpResponseDetails httpResponseDetails = webScraper.getConnectionResponse(path);
     return PageModel.builder()
         .site(siteModel)
         .path(path)
-        .code(connectionResponse.getResponseCode())
-        .content(connectionResponse.getContent())
+        .code(httpResponseDetails.getResponseCode())
+        .content(httpResponseDetails.getContent())
         .build();
   }
 

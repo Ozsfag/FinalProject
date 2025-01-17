@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import searchengine.dto.ResponseInterface;
 import searchengine.services.statistics.StatisticsService;
+import searchengine.web.model.StatisticsResponse;
 
 @RestController
 @RequestMapping("/statistics")
@@ -19,7 +19,7 @@ public class StatisticsController {
    * @return ResponseInterface
    */
   @GetMapping("/statistics")
-  public ResponseEntity<ResponseInterface> statistics() {
+  public ResponseEntity<StatisticsResponse> statistics() {
     return ResponseEntity.ok(statisticsService.getStatistics());
   }
 }

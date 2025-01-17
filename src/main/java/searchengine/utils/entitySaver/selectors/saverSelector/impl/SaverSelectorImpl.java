@@ -14,10 +14,6 @@ import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
 
 @Component
 public class SaverSelectorImpl implements SaverSelector {
-  private final SiteModelSaver siteModelSaver;
-  private final PageModelSaver pageModelSaver;
-  private final LemmaModelSaver lemmaModelSaver;
-  private final IndexModelSaver indexModelSaver;
   private final Map<Class<?>, EntitySaverTemplate> entitySavers;
 
   public SaverSelectorImpl(
@@ -25,10 +21,6 @@ public class SaverSelectorImpl implements SaverSelector {
       PageModelSaver pageModelSaver,
       LemmaModelSaver lemmaModelSaver,
       IndexModelSaver indexModelSaver) {
-    this.siteModelSaver = siteModelSaver.clone();
-    this.pageModelSaver = pageModelSaver.clone();
-    this.lemmaModelSaver = lemmaModelSaver.clone();
-    this.indexModelSaver = indexModelSaver.clone();
     this.entitySavers = new ConcurrentHashMap<>();
     this.entitySavers.put(SiteModel.class, siteModelSaver);
     this.entitySavers.put(PageModel.class, pageModelSaver);
