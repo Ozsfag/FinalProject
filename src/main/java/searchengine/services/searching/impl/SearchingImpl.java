@@ -14,7 +14,7 @@ import searchengine.model.SiteModel;
 import searchengine.services.searching.SearchingService;
 import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandlers.SiteHandler;
-import searchengine.utils.searching.PageRanker.PageRanker;
+import searchengine.utils.searching.PageRankCalculator;
 import searchengine.web.model.TotalSearchResponse;
 import searchengine.web.model.UpsertSearchRequest;
 
@@ -23,7 +23,6 @@ import searchengine.web.model.UpsertSearchRequest;
 @RequiredArgsConstructor
 public class SearchingImpl implements SearchingService {
   private final QueryToIndexesMapper queryToIndexesMapper;
-  private final PageRanker pageRanker;
   private final SearchingDtoFactory searchingDtoFactory;
   private final SiteHandler siteHandler;
   private final DataTransformer dataTransformer;
@@ -36,7 +35,7 @@ public class SearchingImpl implements SearchingService {
     if (uniqueSet.isEmpty())
       return new TotalSearchResponse(true, 0, new ArrayList<>(), "Not found");
 
-    Map<Integer, Float> rel = pageRanker.getPageId2AbsRank(uniqueSet);
+    Map<Integer, Float> rel = PageRankCalculator.getPageId2AbsRank(uniqueSet);
     Collection<DetailedSearchDto> detailedSearchDto =
         getDetailedSearchResponses(
             rel, upsertSearchRequest.getOffset(), upsertSearchRequest.getLimit(), uniqueSet);

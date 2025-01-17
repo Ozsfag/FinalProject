@@ -1,24 +1,17 @@
-package searchengine.utils.searching.snippetTransmitter.impl;
+package searchengine.utils.searching.snippetTransmitter;
 
 import java.util.Collection;
 import java.util.Locale;
+
+import lombok.experimental.UtilityClass;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
 import searchengine.model.PageModel;
-import searchengine.utils.searching.snippetTransmitter.SnippetTransmitter;
-import searchengine.utils.searching.snippetTransmitter.contentMatcher.ContentMatcher;
 
-@Component
+@UtilityClass
 @Lazy
-public class SnippetTransmitterImpl implements SnippetTransmitter {
-  private final ContentMatcher contentMatcher;
+public class SnippetExtractor {
 
-  public SnippetTransmitterImpl(ContentMatcher contentMatcher) {
-    this.contentMatcher = contentMatcher;
-  }
-
-  @Override
   public String getSnippet(Collection<IndexModel> uniqueSet, PageModel pageModel) {
 
     String content = getContentFromPage(pageModel);
@@ -42,7 +35,7 @@ public class SnippetTransmitterImpl implements SnippetTransmitter {
 
   private String getMatchingSentencesFromContent(IndexModel item, String content) {
     String word = getWord(item);
-    return contentMatcher.match(content, word);
+    return ContentHighlighter.match(content, word);
   }
 
   private String getWord(IndexModel item) {

@@ -2,6 +2,8 @@ package searchengine.factory;
 
 import java.util.Collection;
 import java.util.Date;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
@@ -16,17 +18,11 @@ import searchengine.services.indexing.impl.IndexingImpl;
 
 @Component
 @Lazy
+@RequiredArgsConstructor
 public class StatisticsDtoFactory {
   private final SitesList sites;
   private final PageRepository pageRepository;
   private final LemmaRepository lemmaRepository;
-
-  public StatisticsDtoFactory(
-      SitesList sites, PageRepository pageRepository, LemmaRepository lemmaRepository) {
-    this.sites = sites;
-    this.pageRepository = pageRepository;
-    this.lemmaRepository = lemmaRepository;
-  }
 
   public TotalStatistics getTotalStatistics() {
     return new TotalStatistics(

@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class UrlComponents {
+public class ParsedUrlComponents {
   private String schemeAndHost;
   private String path;
   private String host;

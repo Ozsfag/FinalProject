@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
 import searchengine.exceptions.NotInConfigurationException;
-import searchengine.factory.UrlComponentsFactory;
+import searchengine.factory.ParsedUrlComponentsFactory;
 import searchengine.model.SiteModel;
 import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.entityHandlers.SiteHandler;
@@ -49,7 +49,7 @@ public class DataTransformerImpl implements DataTransformer {
   }
 
   private String getSiteSchemeAndHost(String url) throws URISyntaxException {
-    return UrlComponentsFactory.createValidUrlComponents(url).getSchemeAndHost();
+    return ParsedUrlComponentsFactory.createValidUrlComponents(url).getSchemeAndHost();
   }
 
   private boolean isSiteInConfiguration(String siteSchemeAndHost, String siteUrl) {

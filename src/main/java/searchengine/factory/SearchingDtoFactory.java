@@ -7,12 +7,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import searchengine.dto.UrlComponents;
+import searchengine.dto.ParsedUrlComponents;
 import searchengine.dto.searching.DetailedSearchDto;
 import searchengine.model.IndexModel;
 import searchengine.model.PageModel;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.searching.snippetTransmitter.SnippetTransmitter;
+import searchengine.utils.searching.snippetTransmitter.SnippetExtractor;
 import searchengine.utils.webScraper.WebScraper;
 
 @Component
@@ -22,21 +22,20 @@ public class SearchingDtoFactory {
   private final ReentrantReadWriteLock lock;
   private final PageRepository pageRepository;
   private final WebScraper webScraper;
-  private final SnippetTransmitter snippetTransmitter;
 
   public DetailedSearchDto getDetailedSearchResponse(
       Map.Entry<Integer, Float> entry, Collection<IndexModel> uniqueSet) {
     PageModel pageModel = getPageModel(entry.getKey());
 
-    UrlComponents urlComponents = getUrlComponents(pageModel);
+    ParsedUrlComponents parsedUrlComponents = getUrlComponents(pageModel);
     String siteName = pageModel.getSite().getName();
     double relevance = entry.getValue();
     String title = webScraper.getConnectionResponse(pageModel.getPath()).getTitle();
-    String snippet = snippetTransmitter.getSnippet(uniqueSet, pageModel);
+    String snippet = SnippetExtractor.getSnippet(uniqueSet, pageModel);
 
     return DetailedSearchDto.builder()
-        .uri(urlComponents.getPath())
-        .site(urlComponents.getSchemeAndHost())
+        .uri(parsedUrlComponents.getPath())
+        .site(parsedUrlComponents.getSchemeAndHost())
         .title(title)
         .snippet(snippet)
         .siteName(siteName)
@@ -53,9 +52,9 @@ public class SearchingDtoFactory {
     }
   }
 
-  private UrlComponents getUrlComponents(PageModel pageModel) {
+  private ParsedUrlComponents getUrlComponents(PageModel pageModel) {
     try {
-      return UrlComponentsFactory.createValidUrlComponents(pageModel.getPath());
+      return ParsedUrlComponentsFactory.createValidUrlComponents(pageModel.getPath());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e.getLocalizedMessage());
     }

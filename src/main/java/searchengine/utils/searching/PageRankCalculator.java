@@ -1,19 +1,26 @@
-package searchengine.utils.searching.PageRanker.impl;
+package searchengine.utils.searching;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import lombok.experimental.UtilityClass;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import searchengine.model.IndexModel;
-import searchengine.utils.searching.PageRanker.PageRanker;
 
-@Component
+@UtilityClass
 @Lazy
-public class PageRankerImpl implements PageRanker {
+public class PageRankCalculator {
 
-  @Override
+  /**
+   * Transforms a search query into a set of IndexModel objects.
+   *
+   * <p>This method takes a search query and a SiteModel object as parameters. It first retrieves
+   * unique lemmas from the search query using the Morphology service. Then, it maps each lemma to a
+   * set of IndexModel objects by calling the findIndexes method. Finally, it collects the results
+   * into a set and returns it.
+   */
   public Map<Integer, Float> getPageId2AbsRank(Collection<IndexModel> uniqueSet) {
 
     Map<Integer, Float> pageId2RefRank = getPageId2RefRankFromUniques(uniqueSet);

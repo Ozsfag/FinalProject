@@ -1,22 +1,15 @@
-package searchengine.utils.searching.snippetTransmitter.contentMatcher.impl;
+package searchengine.utils.searching.snippetTransmitter;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import lombok.experimental.UtilityClass;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-import searchengine.utils.searching.snippetTransmitter.contentFormatter.ContentFormatter;
-import searchengine.utils.searching.snippetTransmitter.contentMatcher.ContentMatcher;
 
-@Component
+@UtilityClass
 @Lazy
-public class ContentMatcherImpl implements ContentMatcher {
-  private final ContentFormatter contentFormatter;
+public class ContentHighlighter {
 
-  public ContentMatcherImpl(ContentFormatter contentFormatter) {
-    this.contentFormatter = contentFormatter;
-  }
-
-  @Override
   public String match(String content, String word) {
     Matcher matcher = getMatcher(content, word);
     StringBuilder matchingSentences = new StringBuilder();
@@ -36,7 +29,9 @@ public class ContentMatcherImpl implements ContentMatcher {
   }
 
   private String getFormattedWord(Matcher matcher) {
-    return contentFormatter.format(matcher.group());
+    String word = matcher.group();
+    if (word == null) return null;
+    return word.replace(word, "<b>" + word + "</b>");
   }
 
   private String getContext(String content, int start, int end, String formattedWord) {
