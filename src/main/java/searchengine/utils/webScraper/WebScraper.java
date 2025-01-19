@@ -1,7 +1,6 @@
 package searchengine.utils.webScraper;
 
 import java.io.IOException;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.HttpResponseDetails;
@@ -16,6 +15,7 @@ import searchengine.factory.HttpResponseDetailsFactory;
 @RequiredArgsConstructor
 public class WebScraper {
   private final HttpResponseDetailsFactory httpResponseDetailsFactory;
+
   public HttpResponseDetails getConnectionResponse(String url) {
     try {
       return buildConnectionResponse(url);

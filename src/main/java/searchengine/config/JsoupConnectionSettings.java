@@ -7,19 +7,11 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "connection-settings")
 @NoArgsConstructor(force = true)
-@Setter
+@Data
 public final class JsoupConnectionSettings implements Cloneable {
   private String userAgent;
   private String referrer;
-  @Getter private Integer timeout;
-
-  public String getUserAgent() {
-    return String.copyValueOf(userAgent.toCharArray());
-  }
-
-  public String getReferrer() {
-    return String.copyValueOf(referrer.toCharArray());
-  }
+  private Integer timeout;
 
   @Override
   public JsoupConnectionSettings clone() {

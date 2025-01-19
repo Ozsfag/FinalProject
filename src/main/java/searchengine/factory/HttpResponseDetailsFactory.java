@@ -8,18 +8,17 @@ import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.HttpResponseDetails;
 import searchengine.dto.indexing.JsoupResponseStatus;
+import searchengine.handler.JsoupConnectionHandler;
 import searchengine.utils.webScraper.documentExtractor.DocumentExtractor;
-import searchengine.utils.webScraper.jsoupConnectionExecutor.JsoupConnectionExecutor;
 
 @Component
 @RequiredArgsConstructor
 public class HttpResponseDetailsFactory {
-  private final JsoupResponseStatusFactory jsoupResponseStatusFactory;
-  private final JsoupConnectionExecutor jsoupConnectionDtoExecutor;
+  private final JsoupConnectionFactory jsoupConnectionFactory;
 
   public HttpResponseDetails buildConnectionResponse(String url) throws IOException {
-    Connection connection = jsoupResponseStatusFactory.createJsoupConnection(url);
-    JsoupResponseStatus response = jsoupConnectionDtoExecutor.executeDto(connection, url);
+    Connection connection = jsoupConnectionFactory.createJsoupConnection(url);
+    JsoupResponseStatus response = JsoupConnectionHandler.handleConnection(connection);
     Document document = retrieveDocument(connection);
     return new HttpResponseDetails(
         DocumentExtractor.extractUrls(document),
