@@ -2,7 +2,6 @@ package searchengine.factory;
 
 import java.util.Collection;
 import java.util.Date;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;

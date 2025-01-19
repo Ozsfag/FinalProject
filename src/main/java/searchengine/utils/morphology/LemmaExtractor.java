@@ -2,7 +2,6 @@ package searchengine.utils.morphology;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
-
 import lombok.experimental.UtilityClass;
 import org.springframework.context.annotation.Lazy;
 import searchengine.dto.indexing.LemmaExtractorParameters;

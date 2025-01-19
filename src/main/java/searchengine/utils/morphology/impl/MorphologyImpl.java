@@ -5,13 +5,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import searchengine.dto.indexing.LemmaExtractorParameters;
 import searchengine.dto.indexing.ContentWordFrequencyAnalyzerParameters;
-import searchengine.factory.LemmaExtractorParametersFactory;
+import searchengine.dto.indexing.LemmaExtractorParameters;
 import searchengine.factory.ContentWordFrequencyAnalyzerFactory;
-import searchengine.utils.morphology.Morphology;
-import searchengine.utils.morphology.LemmaExtractor;
+import searchengine.factory.LemmaExtractorParametersFactory;
 import searchengine.utils.morphology.ContentWordFrequencyAnalyzer;
+import searchengine.utils.morphology.LemmaExtractor;
+import searchengine.utils.morphology.Morphology;
 
 /**
  * Util that responsible for morphology transformation

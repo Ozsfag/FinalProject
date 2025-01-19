@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import lombok.experimental.UtilityClass;
 import org.springframework.context.annotation.Lazy;
 import searchengine.model.IndexModel;

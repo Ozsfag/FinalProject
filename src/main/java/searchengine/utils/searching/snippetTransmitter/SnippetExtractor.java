@@ -2,7 +2,6 @@ package searchengine.utils.searching.snippetTransmitter;
 
 import java.util.Collection;
 import java.util.Locale;
-
 import lombok.experimental.UtilityClass;
 import org.springframework.context.annotation.Lazy;
 import searchengine.model.IndexModel;

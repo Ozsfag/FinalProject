@@ -2,7 +2,6 @@ package searchengine.utils.searching.snippetTransmitter;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import lombok.experimental.UtilityClass;
 import org.springframework.context.annotation.Lazy;
 
