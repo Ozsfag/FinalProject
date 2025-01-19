@@ -7,7 +7,7 @@ import searchengine.model.SiteModel;
 import searchengine.model.Status;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.processor.updater.siteUpdater.SiteUpdater;
-import searchengine.utils.lockWrapper.LockWrapper;
+import searchengine.mapper.LockWrapper;
 
 @Component
 public class DefaultSiteUpdater implements SiteUpdater {

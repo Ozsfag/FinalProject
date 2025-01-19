@@ -4,33 +4,36 @@ import java.util.concurrent.ForkJoinTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.factory.UrlsCheckerParametersFactory;
+import searchengine.mapper.LockWrapper;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.IndexingStrategy;
-import searchengine.utils.indexing.processor.taskFactory.TaskFactory;
 import searchengine.utils.indexing.recursiveParser.RecursiveParser;
-import searchengine.utils.lockWrapper.LockWrapper;
 import searchengine.utils.urlsChecker.UrlsChecker;
 
 @Component
-public class TaskFactoryImpl implements TaskFactory {
+public class RecursiveTaskFactory {
   @Autowired private UrlsCheckerParametersFactory urlsCheckerParametersFactory;
   @Autowired private UrlsChecker urlsChecker;
   @Autowired private IndexingStrategy indexingStrategy;
   @Autowired private LockWrapper lockWrapper;
   @Autowired private SiteRepository siteRepository;
 
-  @Override
-  public ForkJoinTask<?> initTask(SiteModel siteModel, String url) {
-    RecursiveParser task =
-        new RecursiveParser(
+  /**
+   * Creates a new task for indexing a site represented by the given {@link SiteModel}.
+   *
+   * @param siteModel the SiteModel to create a task for
+   * @return a new ParserImpl instance set up for indexing the given site
+   */
+  public ForkJoinTask<?> createRecursiveTask(SiteModel siteModel, String url) {
+    return new RecursiveParser(
             urlsCheckerParametersFactory,
             urlsChecker,
             indexingStrategy,
             lockWrapper,
             siteRepository,
-            this);
-    task.init(siteModel, url);
-    return task;
+            this,
+            siteModel,
+            url);
   }
 }

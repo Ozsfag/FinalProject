@@ -1,11 +1,13 @@
 package searchengine.utils.indexing;
 
 import java.util.*;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import searchengine.handler.IndexIndexingHandler;
+import searchengine.handler.LemmaIndexingHandler;
+import searchengine.handler.PageIndexingHandler;
 import searchengine.model.*;
-import searchengine.utils.entityHandlers.IndexHandler;
-import searchengine.utils.entityHandlers.LemmaHandler;
-import searchengine.utils.entityHandlers.PageHandler;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.morphology.Morphology;
 
@@ -16,35 +18,23 @@ import searchengine.utils.morphology.Morphology;
  * <p>It uses the following handlers and utilities:
  *
  * <ul>
- *   <li>{@link PageHandler} for handling page-related operations
+ *   <li>{@link PageIndexingHandler} for handling page-related operations
  *   <li>{@link EntitySaverTemplate} for saving entities
  *   <li>{@link Morphology} for word frequency analysis
- *   <li>{@link LemmaHandler} for handling lemma-related operations
- *   <li>{@link IndexHandler} for handling index-related operations
+ *   <li>{@link LemmaIndexingHandler} for handling lemma-related operations
+ *   <li>{@link IndexIndexingHandler} for handling index-related operations
  * </ul>
  *
  * @Ozsfag
  */
 @Component
+@RequiredArgsConstructor
 public class IndexingStrategy {
-  private final PageHandler pageHandler;
+  private final PageIndexingHandler pageIndexingHandler;
   private final EntitySaverTemplate entitySaverTemplate;
   private final Morphology morphology;
-  private final LemmaHandler lemmaHandler;
-  private final IndexHandler indexHandler;
-
-  public IndexingStrategy(
-      PageHandler pageHandler,
-      EntitySaverTemplate entitySaverTemplate,
-      Morphology morphology,
-      LemmaHandler lemmaHandler,
-      IndexHandler indexHandler) {
-    this.pageHandler = pageHandler;
-    this.entitySaverTemplate = entitySaverTemplate;
-    this.morphology = morphology;
-    this.lemmaHandler = lemmaHandler;
-    this.indexHandler = indexHandler;
-  }
+  private final LemmaIndexingHandler lemmaIndexingHandler;
+  private final IndexIndexingHandler indexIndexingHandler;
 
   /**
    * Indexes the lemmas and indexes for a list of pages.
@@ -61,7 +51,7 @@ public class IndexingStrategy {
 
   private Collection<PageModel> retrieveIndexedPageModels(
       Collection<String> urlsToParse, SiteModel siteModel) {
-    return pageHandler.getIndexedPageModelsFromUrls(urlsToParse, siteModel);
+    return pageIndexingHandler.getIndexedPageModelsFromUrls(urlsToParse, siteModel);
   }
 
   private void processPage(PageModel page) {
@@ -79,11 +69,11 @@ public class IndexingStrategy {
 
   private Collection<LemmaModel> retrieveIndexedLemmaModels(
       PageModel page, Map<String, Integer> wordsCount) {
-    return lemmaHandler.getIndexedLemmaModelsFromCountedWords(page.getSite(), wordsCount);
+    return lemmaIndexingHandler.getIndexedLemmaModelsFromCountedWords(page.getSite(), wordsCount);
   }
 
   private Collection<IndexModel> retrieveIndexedIndexModels(
       PageModel page, Collection<LemmaModel> lemmas) {
-    return indexHandler.getIndexedIndexModelsFromCountedWords(page, lemmas);
+    return indexIndexingHandler.getIndexedIndexModelsFromCountedWords(page, lemmas);
   }
 }

@@ -7,7 +7,6 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.UrlsCheckerParameters;
@@ -15,8 +14,8 @@ import searchengine.factory.UrlsCheckerParametersFactory;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.IndexingStrategy;
-import searchengine.utils.indexing.processor.taskFactory.TaskFactory;
-import searchengine.utils.lockWrapper.LockWrapper;
+import searchengine.mapper.LockWrapper;
+import searchengine.utils.indexing.processor.taskFactory.impl.RecursiveTaskFactory;
 import searchengine.utils.urlsChecker.UrlsChecker;
 
 /**
@@ -37,27 +36,13 @@ public class RecursiveParser extends RecursiveTask<Boolean> implements Serializa
   private final transient IndexingStrategy indexingStrategy;
   private final transient LockWrapper lockWrapper;
   private final SiteRepository siteRepository;
-  private final transient TaskFactory taskFactory;
-
-  @Setter private SiteModel siteModel;
-  private String href;
+  private final transient RecursiveTaskFactory recursiveTaskFactory;
+  private final SiteModel siteModel;
+  private final String href;
   private Collection<String> urlsToParse;
   private Collection<ForkJoinTask<?>> subtasks;
 
-  /**
-   * Initializes the parser with the given site model and URL.
-   *
-   * @param siteModel the site model to be indexed
-   * @param href the URL to start indexing from
-   */
-  public void init(SiteModel siteModel, String href) {
-    setSiteModel(siteModel);
-    setHref(href);
-  }
 
-  public void setHref(String href) {
-    this.href = String.copyValueOf(href.toCharArray());
-  }
 
   /**
    * Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed.
@@ -96,7 +81,7 @@ public class RecursiveParser extends RecursiveTask<Boolean> implements Serializa
   private void setSubtasks() {
     this.subtasks =
         urlsToParse.stream()
-            .map(url -> taskFactory.initTask(siteModel, url))
+            .map(url -> recursiveTaskFactory.createRecursiveTask(siteModel, url))
             .collect(Collectors.toUnmodifiableSet());
   }
 

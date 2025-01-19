@@ -1,25 +1,30 @@
-package searchengine.utils.entityHandlers.impl;
+package searchengine.handler;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import searchengine.factory.EntityFactory;
+import searchengine.handler.factory.EntityFactory;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.repositories.IndexRepository;
-import searchengine.utils.entityHandlers.IndexHandler;
-import searchengine.utils.lockWrapper.LockWrapper;
+import searchengine.mapper.LockWrapper;
 
 @Component
-public class IndexHandlerImpl implements IndexHandler {
+public class IndexIndexingHandler {
   @Autowired private LockWrapper lockWrapper;
   @Autowired private IndexRepository indexRepository;
   @Autowired private EntityFactory entityFactory;
-
-  @Override
+  /**
+   * Retrieves a collection of {@link IndexModel} objects, each one associated with a lemma from the
+   * given collection, and their frequency in the given page.
+   *
+   * @param pageModel the page to get the frequency from
+   * @param lemmas the lemmas to get the frequency for
+   * @return a collection of IndexModel objects, each one associated with a lemma and its frequency
+   */
   public Collection<IndexModel> getIndexedIndexModelsFromCountedWords(
       PageModel pageModel, Collection<LemmaModel> lemmas) {
 
@@ -34,10 +39,10 @@ public class IndexHandlerImpl implements IndexHandler {
 
   private Collection<IndexModel> getExistingIndexesFromLemmasByPage(
       Collection<LemmaModel> lemmas, PageModel pageModel) {
-    return lemmas.isEmpty() ? Collections.emptySet() : getFoundedIndexes(lemmas, pageModel);
+    return lemmas.isEmpty() ? Collections.emptySet() : getIndexesFromDatabase(lemmas, pageModel);
   }
 
-  private Collection<IndexModel> getFoundedIndexes(
+  private Collection<IndexModel> getIndexesFromDatabase(
       Collection<LemmaModel> lemmas, PageModel pageModel) {
     return lockWrapper.readLock(
         () -> indexRepository.findByPageIdAndLemmaIn(pageModel.getId(), lemmas));

@@ -8,12 +8,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.dto.searching.DetailedSearchDto;
 import searchengine.factory.SearchingDtoFactory;
+import searchengine.handler.SiteIndexingHandler;
 import searchengine.mapper.QueryToIndexesMapper;
 import searchengine.model.IndexModel;
 import searchengine.model.SiteModel;
 import searchengine.services.searching.SearchingService;
 import searchengine.utils.dataTransformer.DataTransformer;
-import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.searching.PageRankCalculator;
 import searchengine.web.model.TotalSearchResponse;
 import searchengine.web.model.UpsertSearchRequest;
@@ -24,7 +24,7 @@ import searchengine.web.model.UpsertSearchRequest;
 public class SearchingImpl implements SearchingService {
   private final QueryToIndexesMapper queryToIndexesMapper;
   private final SearchingDtoFactory searchingDtoFactory;
-  private final SiteHandler siteHandler;
+  private final SiteIndexingHandler siteIndexingHandler;
   private final DataTransformer dataTransformer;
 
   @Override
@@ -47,7 +47,7 @@ public class SearchingImpl implements SearchingService {
   private SiteModel getSiteModel(String url) {
     return url == null
         ? null
-        : siteHandler
+        : siteIndexingHandler
             .getIndexedSiteModelFromSites(dataTransformer.transformUrlToSites(url))
             .stream()
             .findFirst()

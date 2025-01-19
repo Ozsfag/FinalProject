@@ -1,4 +1,4 @@
-package searchengine.utils.entityHandlers.impl;
+package searchengine.handler;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -6,20 +6,26 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.Site;
-import searchengine.factory.EntityFactory;
+import searchengine.handler.factory.EntityFactory;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
-import searchengine.utils.entityHandlers.SiteHandler;
-import searchengine.utils.lockWrapper.LockWrapper;
+import searchengine.mapper.LockWrapper;
 
 @Component
 @RequiredArgsConstructor
-public class SiteHandlerImpl implements SiteHandler {
+public class SiteIndexingHandler {
   private final LockWrapper lockWrapper;
   private final SiteRepository siteRepository;
   private final EntityFactory entityFactory;
+  /**
+   * Retrieves a collection of SiteModels from a collection of Sites by parsing every Site's URL and
+   * retrieving the corresponding SiteModel from the database. If the SiteModel does not exist in
+   * the database, it will be created and saved to the database.
+   *
+   * @param sitesToParse collection of Sites to be parsed
+   * @return collection of SiteModels retrieved from the database or created from the given sites
+   */
 
-  @Override
   public Collection<SiteModel> getIndexedSiteModelFromSites(Collection<Site> sitesToParse) {
     return sitesToParse.parallelStream()
         .map(this::getSiteIfExistOrCreate)

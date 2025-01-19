@@ -1,4 +1,4 @@
-package searchengine.utils.webScraper;
+package searchengine.handler;
 
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import searchengine.factory.HttpResponseDetailsFactory;
  */
 @Component
 @RequiredArgsConstructor
-public class WebScraper {
+public class HttpResponseHandler {
   private final HttpResponseDetailsFactory httpResponseDetailsFactory;
 
   public HttpResponseDetails getConnectionResponse(String url) {

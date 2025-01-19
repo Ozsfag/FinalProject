@@ -6,14 +6,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.HttpResponseDetails;
 import searchengine.dto.indexing.UrlsCheckerParameters;
+import searchengine.handler.HttpResponseHandler;
+import searchengine.mapper.LockWrapper;
 import searchengine.repositories.PageRepository;
-import searchengine.utils.lockWrapper.LockWrapper;
-import searchengine.utils.webScraper.WebScraper;
 
 @Component
 @RequiredArgsConstructor
 public class UrlsCheckerParametersFactory {
-  private final WebScraper webScraper;
+  private final HttpResponseHandler httpResponseHandler;
   private final PageRepository pageRepository;
   private final LockWrapper lockWrapper;
 
@@ -27,7 +27,7 @@ public class UrlsCheckerParametersFactory {
   }
 
   private Collection<String> getUrlsFromJsoup(String href) {
-    HttpResponseDetails httpResponseDetails = webScraper.getConnectionResponse(href);
+    HttpResponseDetails httpResponseDetails = httpResponseHandler.getConnectionResponse(href);
     return httpResponseDetails.getUrls();
   }
 

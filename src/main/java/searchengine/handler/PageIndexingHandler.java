@@ -1,4 +1,4 @@
-package searchengine.utils.entityHandlers.impl;
+package searchengine.handler;
 
 import static searchengine.services.indexing.impl.IndexingImpl.isIndexing;
 
@@ -8,17 +8,22 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.exceptions.StoppedExecutionException;
-import searchengine.factory.EntityFactory;
+import searchengine.handler.factory.EntityFactory;
 import searchengine.model.PageModel;
 import searchengine.model.SiteModel;
-import searchengine.utils.entityHandlers.PageHandler;
 
 @Component
 @RequiredArgsConstructor
-public class PageHandlerImpl implements PageHandler {
+public class PageIndexingHandler {
   private final EntityFactory entityFactory;
-
-  @Override
+  /**
+   * Retrieves a collection of PageModel objects from a collection of URLs, using the given
+   * SiteModel for context.
+   *
+   * @param urlsToParse the collection of URLs to parse into PageModel objects
+   * @param siteModel the SiteModel to use for context
+   * @return a collection of PageModel objects, one for each URL in the given collection
+   */
   public Collection<PageModel> getIndexedPageModelsFromUrls(
       Collection<String> urlsToParse, SiteModel siteModel) {
 

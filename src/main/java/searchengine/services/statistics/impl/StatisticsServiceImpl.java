@@ -10,7 +10,7 @@ import searchengine.factory.StatisticsDtoFactory;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.statistics.StatisticsService;
-import searchengine.utils.lockWrapper.LockWrapper;
+import searchengine.mapper.LockWrapper;
 import searchengine.web.model.StatisticsResponse;
 
 @Service

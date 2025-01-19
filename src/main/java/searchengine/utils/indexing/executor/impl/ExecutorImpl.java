@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
 import searchengine.exceptions.NotInConfigurationException;
+import searchengine.handler.SiteIndexingHandler;
 import searchengine.model.SiteModel;
 import searchengine.utils.dataTransformer.DataTransformer;
-import searchengine.utils.entityHandlers.SiteHandler;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.indexing.executor.Executor;
 import searchengine.utils.indexing.processor.Processor;
@@ -20,7 +20,7 @@ import searchengine.utils.indexing.processor.Processor;
 @RequiredArgsConstructor
 public class ExecutorImpl implements Executor {
   private final EntitySaverTemplate entitySaverTemplate;
-  private final SiteHandler siteHandler;
+  private final SiteIndexingHandler siteIndexingHandler;
   private final Processor processor;
   private final SitesList sitesList;
   private final ForkJoinPool forkJoinPool;
@@ -44,7 +44,7 @@ public class ExecutorImpl implements Executor {
   }
 
   private Collection<SiteModel> getSiteModels() {
-    return siteHandler.getIndexedSiteModelFromSites(sitesList.getSites());
+    return siteIndexingHandler.getIndexedSiteModelFromSites(sitesList.getSites());
   }
 
   private CompletableFuture<Void> getFutureProcess(SiteModel siteModel) {

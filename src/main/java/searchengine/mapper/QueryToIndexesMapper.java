@@ -11,7 +11,6 @@ import searchengine.config.MorphologySettings;
 import searchengine.model.IndexModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.IndexRepository;
-import searchengine.utils.lockWrapper.LockWrapper;
 import searchengine.utils.morphology.Morphology;
 
 @Component

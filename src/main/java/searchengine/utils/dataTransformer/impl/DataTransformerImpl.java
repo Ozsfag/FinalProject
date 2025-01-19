@@ -12,16 +12,16 @@ import searchengine.config.SitesList;
 import searchengine.dto.indexing.Site;
 import searchengine.exceptions.NotInConfigurationException;
 import searchengine.factory.ParsedUrlComponentsFactory;
+import searchengine.handler.SiteIndexingHandler;
 import searchengine.model.SiteModel;
 import searchengine.utils.dataTransformer.DataTransformer;
-import searchengine.utils.entityHandlers.SiteHandler;
 
 @Component
 @Lazy
 @RequiredArgsConstructor
 public class DataTransformerImpl implements DataTransformer {
   private final SitesList sitesList;
-  private final SiteHandler siteHandler;
+  private final SiteIndexingHandler siteIndexingHandler;
 
   @Override
   public Collection<String> transformUrlToUrls(String url) {
@@ -35,7 +35,7 @@ public class DataTransformerImpl implements DataTransformer {
 
     if (sites.isEmpty()) throw new NotInConfigurationException("Site in not in configuration");
 
-    return siteHandler.getIndexedSiteModelFromSites(sites).iterator().next();
+    return siteIndexingHandler.getIndexedSiteModelFromSites(sites).iterator().next();
   }
 
   @Override
