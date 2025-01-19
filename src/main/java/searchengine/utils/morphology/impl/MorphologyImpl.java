@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.ContentWordFrequencyAnalyzerParameters;
 import searchengine.dto.indexing.LemmaExtractorParameters;
-import searchengine.factory.ContentWordFrequencyAnalyzerFactory;
+import searchengine.factory.ContentWordFrequencyAnalyzerParametersFactory;
 import searchengine.factory.LemmaExtractorParametersFactory;
 import searchengine.utils.morphology.ContentWordFrequencyAnalyzer;
 import searchengine.utils.morphology.LemmaExtractor;
@@ -20,7 +20,10 @@ import searchengine.utils.morphology.Morphology;
  */
 @Component
 public class MorphologyImpl implements Morphology {
-  @Autowired private ContentWordFrequencyAnalyzerFactory contentWordFrequencyAnalyzerFactory;
+  @Autowired
+  private ContentWordFrequencyAnalyzerParametersFactory
+      contentWordFrequencyAnalyzerParametersFactory;
+
   @Autowired private LemmaExtractorParametersFactory lemmaExtractorParametersFactory;
 
   @Override
@@ -28,9 +31,9 @@ public class MorphologyImpl implements Morphology {
     Map<String, Integer> result = new HashMap<>();
 
     ContentWordFrequencyAnalyzerParameters russianCounter =
-        contentWordFrequencyAnalyzerFactory.createRussianWordCounter();
+        contentWordFrequencyAnalyzerParametersFactory.createRussianWordCounter();
     ContentWordFrequencyAnalyzerParameters englishCounter =
-        contentWordFrequencyAnalyzerFactory.createEnglishWordCounter();
+        contentWordFrequencyAnalyzerParametersFactory.createEnglishWordCounter();
 
     result.putAll(ContentWordFrequencyAnalyzer.countWordsFromContent(content, englishCounter));
     result.putAll(ContentWordFrequencyAnalyzer.countWordsFromContent(content, russianCounter));

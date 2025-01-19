@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import searchengine.dto.indexing.UrlsCheckerParameters;
+import searchengine.factory.UrlsCheckerParametersFactory;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.IndexingStrategy;
@@ -30,7 +32,7 @@ import searchengine.utils.urlsChecker.UrlsChecker;
 @RequiredArgsConstructor
 public class RecursiveParser extends RecursiveTask<Boolean> implements Serializable {
   @Serial private static final long serialVersionUID = 1L;
-
+  private final UrlsCheckerParametersFactory urlsCheckerParametersFactory;
   private final transient UrlsChecker urlsChecker;
   private final transient IndexingStrategy indexingStrategy;
   private final transient LockWrapper lockWrapper;
@@ -75,8 +77,8 @@ public class RecursiveParser extends RecursiveTask<Boolean> implements Serializa
   }
 
   private void setCheckedUrls() {
-    this.urlsToParse =
-        Collections.unmodifiableCollection(urlsChecker.getCheckedUrls(href, siteModel));
+    UrlsCheckerParameters params = urlsCheckerParametersFactory.createUrlsCheckerParameters(href);
+    this.urlsToParse = Collections.unmodifiableCollection(urlsChecker.getCheckedUrls(params));
   }
 
   private boolean checkedUrlsIsNotEmpty() {

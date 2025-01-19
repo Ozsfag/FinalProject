@@ -9,7 +9,7 @@ import searchengine.dto.indexing.ContentWordFrequencyAnalyzerParameters;
 
 @Component
 @RequiredArgsConstructor
-public class ContentWordFrequencyAnalyzerFactory {
+public class ContentWordFrequencyAnalyzerParametersFactory {
   private final RussianLuceneMorphology russianLuceneMorphology;
   private final EnglishLuceneMorphology englishLuceneMorphology;
   private final MorphologySettings morphologySettings;

@@ -18,7 +18,8 @@ public class DetailedUrlValidator {
    *
    * @return true if the URL is valid, false otherwise
    */
-  public boolean isValidUrl(String url, Collection<String> urlsFromJsoup, Collection<String> urlsFromDatabase) {
+  public boolean isValidUrl(
+      String url, Collection<String> urlsFromJsoup, Collection<String> urlsFromDatabase) {
     return isValidUrlBase(url)
         && isValidUrlEnding(url)
         && areUrlComponentsUnique(url)
@@ -29,9 +30,7 @@ public class DetailedUrlValidator {
   }
 
   private boolean isValidUrlBase(String url) {
-    return siteList.getSites().stream()
-            .map(Site::getUrl)
-            .anyMatch(url::startsWith);
+    return siteList.getSites().stream().map(Site::getUrl).anyMatch(url::startsWith);
   }
 
   private boolean isValidUrlEnding(String url) {
@@ -46,15 +45,15 @@ public class DetailedUrlValidator {
     String[] urlSplit = url.split("/");
     return Arrays.stream(urlSplit).distinct().count() == urlSplit.length;
   }
+
   private boolean isExternalUrl(String url) {
-    return siteList.getSites().stream()
-            .map(Site::getUrl)
-            .noneMatch(url::equals);
+    return siteList.getSites().stream().map(Site::getUrl).noneMatch(url::equals);
   }
 
   private boolean isNotInDatabase(String urlFromJsoup, Collection<String> urlsFromDatabase) {
     return !urlsFromDatabase.contains(urlFromJsoup);
   }
+
   private boolean isNotRepeated(String href, Collection<String> urlsFromJsoup) {
     long count = urlsFromJsoup.stream().filter(u -> u.equals(href)).count();
     return count <= 1;
