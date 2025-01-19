@@ -16,18 +16,17 @@ import searchengine.utils.webScraper.jsoupConnectionExecutor.JsoupConnectionExec
 public class HttpResponseDetailsFactory {
   private final JsoupResponseStatusFactory jsoupResponseStatusFactory;
   private final JsoupConnectionExecutor jsoupConnectionDtoExecutor;
-  private final DocumentExtractor documentExtractor;
 
   public HttpResponseDetails buildConnectionResponse(String url) throws IOException {
     Connection connection = jsoupResponseStatusFactory.createJsoupConnection(url);
     JsoupResponseStatus response = jsoupConnectionDtoExecutor.executeDto(connection, url);
     Document document = retrieveDocument(connection);
     return new HttpResponseDetails(
-        documentExtractor.extractUrls(document),
+        DocumentExtractor.extractUrls(document),
         url,
-        documentExtractor.extractContent(document),
+        DocumentExtractor.extractContent(document),
         response.getStatusMessage(),
-        documentExtractor.extractTitle(document),
+        DocumentExtractor.extractTitle(document),
         response.getStatusCode());
   }
 

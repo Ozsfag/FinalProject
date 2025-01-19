@@ -1,13 +1,35 @@
 package searchengine.utils.webScraper;
 
-import searchengine.dto.indexing.HttpResponseDetails;
+import java.io.IOException;
 
-public interface WebScraper {
-  /**
-   * Retrieves the connection response for the specified URL.
-   *
-   * @param url the URL to establish a connection with
-   * @return the ConnectionResponse containing URL, HTTP status, content, URLs, and an empty string
-   */
-  HttpResponseDetails getConnectionResponse(String url);
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import searchengine.dto.indexing.HttpResponseDetails;
+import searchengine.factory.HttpResponseDetailsFactory;
+
+/**
+ * a util that parses a page
+ *
+ * @author Ozsfag
+ */
+@Component
+@RequiredArgsConstructor
+public class WebScraper {
+  private final HttpResponseDetailsFactory httpResponseDetailsFactory;
+  public HttpResponseDetails getConnectionResponse(String url) {
+    try {
+      return buildConnectionResponse(url);
+    } catch (IOException e) {
+      return buildConnectionResponseWithException(url, e);
+    }
+  }
+
+  private HttpResponseDetails buildConnectionResponse(String url) throws IOException {
+    return httpResponseDetailsFactory.buildConnectionResponse(url);
+  }
+
+  private HttpResponseDetails buildConnectionResponseWithException(String url, IOException e) {
+    return httpResponseDetailsFactory.buildConnectionResponseWithException(
+        url, e.hashCode(), e.getMessage());
+  }
 }
