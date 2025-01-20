@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.Site;
 import searchengine.handler.factory.EntityFactory;
+import searchengine.mapper.LockWrapper;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
-import searchengine.mapper.LockWrapper;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +17,7 @@ public class SiteIndexingHandler {
   private final LockWrapper lockWrapper;
   private final SiteRepository siteRepository;
   private final EntityFactory entityFactory;
+
   /**
    * Retrieves a collection of SiteModels from a collection of Sites by parsing every Site's URL and
    * retrieving the corresponding SiteModel from the database. If the SiteModel does not exist in
@@ -25,7 +26,6 @@ public class SiteIndexingHandler {
    * @param sitesToParse collection of Sites to be parsed
    * @return collection of SiteModels retrieved from the database or created from the given sites
    */
-
   public Collection<SiteModel> getIndexedSiteModelFromSites(Collection<Site> sitesToParse) {
     return sitesToParse.parallelStream()
         .map(this::getSiteIfExistOrCreate)

@@ -2,14 +2,13 @@ package searchengine.handler;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.handler.factory.EntityFactory;
+import searchengine.mapper.LockWrapper;
 import searchengine.model.LemmaModel;
 import searchengine.model.SiteModel;
 import searchengine.repositories.LemmaRepository;
-import searchengine.mapper.LockWrapper;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +16,7 @@ public class LemmaIndexingHandler {
   private final LockWrapper lockWrapper;
   private final LemmaRepository lemmaRepository;
   private final EntityFactory entityFactory;
+
   /**
    * Retrieves a collection of LemmaModel objects from the provided words count for the given site.
    *
@@ -24,7 +24,6 @@ public class LemmaIndexingHandler {
    * @param wordsCount the map of words to count
    * @return the collection of LemmaModel objects
    */
-
   public Collection<LemmaModel> getIndexedLemmaModelsFromCountedWords(
       SiteModel siteModel, Map<String, Integer> wordsCount) {
     Collection<LemmaModel> existedLemmaModels = getExistedLemmaModels(siteModel, wordsCount);

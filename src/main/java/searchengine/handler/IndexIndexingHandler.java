@@ -6,17 +6,18 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import searchengine.handler.factory.EntityFactory;
+import searchengine.mapper.LockWrapper;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
 import searchengine.repositories.IndexRepository;
-import searchengine.mapper.LockWrapper;
 
 @Component
 public class IndexIndexingHandler {
   @Autowired private LockWrapper lockWrapper;
   @Autowired private IndexRepository indexRepository;
   @Autowired private EntityFactory entityFactory;
+
   /**
    * Retrieves a collection of {@link IndexModel} objects, each one associated with a lemma from the
    * given collection, and their frequency in the given page.

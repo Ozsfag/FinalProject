@@ -9,9 +9,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import searchengine.mapper.LockWrapper;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
-import searchengine.mapper.LockWrapper;
 
 @Component
 @RequiredArgsConstructor

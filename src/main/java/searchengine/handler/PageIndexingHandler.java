@@ -16,6 +16,7 @@ import searchengine.model.SiteModel;
 @RequiredArgsConstructor
 public class PageIndexingHandler {
   private final EntityFactory entityFactory;
+
   /**
    * Retrieves a collection of PageModel objects from a collection of URLs, using the given
    * SiteModel for context.

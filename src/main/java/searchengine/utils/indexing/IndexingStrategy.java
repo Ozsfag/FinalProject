@@ -1,7 +1,6 @@
 package searchengine.utils.indexing;
 
 import java.util.*;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.handler.IndexIndexingHandler;

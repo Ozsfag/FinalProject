@@ -7,10 +7,10 @@ import searchengine.dto.statistics.DetailedStatisticsItem;
 import searchengine.dto.statistics.StatisticsData;
 import searchengine.dto.statistics.TotalStatistics;
 import searchengine.factory.StatisticsDtoFactory;
+import searchengine.mapper.LockWrapper;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.statistics.StatisticsService;
-import searchengine.mapper.LockWrapper;
 import searchengine.web.model.StatisticsResponse;
 
 @Service

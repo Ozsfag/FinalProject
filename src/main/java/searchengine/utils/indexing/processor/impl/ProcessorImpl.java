@@ -2,21 +2,20 @@ package searchengine.utils.indexing.processor.impl;
 
 import java.util.Collection;
 import java.util.concurrent.ForkJoinTask;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.exceptions.ForbidenException;
+import searchengine.factory.RecursiveParserFactory;
 import searchengine.model.SiteModel;
 import searchengine.repositories.PageRepository;
 import searchengine.utils.indexing.IndexingStrategy;
 import searchengine.utils.indexing.processor.Processor;
-import searchengine.utils.indexing.processor.taskFactory.impl.RecursiveTaskFactory;
 import searchengine.utils.indexing.processor.updater.siteUpdater.SiteUpdater;
 
 @Component
 @RequiredArgsConstructor
 public class ProcessorImpl implements Processor {
-  private final RecursiveTaskFactory recursiveTaskFactory;
+  private final RecursiveParserFactory recursiveParserFactory;
   private final PageRepository pageRepository;
   private final SiteUpdater siteUpdater;
   private final IndexingStrategy indexingStrategy;
@@ -24,7 +23,8 @@ public class ProcessorImpl implements Processor {
   @Override
   public void processSiteIndexingRecursively(SiteModel siteModel) {
     try {
-      ForkJoinTask<?> task = recursiveTaskFactory.createRecursiveTask(siteModel, siteModel.getUrl());
+      ForkJoinTask<?> task =
+          recursiveParserFactory.createRecursiveParser(siteModel, siteModel.getUrl());
       task.fork();
       task.join();
 

@@ -1,7 +1,5 @@
 package searchengine.utils.indexing.recursiveParser;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
@@ -9,14 +7,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import searchengine.dto.indexing.RecursiveTaskParameters;
 import searchengine.dto.indexing.UrlsCheckerParameters;
-import searchengine.factory.UrlsCheckerParametersFactory;
-import searchengine.model.SiteModel;
-import searchengine.repositories.SiteRepository;
-import searchengine.utils.indexing.IndexingStrategy;
-import searchengine.mapper.LockWrapper;
-import searchengine.utils.indexing.processor.taskFactory.impl.RecursiveTaskFactory;
-import searchengine.utils.urlsChecker.UrlsChecker;
+import searchengine.factory.RecursiveParserFactory;
 
 /**
  * Recursively indexes a page and its subpages.
@@ -29,20 +22,9 @@ import searchengine.utils.urlsChecker.UrlsChecker;
 @Component
 @Scope(scopeName = "prototype")
 @RequiredArgsConstructor
-public class RecursiveParser extends RecursiveTask<Boolean> implements Serializable {
-  @Serial private static final long serialVersionUID = 1L;
-  private final UrlsCheckerParametersFactory urlsCheckerParametersFactory;
-  private final transient UrlsChecker urlsChecker;
-  private final transient IndexingStrategy indexingStrategy;
-  private final transient LockWrapper lockWrapper;
-  private final SiteRepository siteRepository;
-  private final transient RecursiveTaskFactory recursiveTaskFactory;
-  private final SiteModel siteModel;
-  private final String href;
-  private Collection<String> urlsToParse;
-  private Collection<ForkJoinTask<?>> subtasks;
-
-
+public class RecursiveParser extends RecursiveTask<Boolean> {
+  private final RecursiveTaskParameters parameters;
+  private final RecursiveParserFactory factory;
 
   /**
    * Recursively computes the parsing of URLs and initiates subtasks for each URL to be parsed.
@@ -51,41 +33,43 @@ public class RecursiveParser extends RecursiveTask<Boolean> implements Serializa
    */
   @Override
   protected Boolean compute() {
-    setCheckedUrls();
-    if (checkedUrlsIsNotEmpty()) {
-      indexingUrls();
+    Collection<String> urlsToParse = getCheckedUrls();
+    if (!urlsToParse.isEmpty()) {
+      indexingUrls(urlsToParse);
       updateSiteStatus();
-      setSubtasks();
-      invokeSubtask();
+      invokeSubtask(urlsToParse);
     }
     return true;
   }
 
-  private void setCheckedUrls() {
-    UrlsCheckerParameters params = urlsCheckerParametersFactory.createUrlsCheckerParameters(href);
-    this.urlsToParse = Collections.unmodifiableCollection(urlsChecker.getCheckedUrls(params));
+  private Collection<String> getCheckedUrls() {
+    UrlsCheckerParameters params =
+        parameters
+            .getUrlsCheckerParametersFactory()
+            .createUrlsCheckerParameters(parameters.getUrl());
+    return parameters.getUrlsChecker().getCheckedUrls(params);
   }
 
-  private boolean checkedUrlsIsNotEmpty() {
-    return !urlsToParse.isEmpty();
-  }
-
-  private void indexingUrls() {
-    indexingStrategy.processIndexing(urlsToParse, siteModel);
+  private void indexingUrls(Collection<String> urlsToParse) {
+    parameters.getIndexingStrategy().processIndexing(urlsToParse, parameters.getSiteModel());
   }
 
   private void updateSiteStatus() {
-    lockWrapper.writeLock(() -> siteRepository.updateStatusTimeByUrl(new Date(), href));
+    parameters
+        .getLockWrapper()
+        .writeLock(
+            () ->
+                parameters
+                    .getSiteRepository()
+                    .updateStatusTimeByUrl(new Date(), parameters.getUrl()));
   }
 
-  private void setSubtasks() {
-    this.subtasks =
+  private void invokeSubtask(Collection<String> urlsToParse) {
+    Collection<ForkJoinTask<?>> subtasks =
         urlsToParse.stream()
-            .map(url -> recursiveTaskFactory.createRecursiveTask(siteModel, url))
-            .collect(Collectors.toUnmodifiableSet());
-  }
+            .map(url -> factory.createRecursiveParser(parameters.getSiteModel(), url))
+            .collect(Collectors.toSet());
 
-  private void invokeSubtask() {
     subtasks.forEach(ForkJoinTask::fork);
     subtasks.forEach(ForkJoinTask::join);
   }
