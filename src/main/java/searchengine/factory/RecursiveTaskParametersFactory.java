@@ -8,9 +8,8 @@ import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.IndexingStrategy;
 import searchengine.utils.urlsChecker.UrlsChecker;
-/**
- * Factory class for creating instances of RecursiveTaskParameters.
- */
+
+/** Factory class for creating instances of RecursiveTaskParameters. */
 @Component
 @RequiredArgsConstructor
 public class RecursiveTaskParametersFactory {
@@ -20,6 +19,7 @@ public class RecursiveTaskParametersFactory {
   private final IndexingStrategy indexingStrategy;
   private final LockWrapper lockWrapper;
   private final SiteRepository siteRepository;
+
   /**
    * Creates a new instance of RecursiveTaskParameters with the specified site model and URL.
    *

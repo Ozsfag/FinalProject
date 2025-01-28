@@ -18,8 +18,7 @@ import searchengine.web.model.UpsertIndexingPageRequest;
 
 @RestController
 @RequestMapping("/indexing")
-@Tag(name = "IndexingController v1", description = "Operations related to indexing")
-
+@Tag(name = "Indexing controller v1", description = "Operations related to indexing")
 public class IndexingController {
   @Autowired private IndexingService indexingService;
   @Autowired private DeletingService deletingService;
@@ -32,21 +31,25 @@ public class IndexingController {
   @GetMapping("/startIndexing")
   @Operation(summary = "Start Indexing", description = "Initiates the indexing process.")
   @ApiResponses({
-          @ApiResponse(
-                  responseCode = "200",
-                  content = @Content(schema = @Schema(implementation = IndexingResponse.class), mediaType = "application/json")
-          ),
-          @ApiResponse(
-                  responseCode = "226",
-                  content = @Content(schema = @Schema(implementation = IndexingResponse.class), mediaType = "application/json")
-          )
+    @ApiResponse(
+        responseCode = "200",
+        content =
+            @Content(
+                schema = @Schema(implementation = IndexingResponse.class),
+                mediaType = "application/json")),
+    @ApiResponse(
+        responseCode = "226",
+        content =
+            @Content(
+                schema = @Schema(implementation = IndexingResponse.class),
+                mediaType = "application/json"))
   })
   public ResponseEntity<IndexingResponse> startIndexing() {
     deletingService.deleteData();
     var result = indexingService.startIndexing();
-    return result.isSuccessfulIndexing() ?
-            ResponseEntity.ok(result) :
-            ResponseEntity.status(HttpStatus.IM_USED).body(result);
+    return result.isSuccessfulIndexing()
+        ? ResponseEntity.ok(result)
+        : ResponseEntity.status(HttpStatus.IM_USED).body(result);
   }
 
   /**
@@ -58,20 +61,24 @@ public class IndexingController {
   @GetMapping("/stopIndexing")
   @Operation(summary = "Stop Indexing", description = "Stops the ongoing indexing process.")
   @ApiResponses({
-          @ApiResponse(
-                  responseCode = "200",
-                  content = @Content(schema = @Schema(implementation = StoppingResponse.class), mediaType = "application/json")
-          ),
-          @ApiResponse(
-                  responseCode = "406",
-                  content = @Content(schema = @Schema(implementation = StoppingResponse.class), mediaType = "application/json")
-          )
+    @ApiResponse(
+        responseCode = "200",
+        content =
+            @Content(
+                schema = @Schema(implementation = StoppingResponse.class),
+                mediaType = "application/json")),
+    @ApiResponse(
+        responseCode = "406",
+        content =
+            @Content(
+                schema = @Schema(implementation = StoppingResponse.class),
+                mediaType = "application/json"))
   })
   public ResponseEntity<StoppingResponse> stopIndexing() {
     var result = indexingService.stopIndexing();
-    return result.isSuccessfulStopping() ?
-            ResponseEntity.ok(result) :
-            ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(result);
+    return result.isSuccessfulStopping()
+        ? ResponseEntity.ok(result)
+        : ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(result);
   }
 
   /**
@@ -86,20 +93,24 @@ public class IndexingController {
   @ResponseBody
   @Operation(summary = "Index Page", description = "Indexes a specific page by its URL.")
   @ApiResponses({
-          @ApiResponse(
-                  responseCode = "200",
-                  content = @Content(schema = @Schema(implementation = IndexingResponse.class), mediaType = "application/json")
-          ),
-          @ApiResponse(
-                  responseCode = "400",
-                  content = @Content(schema = @Schema(implementation = IndexingResponse.class), mediaType = "application/json")
-          )
+    @ApiResponse(
+        responseCode = "200",
+        content =
+            @Content(
+                schema = @Schema(implementation = IndexingResponse.class),
+                mediaType = "application/json")),
+    @ApiResponse(
+        responseCode = "400",
+        content =
+            @Content(
+                schema = @Schema(implementation = IndexingResponse.class),
+                mediaType = "application/json"))
   })
   public ResponseEntity<IndexingResponse> indexPage(
       UpsertIndexingPageRequest upsertIndexingPageRequest) {
     var result = indexingService.indexPage(upsertIndexingPageRequest);
-    return result.isSuccessfulIndexing() ?
-            ResponseEntity.ok(result) :
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+    return result.isSuccessfulIndexing()
+        ? ResponseEntity.ok(result)
+        : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
   }
 }

@@ -10,28 +10,27 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenApiConfiguration {
-    @Bean
-    public OpenAPI openAPI() {
-        Server localHost = new Server();
-        localHost.setUrl("http://localhost:8080/");
-        localHost.setDescription("Local env");
+  @Bean
+  public OpenAPI openAPI() {
+    Server localHost = new Server();
+    localHost.setUrl("http://localhost:8080/");
+    localHost.setDescription("Local env");
 
-        Contact developersContact = new Contact();
-        developersContact.setName("Artem Sergienko");
-        developersContact.setEmail("Ozsfag3154artem@gail.com");
+    Contact developersContact = new Contact();
+    developersContact.setName("Artem Sergienko");
+    developersContact.setEmail("Ozsfag3154artem@gail.com");
 
-        License license = new License()
-                .name("GNU GPLv3")
-                .url("https://choosealicense.com/licenses/gpl-3.0/");
+    License license =
+        new License().name("GNU GPLv3").url("https://choosealicense.com/licenses/gpl-3.0/");
 
-        Info info = new Info()
-                .title("Search Engine API")
-                .version("1.0")
-                .description("API documentation for the Search Engine project")
-                .contact(developersContact)
-                .license(license);
+    Info info =
+        new Info()
+            .title("Search Engine API")
+            .version("1.0")
+            .description("API documentation for the Search Engine project")
+            .contact(developersContact)
+            .license(license);
 
-        return new OpenAPI().info(info).addServersItem(localHost);
-
-    }
+    return new OpenAPI().info(info).addServersItem(localHost);
+  }
 }

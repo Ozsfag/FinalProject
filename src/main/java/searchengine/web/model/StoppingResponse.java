@@ -6,6 +6,6 @@ import lombok.Value;
 @Value
 @AllArgsConstructor
 public class StoppingResponse {
-    boolean successfulStopping;
-    String message;
+  boolean successfulStopping;
+  String message;
 }

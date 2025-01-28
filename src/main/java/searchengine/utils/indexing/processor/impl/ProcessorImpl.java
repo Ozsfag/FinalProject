@@ -22,12 +22,12 @@ public class ProcessorImpl implements Processor {
 
   @Override
   public void processSiteIndexingRecursively(SiteModel siteModel) {
-      ForkJoinTask<?> task =
-          recursiveParserFactory.createRecursiveParser(siteModel, siteModel.getUrl());
-      task.fork();
-      task.join();
+    ForkJoinTask<?> task =
+        recursiveParserFactory.createRecursiveParser(siteModel, siteModel.getUrl());
+    task.fork();
+    task.join();
 
-      handleSiteIndexingResult(siteModel);
+    handleSiteIndexingResult(siteModel);
   }
 
   private void handleSiteIndexingResult(SiteModel siteModel) {

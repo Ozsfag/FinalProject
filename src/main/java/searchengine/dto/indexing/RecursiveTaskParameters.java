@@ -2,7 +2,6 @@ package searchengine.dto.indexing;
 
 import lombok.Builder;
 import lombok.Getter;
-import searchengine.factory.RecursiveParserFactory;
 import searchengine.factory.UrlsCheckerParametersFactory;
 import searchengine.mapper.LockWrapper;
 import searchengine.model.SiteModel;

@@ -33,7 +33,7 @@ public class SearchingImpl implements SearchingService {
     Collection<IndexModel> uniqueSet =
         queryToIndexesMapper.mapQueryToIndexModels(upsertSearchRequest.getQuery(), siteModel);
     if (uniqueSet.isEmpty())
-      return new TotalSearchResponse(true, 0, new ArrayList<>(), "Not found");
+      return new TotalSearchResponse(false, 0, new ArrayList<>(), "Not found");
 
     Map<Integer, Float> rel = PageRankCalculator.getPageId2AbsRank(uniqueSet);
     Collection<DetailedSearchDto> detailedSearchDto =

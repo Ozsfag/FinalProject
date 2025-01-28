@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.SiteModel;
 import searchengine.utils.indexing.recursiveParser.RecursiveParser;
-/**
- * Factory for creating RecursiveParser tasks for site indexing.
- */
+
+/** Factory for creating RecursiveParser tasks for site indexing. */
 @Component
 @RequiredArgsConstructor
 public class RecursiveParserFactory {
