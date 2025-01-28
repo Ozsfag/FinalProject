@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @AllArgsConstructor
-public class IndexingResponse {
-  boolean successfulIndexing;
-  String message;
+public class StoppingResponse {
+    boolean successfulStopping;
+    String message;
 }

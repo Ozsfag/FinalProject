@@ -1,6 +1,7 @@
 package searchengine.services.indexing;
 
 import searchengine.web.model.IndexingResponse;
+import searchengine.web.model.StoppingResponse;
 import searchengine.web.model.UpsertIndexingPageRequest;
 
 /**
@@ -21,7 +22,7 @@ public interface IndexingService {
    *
    * @return IndexingResponse
    */
-  IndexingResponse stopIndexing();
+  StoppingResponse stopIndexing();
 
   /**
    * index one page

@@ -10,6 +10,7 @@ import searchengine.exceptions.NotInConfigurationException;
 import searchengine.services.indexing.IndexingService;
 import searchengine.utils.indexing.executor.Executor;
 import searchengine.web.model.IndexingResponse;
+import searchengine.web.model.StoppingResponse;
 import searchengine.web.model.UpsertIndexingPageRequest;
 
 @Service
@@ -39,10 +40,10 @@ public class IndexingImpl implements IndexingService {
   }
 
   @Override
-  public IndexingResponse stopIndexing() {
-    if (!isIndexing) return new IndexingResponse(false, "Индексация не запущена");
+  public StoppingResponse stopIndexing() {
+    if (!isIndexing) return new StoppingResponse(false, "Индексация не запущена");
     setIsIndexingToFalse();
-    return new IndexingResponse(true, "Индексация остановлена пользователем");
+    return new StoppingResponse(true, "Индексация остановлена пользователем");
   }
 
   private void setIsIndexingToFalse() {
