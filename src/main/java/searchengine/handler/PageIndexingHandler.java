@@ -1,6 +1,6 @@
 package searchengine.handler;
 
-import static searchengine.services.indexing.impl.IndexingImpl.isIndexing;
+import static searchengine.services.indexing.impl.IndexingServiceImpl.isIndexing;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -35,7 +35,9 @@ public class PageIndexingHandler {
   }
 
   private PageModel getPageModelByUrl(String url, SiteModel siteModel) {
-    if (!isIndexing) throw new StoppedExecutionException("Индексация остановлена пользователем");
-    return entityFactory.createPageModel(siteModel, url);
+    if (isIndexing) {
+      return entityFactory.createPageModel(siteModel, url);
+    }
+    throw new StoppedExecutionException("Индексация остановлена пользователем");
   }
 }

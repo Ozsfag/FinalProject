@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Lazy
-public class Deleter implements DeletingService {
+public class DeletingServiceImpl implements DeletingService {
   @Autowired private EntityManager em;
 
   /**

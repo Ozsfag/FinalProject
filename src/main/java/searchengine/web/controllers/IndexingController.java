@@ -46,10 +46,7 @@ public class IndexingController {
   })
   public ResponseEntity<IndexingResponse> startIndexing() {
     deletingService.deleteData();
-    var result = indexingService.startIndexing();
-    return result.isSuccessfulIndexing()
-        ? ResponseEntity.ok(result)
-        : ResponseEntity.status(HttpStatus.IM_USED).body(result);
+    return ResponseEntity.ok(indexingService.startIndexing());
   }
 
   /**
@@ -75,10 +72,7 @@ public class IndexingController {
                 mediaType = "application/json"))
   })
   public ResponseEntity<StoppingResponse> stopIndexing() {
-    var result = indexingService.stopIndexing();
-    return result.isSuccessfulStopping()
-        ? ResponseEntity.ok(result)
-        : ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(result);
+    return ResponseEntity.ok(indexingService.stopIndexing());
   }
 
   /**
@@ -107,10 +101,7 @@ public class IndexingController {
                 mediaType = "application/json"))
   })
   public ResponseEntity<IndexingResponse> indexPage(
-      UpsertIndexingPageRequest upsertIndexingPageRequest) {
-    var result = indexingService.indexPage(upsertIndexingPageRequest);
-    return result.isSuccessfulIndexing()
-        ? ResponseEntity.ok(result)
-        : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+          UpsertIndexingPageRequest upsertIndexingPageRequest) {
+    return ResponseEntity.ok(indexingService.indexPage(upsertIndexingPageRequest));
   }
 }

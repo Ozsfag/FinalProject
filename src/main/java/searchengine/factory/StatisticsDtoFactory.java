@@ -13,7 +13,7 @@ import searchengine.dto.statistics.TotalStatistics;
 import searchengine.model.SiteModel;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
-import searchengine.services.indexing.impl.IndexingImpl;
+import searchengine.services.indexing.impl.IndexingServiceImpl;
 
 @Component
 @Lazy
@@ -25,7 +25,7 @@ public class StatisticsDtoFactory {
 
   public TotalStatistics getTotalStatistics() {
     return new TotalStatistics(
-        sites.getSites().size(), getPagesCount(), getLemmasCount(), IndexingImpl.isIndexing);
+        sites.getSites().size(), getPagesCount(), getLemmasCount(), IndexingServiceImpl.isIndexing);
   }
 
   private long getPagesCount() {

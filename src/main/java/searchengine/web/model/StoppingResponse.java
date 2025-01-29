@@ -1,11 +1,13 @@
 package searchengine.web.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Value;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Value
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class StoppingResponse {
-  boolean successfulStopping;
-  String message;
+  private boolean result;
+  private String message;
 }

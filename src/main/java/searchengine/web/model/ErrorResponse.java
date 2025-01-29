@@ -5,8 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UpsertIndexingPageRequest {
-  private String url;
+@AllArgsConstructor
+public class ErrorResponse {
+    private boolean result;
+    private String message;
 }
