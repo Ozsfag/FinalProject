@@ -11,8 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.services.searching.SearchingService;
-import searchengine.web.model.TotalSearchResponse;
-import searchengine.web.model.UpsertSearchRequest;
+import searchengine.web.models.TotalSearchResponse;
+import searchengine.web.models.UpsertSearchRequest;
 
 @RestController
 @RequestMapping("/searching")

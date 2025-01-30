@@ -11,7 +11,7 @@ import searchengine.mapper.LockWrapper;
 import searchengine.model.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.statistics.StatisticsService;
-import searchengine.web.model.StatisticsResponse;
+import searchengine.web.models.StatisticsResponse;
 
 @Service
 public class StatisticsServiceImpl implements StatisticsService {

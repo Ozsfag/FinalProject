@@ -1,4 +1,4 @@
-package searchengine.web.model;
+package searchengine.web.models;
 
 import lombok.Data;
 

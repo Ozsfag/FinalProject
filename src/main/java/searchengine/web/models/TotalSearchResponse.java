@@ -1,4 +1,4 @@
-package searchengine.web.model;
+package searchengine.web.models;
 
 import java.util.Collection;
 import lombok.*;

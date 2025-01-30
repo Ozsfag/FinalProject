@@ -15,8 +15,8 @@ import searchengine.model.SiteModel;
 import searchengine.services.searching.SearchingService;
 import searchengine.utils.dataTransformer.DataTransformer;
 import searchengine.utils.searching.PageRankCalculator;
-import searchengine.web.model.TotalSearchResponse;
-import searchengine.web.model.UpsertSearchRequest;
+import searchengine.web.models.TotalSearchResponse;
+import searchengine.web.models.UpsertSearchRequest;
 
 @Service
 @Lazy

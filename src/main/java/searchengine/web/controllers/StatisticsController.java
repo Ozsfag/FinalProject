@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import searchengine.services.statistics.StatisticsService;
-import searchengine.web.model.StatisticsResponse;
+import searchengine.web.models.StatisticsResponse;
 
 @RestController
 @RequestMapping("/statistics")

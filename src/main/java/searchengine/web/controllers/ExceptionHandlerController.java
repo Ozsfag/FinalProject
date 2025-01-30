@@ -11,36 +11,34 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import searchengine.exceptions.IndexingAlreadyRunningException;
 import searchengine.exceptions.StoppedExecutionException;
-import searchengine.web.model.ErrorResponse;
+import searchengine.web.models.ErrorResponse;
 
 @RestControllerAdvice
 @Slf4j
 public class ExceptionHandlerController {
-    @ExceptionHandler(IndexingAlreadyRunningException.class)
-    public ResponseEntity<ErrorResponse> indexingAlreadyRunning(IndexingAlreadyRunningException ex) {
-        log.error("Индексация уже запущена", ex);
-        return ResponseEntity
-                .status(HttpStatus.IM_USED)
-                .body(new ErrorResponse(false, ex.getLocalizedMessage()));
-    }
+  @ExceptionHandler(IndexingAlreadyRunningException.class)
+  public ResponseEntity<ErrorResponse> indexingAlreadyRunning(IndexingAlreadyRunningException ex) {
+    log.error("Индексация уже запущена", ex);
+    return ResponseEntity.status(HttpStatus.IM_USED)
+        .body(new ErrorResponse(false, ex.getLocalizedMessage()));
+  }
 
-    @ExceptionHandler(StoppedExecutionException.class)
-    public ResponseEntity<ErrorResponse> stoppedExecution(StoppedExecutionException ex) {
-        log.error("Индексация остановлена пользователем", ex);
-        return ResponseEntity
-                .status(HttpStatus.NOT_ACCEPTABLE)
-                .body(new ErrorResponse(false, ex.getLocalizedMessage()));
-    }
+  @ExceptionHandler(StoppedExecutionException.class)
+  public ResponseEntity<ErrorResponse> stoppedExecution(StoppedExecutionException ex) {
+    log.error("Индексация остановлена пользователем", ex);
+    return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+        .body(new ErrorResponse(false, ex.getLocalizedMessage()));
+  }
 
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<ErrorResponse> handleBindException(BindException ex) {
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.toList());
-        String errorMessage = String.join("; ", errors);
-        log.error("Validation error: {}", errorMessage);
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(false, errorMessage));
-    }
+  @ExceptionHandler(BindException.class)
+  public ResponseEntity<ErrorResponse> handleBindException(BindException ex) {
+    List<String> errors =
+        ex.getBindingResult().getFieldErrors().stream()
+            .map(FieldError::getDefaultMessage)
+            .collect(Collectors.toList());
+    String errorMessage = String.join("; ", errors);
+    log.error("Validation error: {}", errorMessage);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse(false, errorMessage));
+  }
 }

@@ -1,6 +1,4 @@
-package searchengine.annotations;
-
-import searchengine.validator.HostValidator;
+package searchengine.web.annotations;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -9,10 +7,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = HostValidator.class)
+@Constraint(validatedBy = searchengine.web.validators.ComprehensiveUrlValidator.class)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidHost {
+public @interface ComprehensiveUrlValidator {
   String message() default "Invalid host";
 
   Class<?>[] groups() default {};

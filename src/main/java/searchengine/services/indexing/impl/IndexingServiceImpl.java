@@ -7,9 +7,9 @@ import searchengine.exceptions.IndexingAlreadyRunningException;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.services.indexing.IndexingService;
 import searchengine.utils.indexing.executor.Executor;
-import searchengine.web.model.IndexingResponse;
-import searchengine.web.model.StoppingResponse;
-import searchengine.web.model.UpsertIndexingPageRequest;
+import searchengine.web.models.IndexingResponse;
+import searchengine.web.models.StoppingResponse;
+import searchengine.web.models.UpsertIndexingPageRequest;
 
 @Service
 @Slf4j
@@ -47,8 +47,7 @@ public class IndexingServiceImpl implements IndexingService {
 
   @Override
   public IndexingResponse indexPage(UpsertIndexingPageRequest upsertIndexingPageRequest) {
-    return CompletableFuture.supplyAsync(() -> indexPageTask(
-            upsertIndexingPageRequest)).join();
+    return CompletableFuture.supplyAsync(() -> indexPageTask(upsertIndexingPageRequest)).join();
   }
 
   private IndexingResponse indexPageTask(UpsertIndexingPageRequest request) {

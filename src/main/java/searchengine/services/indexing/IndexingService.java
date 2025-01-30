@@ -1,8 +1,8 @@
 package searchengine.services.indexing;
 
-import searchengine.web.model.IndexingResponse;
-import searchengine.web.model.StoppingResponse;
-import searchengine.web.model.UpsertIndexingPageRequest;
+import searchengine.web.models.IndexingResponse;
+import searchengine.web.models.StoppingResponse;
+import searchengine.web.models.UpsertIndexingPageRequest;
 
 /**
  * Service that indexing urls from application.yaml
