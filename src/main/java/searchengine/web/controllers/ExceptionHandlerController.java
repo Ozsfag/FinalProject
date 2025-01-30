@@ -1,16 +1,17 @@
 package searchengine.web.controllers;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import searchengine.exceptions.IndexingAlreadyRunningException;
-import searchengine.exceptions.NotInConfigurationException;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.web.model.ErrorResponse;
-
-import java.net.URISyntaxException;
 
 @RestControllerAdvice
 @Slf4j
@@ -31,19 +32,15 @@ public class ExceptionHandlerController {
                 .body(new ErrorResponse(false, ex.getLocalizedMessage()));
     }
 
-    @ExceptionHandler(NotInConfigurationException.class)
-    public ResponseEntity<ErrorResponse> parsedPageNotContainsInConfiguration(NotInConfigurationException ex) {
-        log.error("Ошибка при индексации страницы. Сраница не содержится с конфигурации.");
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ErrorResponse> handleBindException(BindException ex) {
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.toList());
+        String errorMessage = String.join("; ", errors);
+        log.error("Validation error: {}", errorMessage);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(false, ex.getLocalizedMessage()));
-    }
-
-    @ExceptionHandler(URISyntaxException.class)
-    public ResponseEntity<ErrorResponse> wrongFormatOfParsedUrl(URISyntaxException ex) {
-        log.error("Ошибка при индексации страницы. Сраница имеет неправильынй формат.");
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(false, ex.getLocalizedMessage()));
+                .body(new ErrorResponse(false, errorMessage));
     }
 }

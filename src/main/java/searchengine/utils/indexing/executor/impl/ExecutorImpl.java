@@ -1,15 +1,12 @@
 package searchengine.utils.indexing.executor.impl;
 
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import searchengine.config.SitesList;
-import searchengine.exceptions.NotInConfigurationException;
 import searchengine.handler.SiteIndexingHandler;
 import searchengine.model.SiteModel;
 import searchengine.utils.dataTransformer.DataTransformer;
@@ -54,8 +51,7 @@ public class ExecutorImpl implements Executor {
   }
 
   @Override
-  public void executeOnePageIndexing(String url)
-      throws NotInConfigurationException, URISyntaxException {
+  public void executeOnePageIndexing(String url) {
     SiteModel siteModel = dataTransformer.transformUrlToSiteModel(url);
     Collection<String> urls = dataTransformer.transformUrlToUrls(url);
     processor.processOneSiteIndexing(url, siteModel, urls);

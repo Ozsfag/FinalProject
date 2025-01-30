@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.services.deleting.DeletingService;
@@ -15,6 +14,8 @@ import searchengine.services.indexing.IndexingService;
 import searchengine.web.model.IndexingResponse;
 import searchengine.web.model.StoppingResponse;
 import searchengine.web.model.UpsertIndexingPageRequest;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/indexing")
@@ -101,7 +102,7 @@ public class IndexingController {
                 mediaType = "application/json"))
   })
   public ResponseEntity<IndexingResponse> indexPage(
-          UpsertIndexingPageRequest upsertIndexingPageRequest) {
+      @Valid UpsertIndexingPageRequest upsertIndexingPageRequest) {
     return ResponseEntity.ok(indexingService.indexPage(upsertIndexingPageRequest));
   }
 }

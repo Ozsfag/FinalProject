@@ -1,14 +1,9 @@
 package searchengine.services.indexing.impl;
 
-import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import searchengine.exceptions.IndexingAlreadyRunningException;
-import searchengine.exceptions.NotInConfigurationException;
 import searchengine.exceptions.StoppedExecutionException;
 import searchengine.services.indexing.IndexingService;
 import searchengine.utils.indexing.executor.Executor;
@@ -52,17 +47,11 @@ public class IndexingServiceImpl implements IndexingService {
 
   @Override
   public IndexingResponse indexPage(UpsertIndexingPageRequest upsertIndexingPageRequest) {
-    return CompletableFuture.supplyAsync(() -> {
-      try {
-        return indexPageTask(upsertIndexingPageRequest);
-      } catch (NotInConfigurationException | URISyntaxException e) {
-        throw new RuntimeException(e);
-      }
-    }).join();
+    return CompletableFuture.supplyAsync(() -> indexPageTask(
+            upsertIndexingPageRequest)).join();
   }
 
-  private IndexingResponse indexPageTask(UpsertIndexingPageRequest request)
-          throws NotInConfigurationException, URISyntaxException {
+  private IndexingResponse indexPageTask(UpsertIndexingPageRequest request) {
     executor.executeOnePageIndexing(request.getUrl());
     return new IndexingResponse(true, "Indexing completed successfully");
   }

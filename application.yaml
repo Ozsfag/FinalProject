@@ -32,7 +32,7 @@ spring:
             factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
     hibernate:
       ddl-auto: create
-    show-sql: true
+    show-sql: false
 
 indexing-settings:
   sites:
