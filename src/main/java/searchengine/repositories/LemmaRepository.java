@@ -8,7 +8,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import searchengine.model.LemmaModel;
+import searchengine.models.LemmaModel;
 
 @Repository
 public interface LemmaRepository extends JpaRepository<LemmaModel, Integer> {

@@ -2,13 +2,13 @@ package searchengine.services.statistics.impl;
 
 import java.util.Collection;
 import org.springframework.stereotype.Service;
-import searchengine.config.SitesList;
+import searchengine.configuration.SitesList;
 import searchengine.dto.statistics.DetailedStatisticsItem;
 import searchengine.dto.statistics.StatisticsData;
 import searchengine.dto.statistics.TotalStatistics;
-import searchengine.factory.StatisticsDtoFactory;
-import searchengine.mapper.LockWrapper;
-import searchengine.model.SiteModel;
+import searchengine.factories.StatisticsDtoFactory;
+import searchengine.mappers.LockWrapper;
+import searchengine.models.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.statistics.StatisticsService;
 import searchengine.web.models.StatisticsResponse;

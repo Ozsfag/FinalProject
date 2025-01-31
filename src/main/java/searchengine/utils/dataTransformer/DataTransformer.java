@@ -3,7 +3,7 @@ package searchengine.utils.dataTransformer;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import searchengine.dto.indexing.Site;
-import searchengine.model.SiteModel;
+import searchengine.models.SiteModel;
 
 public interface DataTransformer {
   /**

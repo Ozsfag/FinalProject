@@ -1,7 +1,7 @@
 package searchengine.utils.indexing.processor;
 
 import java.util.Collection;
-import searchengine.model.SiteModel;
+import searchengine.models.SiteModel;
 import searchengine.utils.indexing.IndexingStrategy;
 
 public interface Processor {

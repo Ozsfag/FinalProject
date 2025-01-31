@@ -9,8 +9,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import searchengine.model.PageModel;
-import searchengine.model.SiteModel;
+import searchengine.models.PageModel;
+import searchengine.models.SiteModel;
 
 @Repository
 public interface PageRepository extends JpaRepository<PageModel, Integer> {

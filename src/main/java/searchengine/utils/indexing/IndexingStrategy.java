@@ -3,10 +3,10 @@ package searchengine.utils.indexing;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import searchengine.handler.IndexIndexingHandler;
-import searchengine.handler.LemmaIndexingHandler;
-import searchengine.handler.PageIndexingHandler;
-import searchengine.model.*;
+import searchengine.handlers.IndexIndexingHandler;
+import searchengine.handlers.LemmaIndexingHandler;
+import searchengine.handlers.PageIndexingHandler;
+import searchengine.models.*;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.morphology.Morphology;
 

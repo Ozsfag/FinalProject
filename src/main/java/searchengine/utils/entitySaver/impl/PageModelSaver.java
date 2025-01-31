@@ -3,7 +3,7 @@ package searchengine.utils.entitySaver.impl;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
-import searchengine.model.PageModel;
+import searchengine.models.PageModel;
 import searchengine.repositories.PageRepository;
 import searchengine.utils.entitySaver.EntitySaverTemplate;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;

@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Locale;
 import lombok.experimental.UtilityClass;
 import org.springframework.context.annotation.Lazy;
-import searchengine.model.IndexModel;
-import searchengine.model.PageModel;
+import searchengine.models.IndexModel;
+import searchengine.models.PageModel;
 
 @UtilityClass
 @Lazy

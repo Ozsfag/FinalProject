@@ -1,15 +1,14 @@
 package searchengine.web.validators;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import searchengine.config.MorphologySettings;
-import searchengine.config.SitesList;
-import searchengine.dto.indexing.Site;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import searchengine.configuration.MorphologySettings;
+import searchengine.configuration.SitesList;
+import searchengine.dto.indexing.Site;
 
 public class ComprehensiveUrlValidator
     implements ConstraintValidator<searchengine.web.annotations.ComprehensiveUrlValidator, String> {

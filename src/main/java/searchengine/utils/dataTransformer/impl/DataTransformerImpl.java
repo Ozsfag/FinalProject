@@ -7,10 +7,10 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import searchengine.config.SitesList;
+import searchengine.configuration.SitesList;
 import searchengine.dto.indexing.Site;
-import searchengine.handler.SiteIndexingHandler;
-import searchengine.model.SiteModel;
+import searchengine.handlers.SiteIndexingHandler;
+import searchengine.models.SiteModel;
 import searchengine.utils.dataTransformer.DataTransformer;
 
 @Component

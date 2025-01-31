@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.RecursiveTaskParameters;
-import searchengine.dto.indexing.UrlsCheckerParameters;
-import searchengine.factory.RecursiveParserFactory;
+import searchengine.dto.indexing.UrlsFilterParameters;
+import searchengine.factories.RecursiveParserFactory;
 
 /**
  * Recursively indexes a page and its subpages.
@@ -43,11 +43,11 @@ public class RecursiveParser extends RecursiveTask<Boolean> {
   }
 
   private Collection<String> getCheckedUrls() {
-    UrlsCheckerParameters params =
+    UrlsFilterParameters params =
         parameters
-            .getUrlsCheckerParametersFactory()
+            .getUrlsFilterParametersFactory()
             .createUrlsCheckerParameters(parameters.getUrl());
-    return parameters.getUrlsChecker().getCheckedUrls(params);
+    return parameters.getUrlsFilter().getCheckedUrls(params);
   }
 
   private void indexingUrls(Collection<String> urlsToParse) {

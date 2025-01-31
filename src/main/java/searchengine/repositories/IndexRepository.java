@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import searchengine.model.IndexModel;
-import searchengine.model.LemmaModel;
+import searchengine.models.IndexModel;
+import searchengine.models.LemmaModel;
 
 @Repository
 public interface IndexRepository extends JpaRepository<IndexModel, Integer> {

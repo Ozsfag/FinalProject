@@ -1,6 +1,6 @@
 package searchengine.utils.indexing.processor.updater.siteUpdater;
 
-import searchengine.model.SiteModel;
+import searchengine.models.SiteModel;
 
 public interface SiteUpdater {
   /**
