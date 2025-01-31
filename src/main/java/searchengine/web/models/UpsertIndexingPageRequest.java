@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
-import searchengine.annotations.ComprehensiveUrlValidator;
+import searchengine.annotations.URIValidator;
 
 @Data
 @AllArgsConstructor
@@ -15,6 +15,6 @@ public class UpsertIndexingPageRequest {
   @NotNull(message = "URL cannot be null")
   @NotEmpty(message = "URL cannot be empty")
   @URL(message = "Invalid URL format")
-  @ComprehensiveUrlValidator(message = "URL host is not in the allowed sites list")
+  @URIValidator(message = "URL host is not in the allowed sites list")
   private String url;
 }

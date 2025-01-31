@@ -6,12 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
-import searchengine.validators.URIValidator;
 
-@Constraint(validatedBy = URIValidator.class)
+@Constraint(validatedBy = searchengine.validators.URIValidator.class)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ComprehensiveUrlValidator {
+public @interface URIValidator {
   String message() default "Invalid host";
 
   Class<?>[] groups() default {};

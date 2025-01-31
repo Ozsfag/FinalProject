@@ -13,7 +13,7 @@ import searchengine.dto.indexing.Site;
 
 @Component
 public class URIValidator
-    implements ConstraintValidator<searchengine.annotations.ComprehensiveUrlValidator, String> {
+    implements ConstraintValidator<searchengine.annotations.URIValidator, String> {
 
   @Autowired private SitesList sitesList;
   @Autowired private MorphologySettings morphologySettings;
