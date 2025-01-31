@@ -47,6 +47,7 @@ public class IndexingServiceImpl implements IndexingService {
 
   @Override
   public IndexingResponse indexPage(UpsertIndexingPageRequest upsertIndexingPageRequest) {
+    if (!isIndexing) isIndexing = true;
     return CompletableFuture.supplyAsync(() -> indexPageTask(upsertIndexingPageRequest)).join();
   }
 

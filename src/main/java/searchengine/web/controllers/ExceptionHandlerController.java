@@ -1,7 +1,5 @@
 package searchengine.web.controllers;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +30,11 @@ public class ExceptionHandlerController {
 
   @ExceptionHandler(BindException.class)
   public ResponseEntity<ErrorResponse> handleBindException(BindException ex) {
-    List<String> errors =
+    String errors =
         ex.getBindingResult().getFieldErrors().stream()
             .map(FieldError::getDefaultMessage)
-            .collect(Collectors.toList());
+            .findFirst()
+            .get();
     String errorMessage = String.join("; ", errors);
     log.error("Validation error: {}", errorMessage);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
