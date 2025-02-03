@@ -25,6 +25,6 @@ public class UrlsFilter {
   }
 
   private boolean isValidUrl(String url, UrlsFilterParameters parameters) {
-      return UrlExistenceValidator.isValidUrl(url, parameters) && URIValidator.isValid(url, null);
+    return UrlExistenceValidator.isValidUrl(url, parameters) && URIValidator.isValid(url, null);
   }
 }

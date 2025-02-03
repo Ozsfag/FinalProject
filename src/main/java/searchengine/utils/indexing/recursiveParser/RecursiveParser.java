@@ -44,9 +44,7 @@ public class RecursiveParser extends RecursiveTask<Boolean> {
 
   private Collection<String> getCheckedUrls() {
     UrlsFilterParameters params =
-        parameters
-            .getUrlsFilterParametersFactory()
-            .createUrlsCheckerParameters(parameters.getUrl());
+        parameters.getUrlsFilterParametersFactory().createParameters(parameters.getUrl());
     return parameters.getUrlsFilter().getCheckedUrls(params);
   }
 

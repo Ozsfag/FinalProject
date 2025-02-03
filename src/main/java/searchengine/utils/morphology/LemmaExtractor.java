@@ -9,32 +9,40 @@ import searchengine.dto.indexing.LemmaExtractorParameters;
 @UtilityClass
 @Lazy
 public class LemmaExtractor {
+
   /**
-   * Returns a stream of strings representing the lemmas extracted from the given query.
+   * Extracts lemmas from the given query using specified parameters.
    *
    * @param query the query from which to extract lemmas
-   * @return a stream of strings representing the lemmas extracted from the query
+   * @param lemmaExtractorParameters parameters for lemma extraction
+   * @return a stream of strings representing the extracted lemmas
    */
   public Stream<String> getLemmasFromQuery(
       String query, LemmaExtractorParameters lemmaExtractorParameters) {
-    return getLoweredReplacedAndSplittedQuery(query, lemmaExtractorParameters)
+    if (query == null || query.isEmpty()) {
+      return Stream.empty();
+    }
+
+    return processQuery(query, lemmaExtractorParameters)
         .parallel()
-        .filter(word -> wordIsNotParticle(word, lemmaExtractorParameters))
-        .flatMap(word -> getInfinitivesByLanguage(query, lemmaExtractorParameters));
+        .filter(word -> isValidWord(word, lemmaExtractorParameters))
+        .flatMap(word -> getInfinitives(word, lemmaExtractorParameters));
   }
 
-  private Stream<String> getLoweredReplacedAndSplittedQuery(
+  private Stream<String> processQuery(
       String query, LemmaExtractorParameters lemmaExtractorParameters) {
-    return Arrays.stream(
+    String processedQuery =
         query
             .toLowerCase()
             .replaceAll(
-                lemmaExtractorParameters.getNonLetters(), lemmaExtractorParameters.getEmptyString())
-            .split(lemmaExtractorParameters.getSplitter()));
+                lemmaExtractorParameters.getNonLetters(),
+                lemmaExtractorParameters.getEmptyString());
+
+    return Arrays.stream(processedQuery.split(lemmaExtractorParameters.getSplitter()))
+        .filter(word -> !word.isBlank());
   }
 
-  private boolean wordIsNotParticle(
-      String word, LemmaExtractorParameters lemmaExtractorParameters) {
+  private boolean isValidWord(String word, LemmaExtractorParameters lemmaExtractorParameters) {
     return word.length() > 2
         && !word.isBlank()
         && lemmaExtractorParameters.getParticles().stream()
@@ -46,10 +54,10 @@ public class LemmaExtractor {
                         .contains(part));
   }
 
-  private Stream<String> getInfinitivesByLanguage(
-      String queryWord, LemmaExtractorParameters lemmaExtractorParameters) {
-    return queryWord.matches(lemmaExtractorParameters.getOnlyLetters())
-        ? lemmaExtractorParameters.getSecondaryMorphology().getNormalForms(queryWord).stream()
-        : lemmaExtractorParameters.getPrimaryMorphology().getNormalForms(queryWord).stream();
+  private Stream<String> getInfinitives(
+      String word, LemmaExtractorParameters lemmaExtractorParameters) {
+    return word.matches(lemmaExtractorParameters.getOnlyLetters())
+        ? lemmaExtractorParameters.getSecondaryMorphology().getNormalForms(word).stream()
+        : lemmaExtractorParameters.getPrimaryMorphology().getNormalForms(word).stream();
   }
 }

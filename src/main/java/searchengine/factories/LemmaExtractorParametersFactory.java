@@ -23,15 +23,13 @@ public class LemmaExtractorParametersFactory {
   public LemmaExtractorParameters createRussianParameters() {
     if (russianParameters == null) {
       synchronized (this) {
-        if (russianParameters == null) {
-          russianParameters =
-              createQueryHandler(
-                  morphologySettings.getNotCyrillicLetters(),
-                  russianLuceneMorphology,
-                  englishLuceneMorphology,
-                  morphologySettings.getRussianParticleNames(),
-                  morphologySettings.getOnlyLatinLetters());
-        }
+        russianParameters =
+            createQueryHandler(
+                morphologySettings.getNotCyrillicLetters(),
+                russianLuceneMorphology,
+                englishLuceneMorphology,
+                morphologySettings.getRussianParticleNames(),
+                morphologySettings.getOnlyLatinLetters());
       }
     }
     return russianParameters;
@@ -40,15 +38,13 @@ public class LemmaExtractorParametersFactory {
   public LemmaExtractorParameters createEnglishParameters() {
     if (englishParameters == null) {
       synchronized (this) {
-        if (englishParameters == null) {
-          englishParameters =
-              createQueryHandler(
-                  morphologySettings.getNotLatinLetters(),
-                  englishLuceneMorphology,
-                  russianLuceneMorphology,
-                  morphologySettings.getEnglishParticlesNames(),
-                  morphologySettings.getOnlyCyrillicLetters());
-        }
+        englishParameters =
+            createQueryHandler(
+                morphologySettings.getNotLatinLetters(),
+                englishLuceneMorphology,
+                russianLuceneMorphology,
+                morphologySettings.getEnglishParticlesNames(),
+                morphologySettings.getOnlyCyrillicLetters());
       }
     }
     return englishParameters;

@@ -17,7 +17,7 @@ public class UrlsFilterParametersFactory {
   private final PageRepository pageRepository;
   private final LockWrapper lockWrapper;
 
-  public UrlsFilterParameters createUrlsCheckerParameters(String href) {
+  public UrlsFilterParameters createParameters(String href) {
     Collection<String> urlsFromJsoup = getUrlsFromJsoup(href);
     Collection<String> urlsFromDatabase = getUrlsFromDatabase(urlsFromJsoup);
     return UrlsFilterParameters.builder()

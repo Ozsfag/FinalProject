@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import searchengine.dto.searching.DetailedSearchDto;
+import searchengine.exceptions.SearchNotFoundException;
 import searchengine.factories.SearchingDtoFactory;
 import searchengine.handlers.SiteIndexingHandler;
 import searchengine.mappers.QueryToIndexesMapper;
@@ -21,7 +22,7 @@ import searchengine.web.models.UpsertSearchRequest;
 @Service
 @Lazy
 @RequiredArgsConstructor
-public class SearchingImpl implements SearchingService {
+public class SearchingServiceImpl implements SearchingService {
   private final QueryToIndexesMapper queryToIndexesMapper;
   private final SearchingDtoFactory searchingDtoFactory;
   private final SiteIndexingHandler siteIndexingHandler;
@@ -32,8 +33,9 @@ public class SearchingImpl implements SearchingService {
     SiteModel siteModel = getSiteModel(upsertSearchRequest.getSite());
     Collection<IndexModel> uniqueSet =
         queryToIndexesMapper.mapQueryToIndexModels(upsertSearchRequest.getQuery(), siteModel);
+
     if (uniqueSet.isEmpty())
-      return new TotalSearchResponse(false, 0, new ArrayList<>(), "Not found");
+      throw new SearchNotFoundException("Nothing was found at a given request");
 
     Map<Integer, Float> rel = PageRankCalculator.getPageId2AbsRank(uniqueSet);
     Collection<DetailedSearchDto> detailedSearchDto =
@@ -54,15 +56,6 @@ public class SearchingImpl implements SearchingService {
             .orElseGet(null);
   }
 
-  /**
-   * Generates a list of detailed search responses based on the given parameters.
-   *
-   * @param rel a map containing the page ID and relevance
-   * @param offset the number of responses to skip
-   * @param limit the maximum number of responses to return
-   * @param uniqueSet a set of unique IndexModel objects
-   * @return a list of DetailedSearchResponse objects
-   */
   private Collection<DetailedSearchDto> getDetailedSearchResponses(
       Map<Integer, Float> rel, int offset, int limit, Collection<IndexModel> uniqueSet) {
     return rel.entrySet().stream()
