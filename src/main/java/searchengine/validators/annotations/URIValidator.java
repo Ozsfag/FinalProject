@@ -1,4 +1,4 @@
-package searchengine.annotations;
+package searchengine.validators.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

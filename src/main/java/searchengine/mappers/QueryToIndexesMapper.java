@@ -1,17 +1,20 @@
 package searchengine.mappers;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import searchengine.configuration.MorphologySettings;
+import searchengine.dto.searching.SearchRequestParameter;
 import searchengine.models.IndexModel;
 import searchengine.models.SiteModel;
 import searchengine.repositories.IndexRepository;
+import searchengine.repositories.IndexSpecification;
 import searchengine.utils.morphology.Morphology;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @Lazy
@@ -22,36 +25,29 @@ public class QueryToIndexesMapper {
   @Autowired private MorphologySettings morphologySettings;
 
   /**
-   * Transforms a search query into a set of IndexModel objects.
+   * Transforms a search query into a collection of IndexModel objects. Processes the query through
+   * morphology analysis and applies specifications for filtering.
    *
-   * <p>This method takes a search query and a SiteModel object as parameters. It first retrieves
-   * unique lemmas from the search query using the Morphology service. Then, it maps each lemma to a
-   * set of IndexModel objects by calling the findIndexes method. Finally, it collects the results
-   * into a set and returns it.
+   * @param params Search request parameters containing query and site filters
+   * @return Collection of matching IndexModel objects, ordered by relevance
+   * @throws IllegalArgumentException if params is null or contains invalid data
    */
-  public Collection<IndexModel> mapQueryToIndexModels(String query, SiteModel siteModel) {
-    return morphology.getUniqueLemmasFromSearchQuery(query).stream()
-        .flatMap(queryWord -> findIndexes(queryWord, siteModel))
+  public Collection<IndexModel> mapQueryToIndexModels(SearchRequestParameter params) {
+    return morphology.getUniqueLemmasFromSearchQuery(params.getQuery()).parallelStream()
+        .flatMap(queryWord -> findIndexesForLemma(queryWord, params.getSiteModel()))
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
-  private Stream<IndexModel> findIndexes(String queryWord, SiteModel siteModel) {
-    return siteModel == null
-        ? findIndexesBy2Params(queryWord).stream()
-        : findIndexesBy3Params(queryWord, siteModel).stream();
+  private Stream<IndexModel> findIndexesForLemma(String queryWord, SiteModel siteModel) {
+    return lockWrapper.readLock(
+        () -> indexRepository.findAll(createSpecification(queryWord, siteModel)).stream());
   }
 
-  private Collection<IndexModel> findIndexesBy2Params(String queryWord) {
-    return lockWrapper.readLock(
-        () ->
-            indexRepository.findByLemmaAndFrequencyLessThan(
-                queryWord, morphologySettings.getMaxFrequency()));
-  }
-
-  private Collection<IndexModel> findIndexesBy3Params(String queryWord, SiteModel siteModel) {
-    return lockWrapper.readLock(
-        () ->
-            indexRepository.findByLemmaAndFrequencyLessThanAndSiteId(
-                queryWord, morphologySettings.getMaxFrequency(), siteModel.getId()));
+  private org.springframework.data.jpa.domain.Specification<IndexModel> createSpecification(
+      String queryWord, SiteModel siteModel) {
+    return IndexSpecification.createCombinedSpecification(
+        queryWord,
+        siteModel != null ? siteModel.getId() : null,
+        morphologySettings.getMaxFrequency());
   }
 }

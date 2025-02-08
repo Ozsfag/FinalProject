@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
-import searchengine.annotations.URIValidator;
+import searchengine.validators.annotations.URIValidator;
 
 @Data
 @AllArgsConstructor
