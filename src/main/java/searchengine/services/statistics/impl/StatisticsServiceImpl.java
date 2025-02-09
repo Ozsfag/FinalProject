@@ -1,35 +1,25 @@
 package searchengine.services.statistics.impl;
 
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import searchengine.aspects.annotations.LockableRead;
 import searchengine.configuration.SitesList;
 import searchengine.dto.statistics.DetailedStatisticsItem;
 import searchengine.dto.statistics.StatisticsData;
 import searchengine.dto.statistics.TotalStatistics;
 import searchengine.factories.StatisticsDtoFactory;
-import searchengine.mappers.LockWrapper;
 import searchengine.models.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.statistics.StatisticsService;
 import searchengine.web.models.StatisticsResponse;
 
 @Service
+@RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
   private final StatisticsDtoFactory statisticsDtoFactory;
   private final SitesList sites;
   private final SiteRepository siteRepository;
-  private final LockWrapper lockWrapper;
-
-  public StatisticsServiceImpl(
-      StatisticsDtoFactory statisticsDtoFactory,
-      SitesList sites,
-      SiteRepository siteRepository,
-      LockWrapper lockWrapper) {
-    this.statisticsDtoFactory = statisticsDtoFactory;
-    this.sites = sites;
-    this.siteRepository = siteRepository;
-    this.lockWrapper = lockWrapper;
-  }
 
   /**
    * Retrieves statistics for sites, pages, and lemmas.
@@ -58,7 +48,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         .toList();
   }
 
+  @LockableRead
   private SiteModel getSiteModelByUrl(String url) {
-    return lockWrapper.readLock(() -> siteRepository.findSiteByUrl(url));
+    return siteRepository.findSiteByUrl(url);
   }
 }

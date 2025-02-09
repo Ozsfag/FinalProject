@@ -4,8 +4,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import searchengine.aspects.annotations.LockableRead;
 import searchengine.handlers.factory.EntityFactory;
-import searchengine.mappers.LockWrapper;
 import searchengine.models.LemmaModel;
 import searchengine.models.SiteModel;
 import searchengine.repositories.LemmaRepository;
@@ -13,7 +13,6 @@ import searchengine.repositories.LemmaRepository;
 @Component
 @RequiredArgsConstructor
 public class LemmaIndexingHandler {
-  private final LockWrapper lockWrapper;
   private final LemmaRepository lemmaRepository;
   private final EntityFactory entityFactory;
 
@@ -40,10 +39,10 @@ public class LemmaIndexingHandler {
         : getLemmasFromDatabase(siteModel, countedWords);
   }
 
+  @LockableRead
   private Collection<LemmaModel> getLemmasFromDatabase(
       SiteModel siteModel, Collection<String> countedWords) {
-    return lockWrapper.readLock(
-        () -> lemmaRepository.findByLemmaInAndSiteId(countedWords, siteModel.getId()));
+    return lemmaRepository.findByLemmaInAndSiteId(countedWords, siteModel.getId());
   }
 
   private Collection<LemmaModel> getNewLemmas(

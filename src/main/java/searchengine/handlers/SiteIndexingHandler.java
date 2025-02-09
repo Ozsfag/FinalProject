@@ -5,16 +5,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import searchengine.aspects.annotations.LockableRead;
 import searchengine.dto.indexing.Site;
 import searchengine.handlers.factory.EntityFactory;
-import searchengine.mappers.LockWrapper;
 import searchengine.models.SiteModel;
 import searchengine.repositories.SiteRepository;
 
 @Component
 @RequiredArgsConstructor
 public class SiteIndexingHandler {
-  private final LockWrapper lockWrapper;
   private final SiteRepository siteRepository;
   private final EntityFactory entityFactory;
 
@@ -36,8 +35,9 @@ public class SiteIndexingHandler {
     return Optional.ofNullable(getExistedSiteModel(site)).orElseGet(() -> createSiteModel(site));
   }
 
+  @LockableRead
   private SiteModel getExistedSiteModel(Site site) {
-    return lockWrapper.readLock(() -> siteRepository.findSiteByUrl(site.getUrl()));
+    return siteRepository.findSiteByUrl(site.getUrl());
   }
 
   private SiteModel createSiteModel(Site site) {

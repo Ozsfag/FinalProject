@@ -2,6 +2,8 @@ package searchengine.utils.entitySaver;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -9,7 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import searchengine.mappers.LockWrapper;
+import searchengine.aspects.annotations.LockableWrite;
 import searchengine.utils.entitySaver.selectors.repositorySelector.RepositorySelector;
 import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
 
@@ -17,7 +19,6 @@ import searchengine.utils.entitySaver.selectors.saverSelector.SaverSelector;
 @RequiredArgsConstructor
 public abstract class EntitySaverTemplate<T> {
   @Autowired @Lazy private SaverSelector saverSelector;
-  @Autowired private LockWrapper lockWrapper;
   public final RepositorySelector repositorySelector;
 
   /**
@@ -53,8 +54,13 @@ public abstract class EntitySaverTemplate<T> {
   private Collection<T> saveAllEntities(Collection<T> validatedEntities)
       throws DataIntegrityViolationException {
     JpaRepository<T, ?> repository = getRepository(validatedEntities);
-    lockWrapper.writeLock(() -> repository.saveAllAndFlush(validatedEntities));
-    return validatedEntities;
+    return saveEntitiesWithLock(repository, validatedEntities);
+  }
+
+  @LockableWrite
+  private <S extends T> List<S> saveEntitiesWithLock(
+      JpaRepository<T, ?> repository, Iterable<S> validatedEntities) {
+    return repository.saveAllAndFlush(validatedEntities);
   }
 
   /**

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import searchengine.aspects.annotations.LockableWrite;
 import searchengine.dto.indexing.RecursiveTaskParameters;
 import searchengine.dto.indexing.UrlsFilterParameters;
 import searchengine.factories.RecursiveParserFactory;
@@ -52,14 +53,10 @@ public class RecursiveParser extends RecursiveTask<Boolean> {
     parameters.getIndexingStrategy().processIndexing(urlsToParse, parameters.getSiteModel());
   }
 
+  @LockableWrite
   private void updateSiteStatus() {
-    parameters
-        .getLockWrapper()
-        .writeLock(
-            () ->
-                parameters
-                    .getSiteRepository()
-                    .updateStatusTimeByUrl(new Date(), parameters.getUrl()));
+
+    parameters.getSiteRepository().updateStatusTimeByUrl(new Date(), parameters.getUrl());
   }
 
   private void invokeSubtask(Collection<String> urlsToParse) {

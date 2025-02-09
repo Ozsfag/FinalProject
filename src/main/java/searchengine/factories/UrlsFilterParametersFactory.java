@@ -4,10 +4,10 @@ import java.util.Collection;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import searchengine.aspects.annotations.LockableRead;
 import searchengine.dto.indexing.HttpResponseDetails;
 import searchengine.dto.indexing.UrlsFilterParameters;
 import searchengine.handlers.HttpResponseHandler;
-import searchengine.mappers.LockWrapper;
 import searchengine.repositories.PageRepository;
 
 @Component
@@ -15,7 +15,6 @@ import searchengine.repositories.PageRepository;
 public class UrlsFilterParametersFactory {
   private final HttpResponseHandler httpResponseHandler;
   private final PageRepository pageRepository;
-  private final LockWrapper lockWrapper;
 
   public UrlsFilterParameters createParameters(String href) {
     Collection<String> urlsFromJsoup = getUrlsFromJsoup(href);
@@ -32,8 +31,11 @@ public class UrlsFilterParametersFactory {
   }
 
   private Collection<String> getUrlsFromDatabase(Collection<String> urlsFromJsoup) {
-    return urlsFromJsoup.isEmpty()
-        ? Collections.emptyList()
-        : lockWrapper.readLock(() -> pageRepository.findAllPathsByPathIn(urlsFromJsoup));
+    return urlsFromJsoup.isEmpty() ? Collections.emptyList() : getPaths(urlsFromJsoup);
+  }
+
+  @LockableRead
+  private Collection<String> getPaths(Collection<String> urlsFromJsoup) {
+    return pageRepository.findAllPathsByPathIn(urlsFromJsoup);
   }
 }

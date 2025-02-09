@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.dto.indexing.RecursiveTaskParameters;
 import searchengine.filters.UrlsFilter;
-import searchengine.mappers.LockWrapper;
 import searchengine.models.SiteModel;
 import searchengine.repositories.SiteRepository;
 import searchengine.utils.indexing.IndexingStrategy;
@@ -17,7 +16,6 @@ public class RecursiveTaskParametersFactory {
   private final UrlsFilterParametersFactory urlsFilterParametersFactory;
   private final UrlsFilter urlsFilter;
   private final IndexingStrategy indexingStrategy;
-  private final LockWrapper lockWrapper;
   private final SiteRepository siteRepository;
 
   /**
@@ -30,7 +28,6 @@ public class RecursiveTaskParametersFactory {
   public RecursiveTaskParameters create(SiteModel siteModel, String url) {
     return RecursiveTaskParameters.builder()
         .indexingStrategy(indexingStrategy)
-        .lockWrapper(lockWrapper)
         .siteRepository(siteRepository)
         .urlsFilterParametersFactory(urlsFilterParametersFactory)
         .siteModel(siteModel)

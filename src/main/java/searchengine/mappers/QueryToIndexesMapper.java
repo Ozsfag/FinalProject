@@ -1,8 +1,13 @@
 package searchengine.mappers;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import searchengine.aspects.annotations.LockableRead;
 import searchengine.configuration.MorphologySettings;
 import searchengine.dto.searching.SearchRequestParameter;
 import searchengine.models.IndexModel;
@@ -11,16 +16,10 @@ import searchengine.repositories.IndexRepository;
 import searchengine.repositories.IndexSpecification;
 import searchengine.utils.morphology.Morphology;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 @Component
 @Lazy
 public class QueryToIndexesMapper {
   @Autowired private Morphology morphology;
-  @Autowired private LockWrapper lockWrapper;
   @Autowired private IndexRepository indexRepository;
   @Autowired private MorphologySettings morphologySettings;
 
@@ -38,9 +37,9 @@ public class QueryToIndexesMapper {
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
+  @LockableRead
   private Stream<IndexModel> findIndexesForLemma(String queryWord, SiteModel siteModel) {
-    return lockWrapper.readLock(
-        () -> indexRepository.findAll(createSpecification(queryWord, siteModel)).stream());
+    return indexRepository.findAll(createSpecification(queryWord, siteModel)).stream();
   }
 
   private org.springframework.data.jpa.domain.Specification<IndexModel> createSpecification(

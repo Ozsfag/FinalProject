@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import searchengine.aspects.annotations.LockableRead;
 import searchengine.handlers.factory.EntityFactory;
-import searchengine.mappers.LockWrapper;
 import searchengine.models.IndexModel;
 import searchengine.models.LemmaModel;
 import searchengine.models.PageModel;
@@ -14,7 +14,6 @@ import searchengine.repositories.IndexRepository;
 
 @Component
 public class IndexIndexingHandler {
-  @Autowired private LockWrapper lockWrapper;
   @Autowired private IndexRepository indexRepository;
   @Autowired private EntityFactory entityFactory;
 
@@ -43,10 +42,10 @@ public class IndexIndexingHandler {
     return lemmas.isEmpty() ? Collections.emptySet() : getIndexesFromDatabase(lemmas, pageModel);
   }
 
+  @LockableRead
   private Collection<IndexModel> getIndexesFromDatabase(
       Collection<LemmaModel> lemmas, PageModel pageModel) {
-    return lockWrapper.readLock(
-        () -> indexRepository.findByPageIdAndLemmaIn(pageModel.getId(), lemmas));
+    return indexRepository.findByPageIdAndLemmaIn(pageModel.getId(), lemmas);
   }
 
   private Collection<IndexModel> getUpdateExistedIndexModel(
